@@ -168,12 +168,12 @@ ggparcoord <- function(
   mapping      = NULL,
   title        = ""
 ) {
-
+  
   if (! identical(class(data), "data.frame")) {
     data <- as.data.frame(data)
   }
   saveData <- data
-
+  
   ### Error Checking ###
   if (is.null(groupColumn)) {
     if (any(tolower(order) %in% c("anyclass", "allclass"))) {
@@ -184,7 +184,7 @@ ggparcoord <- function(
   ) {
     stop("invalid value for 'groupColumn'; must be a single numeric or character index")
   }
-
+  
   if (!(tolower(scale) %in% c(
     "std", "robust", "uniminmax", "globalminmax", "center", "centerobs"
   ))) {
@@ -193,17 +193,17 @@ ggparcoord <- function(
       "'std', 'robust', 'uniminmax', 'globalminmax', 'center', or 'centerObs'"
     ))
   }
-
+  
   if (!(centerObsID %in% 1:dim(data)[1])) {
     stop("invalid value for 'centerObsID'; must be a single numeric row index")
   }
-
+  
   if (!(tolower(missing) %in% c("exclude", "mean", "median", "min10", "random"))) {
     stop(
       "invalid value for 'missing'; must be one of 'exclude', 'mean', 'median', 'min10', 'random'"
     )
   }
-
+  
   if (!(
     is.numeric(order) || (
       is.character(order) &&
@@ -218,35 +218,35 @@ ggparcoord <- function(
       "'Convex', 'Skinny', 'Stringy', 'Monotonic'"
     ))
   }
-
+  
   if (!(is.logical(showPoints))) {
     stop("invalid value for 'showPoints'; must be a logical operator")
   }
-
+  
   alphaLinesIsCharacter <- is.character(alphaLines)
   if (alphaLinesIsCharacter) {
     if (!(alphaLines %in% names(data))) {
       stop("'alphaLines' column is missing in data")
     }
-
+    
     alphaRange <- range(data[, alphaLines])
     if (any(is.na(alphaRange))) {
       stop("missing data in 'alphaLines' column")
     }
-
+    
     if (alphaRange[1] < 0 || alphaRange[2] > 1) {
       stop("invalid value for 'alphaLines' column; max range must be from 0 to 1")
     }
     alphaVar <- data[, alphaLines]
-
+    
   } else if ((alphaLines < 0) || (alphaLines > 1)) { # nolint
     stop("invalid value for 'alphaLines'; must be a scalar value between 0 and 1")
   }
-
+  
   if (!(is.logical(boxplot))) {
     stop("invalid value for 'boxplot'; must be a logical operator")
   }
-
+  
   if (is.logical(splineFactor)) {
     if (splineFactor) {
       splineFactor <- 3
@@ -256,8 +256,8 @@ ggparcoord <- function(
   } else if (! is.numeric(splineFactor)) {
     stop("invalid value for 'splineFactor'; must be a logical or numeric value")
   }
-
-
+  
+  
   ### Setup ###
   if (is.numeric(groupColumn)) {
     groupColumn <- names(data)[groupColumn]
@@ -265,7 +265,7 @@ ggparcoord <- function(
   if (!is.null(groupColumn)) {
     groupVar <- data[, groupColumn]
   }
-
+  
   if (is.character(columns)) {
     columns_ <- c()
     for (colPos in seq_along(columns)) {
@@ -274,7 +274,7 @@ ggparcoord <- function(
     columns <- columns_
   }
   # data <- data[, columns]
-
+  
   # Change character vars to factors
   char.vars <- column_is_character(data)
   if (length(char.vars) >= 1) {
@@ -295,12 +295,12 @@ ggparcoord <- function(
   # being plotted as numeric)
   saveData2 <- data
   saveData2[, groupColumn] <- as.numeric(saveData2[, groupColumn])
-
+  
   p <- c(ncol(data) + 1, ncol(data) + 2)
   data$.ID <- as.factor(1:nrow(data))
   data$anyMissing <- apply(is.na(data[, columns]), 1, any)
   columnsPlusTwo <- c(columns, p)
-
+  
   inner_rescaler_default <- function (x, type = "sd", ...) {
     # copied directly from reshape because of import difficulties :-(
     # rescaler.default
@@ -336,7 +336,7 @@ ggparcoord <- function(
     }
     x
   }
-
+  
   ### Scaling ###
   if (tolower(scale) %in% c("std", "robust", "uniminmax", "center")) {
     rescalerType <- c(
@@ -346,7 +346,7 @@ ggparcoord <- function(
       "center" = "range"
     )[tolower(scale)]
     data[, columnsPlusTwo] <- inner_rescaler(data[, columnsPlusTwo], type = rescalerType)
-
+    
     if (tolower(scale) == "center") {
       data[, columns] <- apply(data[, columns], 2, function(x) {
         x <- x - eval(
@@ -358,21 +358,21 @@ ggparcoord <- function(
         )
       })
     }
-
+    
   }
-
+  
   ### Imputation ###
   if (tolower(missing) == "exclude") {
     dataCompleteCases <- complete.cases(data[, columnsPlusTwo])
-
+    
     if (!is.null(groupColumn)) {
       groupVar <- groupVar[dataCompleteCases]
     }
-
+    
     if (alphaLinesIsCharacter) {
       alphaVar <- alphaVar[dataCompleteCases]
     }
-
+    
     data <- data[dataCompleteCases, ]
   }
   else if (tolower(missing) %in% c("mean", "median", "min10", "random")) {
@@ -399,9 +399,9 @@ ggparcoord <- function(
       }
       return(x)
     })
-
+    
   }
-
+  
   ### Scaling (round 2) ###
   # Centering by observation needs to be done after handling missing values
   #   in case the observation to be centered on has missing values
@@ -411,35 +411,35 @@ ggparcoord <- function(
       x <- x - x[centerObsID]
     })
   }
-
+  
   # meltIDVars <- c(".ID", "anyMissing")
   meltIDVars <- colnames(data)[-columns]
-
+  
   if (!is.null(groupColumn)) {
     # data <- cbind(data, groupVar)
     # names(data)[dim(data)[2]] <- groupCol
-
+    
     meltIDVars <- union(groupColumn, meltIDVars)
   }
-
+  
   if (alphaLinesIsCharacter) {
     data <- cbind(data, alphaVar)
     names(data)[dim(data)[2]] <- alphaLines
     meltIDVars <- union(meltIDVars, alphaLines)
   }
-
+  
   # if(is.list(mapping)) {
   #   mappingNames <- names(mapping)
   # }
   data.m <- melt(data, id.vars = meltIDVars, measure.vars = columns)
-
+  
   ### Ordering ###
   if (length(order) > 1 & is.numeric(order)) {
     data.m$variable <- factor(data.m$variable, levels = names(saveData)[order])
   }
   else if (order %in% c("Outlying", "Skewed", "Clumpy", "Sparse", "Striated", "Convex", "Skinny",
                         "Stringy", "Monotonic")) {
-
+    
     require_pkgs("scagnostics")
     scag <- scagnostics::scagnostics(saveData2)
     data.m$variable <- factor(data.m$variable, levels = scag_order(scag, names(saveData2), order))
@@ -466,7 +466,7 @@ ggparcoord <- function(
     axis.order <- singleClassOrder(groupVar, saveData2)
     data.m$variable <- factor(data.m$variable, levels = axis.order)
   }
-
+  
   if (!is.null(groupColumn)) {
     mapping2 <- aes_string(
       x = "variable",
@@ -484,7 +484,7 @@ ggparcoord <- function(
   mapping2 <- add_and_overwrite_aes(mapping2, mapping)
   # mapping2 <- add_and_overwrite_aes(aes_string(size = I(0.5)), mapping2)
   p <- ggplot(data = data.m, mapping = mapping2)
-
+  
   if (!is.null(shadeBox)) {
     # Fix so that if missing = "min10", the box only goes down to the true min
     d.sum <- ddply(data.m, .(variable), summarize,
@@ -493,17 +493,17 @@ ggparcoord <- function(
     p <- p + geom_linerange(data = d.sum, size = I(10), col = shadeBox,
                             mapping = aes(y = NULL, ymin = min, ymax = max, group = variable))
   }
-
+  
   if (boxplot) {
     p <- p + geom_boxplot(mapping = aes_string(group = "variable"), alpha = 0.8)
   }
-
+  
   if (!is.null(mapping2$size)) {
     lineSize <- mapping2$size
   } else {
     lineSize <- 0.5
   }
-
+  
   if (splineFactor > 0) {
     data.m$ggally_splineFactor <- splineFactor
     if (class(splineFactor) == "AsIs") {
@@ -517,10 +517,10 @@ ggparcoord <- function(
         spline = spline(variable, value, n = length(variable) * ggally_splineFactor[1])
       )
     }
-
+    
     linexvar <- "spline.x"
     lineyvar <- "spline.y"
-
+    
     if (alphaLinesIsCharacter) {
       p <- p +
         geom_line(
@@ -529,7 +529,7 @@ ggparcoord <- function(
           data = data.m
         ) +
         scale_alpha(range = alphaRange)
-
+      
     } else {
       p <- p +
         geom_line(
@@ -539,35 +539,35 @@ ggparcoord <- function(
           data = data.m
         )
     }
-
+    
     if (showPoints) {
       p <- p + geom_point(aes(x = as.numeric(variable), y = value))
     }
-
+    
     xAxisLabels <- levels(data.m$variable)
     # while continuous data, this makes it present like it's discrete
     p <- p + scale_x_discrete(breaks = seq_along(xAxisLabels), labels = xAxisLabels)
-
+    
   } else {
     if (alphaLinesIsCharacter) {
       p <- p +
         geom_line(aes_string(alpha = alphaLines), size = lineSize, data = data.m) +
         scale_alpha(range = alphaRange)
-
+      
     } else {
       # p <- p + geom_line(alpha = alphaLines, size = lineSize)
       p <- p + geom_line(alpha = alphaLines)
     }
-
+    
     if (showPoints) {
       p <- p + geom_point()
     }
   }
-
+  
   if (title != "") {
     p <- p + labs(title = title)
   }
-
+  
   p
 }
 
@@ -600,20 +600,20 @@ column_is_factor <- function(df) {
 #' @return character vector of variable ordered according to the given
 #'   scagnostic measure
 scag_order <- function(scag, vars, measure) {
-
+  
   scag <- sort(scag[measure, ], decreasing = TRUE)
   scagNames <- names(scag)
-
+  
   # retrieve all names.  assume name doesn't contain a space
   nameLocs <- regexec("^([^ ]+) \\* ([^ ]+)$", scagNames)
-
+  
   colNames <- lapply(seq_along(nameLocs), function(i) {
     nameLoc <- nameLocs[[i]]
     scagName <- scagNames[[i]]
     # retrieve the column name from "FIRSTNAME * SECONDNAME"
     substr(rep(scagName, 2), nameLoc[-1], nameLoc[-1] + attr(nameLoc, "match.length")[-1] - 1)
   })
-
+  
   ret <- c()
   colNamesLength <- length(colNames)
   colNameValues <- unlist(colNames)
@@ -635,17 +635,17 @@ scag_order <- function(scag, vars, measure) {
         # nothing left in set, append both
         ret <- append(ret, cols)
       }
-
+      
       # if only the first hasn't been added...
     } else if (colsUsed[1] == FALSE) {
       ret <- append(ret, cols[1])
-
+      
       # if only the second hasn't been added...
     } else if (colsUsed[2] == FALSE) {
       ret <- append(ret, cols[2])
     }
   }
-
+  
   if (length(ret) != length(vars)) {
     stop(str_c(
       "Could not compute a correct ordering: ",
@@ -653,7 +653,7 @@ scag_order <- function(scag, vars, measure) {
       "Missing: ", paste0(vars[! (vars %in% ret)], collapse = ", ")
     ))
   }
-
+  
   return(ret)
 }
 
@@ -706,332 +706,4 @@ skewness <- function(x) {
   n <- length(x)
   skewness <- (1 / n) * sum( (x - xbar) ^ 3) / ( (1 / n) * sum( (x - xbar) ^ 2)) ^ (3 / 2)
   return(skewness)
-}
-
-
-
-
-
-
-
-
-
-
-#' lowertriangle - rearrange dataset as the preparation of ggscatmat function
-#'
-#' function for making the melted dataset used to plot the lowertriangle scatterplots.
-#'
-#' @export
-#' @param data a data matrix. Should contain numerical (continuous) data.
-#' @param columns an option to choose the column to be used in the raw dataset. Defaults to \code{1:ncol(data)}
-#' @param color an option to choose a factor variable to be grouped with. Defaults to \code{(NULL)}
-#' @author Mengjia Ni, Di Cook \email{dicook@@monash.edu}
-#' @examples
-#' data(flea)
-#' head(lowertriangle(flea, columns= 2:4))
-#' head(lowertriangle(flea))
-#' head(lowertriangle(flea, color="species"))
-lowertriangle <- function(data, columns=1:ncol(data), color=NULL) {
-  data <- upgrade_scatmat_data(data)
-  data.choose <- data[, columns]
-  dn <- data.choose[sapply(data.choose, is.numeric)]
-  factor <- data[sapply(data, is.factor)]
-  p <- ncol(dn)
-  newdata <- NULL
-  for (i in 1:p) {
-    for (j in 1:p) {
-      newdata <- rbind(newdata,
-                       cbind(dn[, i], dn[, j], i, j, colnames(dn)[i], colnames(dn)[j], factor)
-      )
-    }
-  }
-  colnames(newdata) <- c("xvalue", "yvalue", "xslot", "yslot", "xlab", "ylab", colnames(factor))
-
-  rp <- data.frame(newdata)
-  rp[, 2][rp[, 3] >= rp[, 4]] <- "NA"
-  rp[, 1][rp[, 3] > rp[, 4]] <- "NA"
-
-  rp$xvalue <- suppressWarnings(as.numeric(as.character(rp$xvalue)))
-  rp$yvalue <- suppressWarnings(as.numeric(as.character(rp$yvalue)))
-
-  if (is.null(color)){
-    rp.new <- rp[, 1:6]
-  } else {
-    colorcolumn <- rp[, which(colnames(rp) == color)]
-    rp.new <- cbind(rp[, 1:6], colorcolumn)
-  }
-  return(rp.new)
-}
-
-#' uppertriangle - rearrange dataset as the preparation of ggscatmat function
-#'
-#' function for making the dataset used to plot the uppertriangle plots.
-#'
-#' @export
-#' @param data a data matrix. Should contain numerical (continuous) data.
-#' @param columns an option to choose the column to be used in the raw dataset. Defaults to \code{1:ncol(data)}
-#' @param color an option to choose a factor variable to be grouped with. Defaults to \code{(NULL)}
-#' @param corMethod method argument supplied to \code{\link[stats]{cor}}
-#' @author Mengjia Ni, Di Cook \email{dicook@@monash.edu}
-#' @importFrom stats cor
-#' @examples
-#' data(flea)
-#' head(uppertriangle(flea, columns=2:4))
-#' head(uppertriangle(flea))
-#' head(uppertriangle(flea, color="species"))
-uppertriangle <- function(data, columns=1:ncol(data), color=NULL, corMethod = "pearson") {
-  data <- upgrade_scatmat_data(data)
-  data.choose <- data[, columns]
-  dn <- data.choose[sapply(data.choose, is.numeric)]
-  factor <- data[sapply(data, is.factor)]
-  p <- ncol(dn)
-  newdata <- NULL
-  for (i in 1:p) {
-    for (j in 1:p) {
-      newdata <- rbind(newdata,
-                       cbind(dn[, i], dn[, j], i, j, colnames(dn)[i], colnames(dn)[j],
-                             min(dn[, i]) + 0.5 * (max(dn[, i]) - min(dn[, i])),
-                             min(dn[, j]) + 0.5 * (max(dn[, j]) - min(dn[, j])), factor)
-      )
-    }
-  }
-  colnames(newdata) <- c(
-    "xvalue", "yvalue",
-    "xslot", "yslot",
-    "xlab", "ylab",
-    "xcenter", "ycenter",
-    colnames(factor)
-  )
-
-  rp <- data.frame(newdata)
-  rp[, 2][rp[, 3] <= rp[, 4]] <- "NA"
-  rp[, 1][rp[, 3] < rp[, 4]] <- "NA"
-
-  rp$xvalue <- suppressWarnings(as.numeric(as.character(rp$xvalue)))
-  rp$yvalue <- suppressWarnings(as.numeric(as.character(rp$yvalue)))
-
-  if (is.null(color)){
-    rp.new <- rp[, 1:8]
-  }else{
-    colorcolumn <- rp[, which(colnames(rp) == color)]
-    rp.new <- cbind(rp[, 1:8],  colorcolumn)
-  }
-  a <- rp.new
-  b <- subset(a, (a$yvalue != "NA") & (a$xvalue != "NA"))
-  if (is.null(color)){
-    data.cor <- ddply(
-      b, .(ylab, xlab),
-      function(subsetDt) {
-        xlab <- subsetDt$xlab
-        ylab <- subsetDt$ylab
-        xvalue <- subsetDt$xvalue
-        yvalue <- subsetDt$yvalue
-
-        if (identical(corMethod, "rsquare")) {
-          r <- cor(
-            xvalue, yvalue,
-            use = "pairwise.complete.obs",
-            method = "pearson"
-          )
-          r <- r ^ 2
-        } else {
-          r <- cor(
-            xvalue, yvalue,
-            use = "pairwise.complete.obs",
-            method = corMethod
-          )
-        }
-        r <- paste(round(r, digits = 2))
-
-        data.frame(
-          xlab = unique(xlab), ylab = unique(ylab),
-          r = r,
-          xvalue = min(xvalue) + 0.5 * (max(xvalue) - min(xvalue)),
-          yvalue = min(yvalue) + 0.5 * (max(yvalue) - min(yvalue))
-        )
-      }
-    )
-    return(data.cor)
-
-  }else{
-    c <- b
-    data.cor1 <- ddply(
-      c, .(ylab, xlab, colorcolumn),
-      function(subsetDt) {
-        xlab <- subsetDt$xlab
-        ylab <- subsetDt$ylab
-        colorcolumn <- subsetDt$colorcolumn
-        xvalue <- subsetDt$xvalue
-        yvalue <- subsetDt$yvalue
-
-        if (identical(corMethod, "rsquare")) {
-          r <- cor(
-            xvalue, yvalue,
-            use = "pairwise.complete.obs",
-            method = "pearson"
-          )
-          r <- r ^ 2
-        } else {
-          r <- cor(
-            xvalue, yvalue,
-            use = "pairwise.complete.obs",
-            method = corMethod
-          )
-        }
-        r <- paste(round(r, digits = 2))
-        data.frame(
-          ylab = unique(ylab), xlab = unique(xlab), colorcolumn = unique(colorcolumn),
-          r = r
-        )
-      }
-    )
-
-    n <- nrow(data.frame(unique(b$colorcolumn)))
-    position <- ddply(b, .(ylab, xlab), summarise,
-                      xvalue = min(xvalue) + 0.5 * (max(xvalue) - min(xvalue)),
-                      ymin = min(yvalue),
-                      ymax = max(yvalue),
-                      range = max(yvalue) - min(yvalue))
-    df <- data.frame()
-    for (i in 1:nrow(position)) {
-      for (j in 1:n){
-        row <- position[i, ]
-        df <- rbind(df, cbind(row[, 3], (row[, 4] + row[, 6] * j / (n + 1))))
-      }
-    }
-    data.cor <- cbind(data.cor1, df)
-    colnames(data.cor) <- c("ylab", "xlab", "colorcolumn", "r", "xvalue", "yvalue")
-    return(data.cor)
-  }
-}
-
-#' scatmat - plot the lowertriangle plots and density plots of the scatter plot matrix.
-#'
-#' function for making scatterplots in the lower triangle and diagonal density plots.
-#'
-#' @export
-#' @param data a data matrix. Should contain numerical (continuous) data.
-#' @param columns an option to choose the column to be used in the raw dataset. Defaults to \code{1:ncol(data)}
-#' @param color an option to group the dataset by the factor variable and color them by different colors. Defaults to \code{NULL}
-#' @param alpha an option to set the transparency in scatterplots for large data. Defaults to \code{1}.
-#' @author Mengjia Ni, Di Cook \email{dicook@@monash.edu}
-#' @examples
-#' data(flea)
-#' scatmat(flea, columns=2:4)
-#' scatmat(flea, columns= 2:4, color="species")
-scatmat <- function(data, columns=1:ncol(data), color=NULL, alpha=1) {
-  data <- upgrade_scatmat_data(data)
-  data.choose <- data[, columns]
-  dn <- data.choose[sapply(data.choose, is.numeric)]
-  if (ncol(dn) == 0) {
-    stop("All of your variables are factors. Need numeric variables to make scatterplot matrix.")
-  } else {
-    ltdata.new <- lowertriangle(data, columns = columns, color = color)
-    r <- ggplot(ltdata.new, mapping = aes_string(x = "xvalue", y = "yvalue")) +
-      theme(axis.title.x = element_blank(), axis.title.y = element_blank()) +
-      facet_grid(ylab ~ xlab, scales = "free") +
-      theme(aspect.ratio = 1)
-    if (is.null(color)) {
-      densities <- do.call("rbind", lapply(1:ncol(dn), function(i) {
-        data.frame(xlab = names(dn)[i], ylab = names(dn)[i],
-                   x = dn[, i])
-      }))
-      for (m in 1:ncol(dn)) {
-        j <- subset(densities, xlab == names(dn)[m])
-        r <- r + stat_density(
-          aes(
-            x = x,
-            y = ..scaled.. * diff(range(x)) + min(x) # nolint
-          ),
-          data = j, position = "identity", geom = "line", color = "black")
-      }
-      r <- r + geom_point(alpha = alpha, na.rm = TRUE)
-      return(r)
-    } else {
-      densities <- do.call("rbind", lapply(1:ncol(dn), function(i) {
-        data.frame(xlab = names(dn)[i], ylab = names(dn)[i],
-                   x = dn[, i], colorcolumn = data[, which(colnames(data) == color)])
-      }))
-      for (m in 1:ncol(dn)) {
-        j <- subset(densities, xlab == names(dn)[m])
-        r <- r +
-          stat_density(
-            aes_string(
-              x = "x", y = "..scaled.. * diff(range(x)) + min(x)",
-              colour = "colorcolumn"
-            ),
-            data = j,
-            position = "identity",
-            geom = "line"
-          )
-      }
-      r <- r +
-        geom_point(
-          data = ltdata.new,
-          aes_string(colour = "colorcolumn"),
-          alpha = alpha,
-          na.rm = TRUE
-        )
-      return(r)
-    }
-  }
-}
-
-#' ggscatmat - a traditional scatterplot matrix for purely quantitative variables
-#'
-#' This function makes a scatterplot matrix for quantitative variables with density plots on the diagonal
-#' and correlation printed in the upper triangle.
-#'
-#' @export
-#' @param data a data matrix. Should contain numerical (continuous) data.
-#' @param columns an option to choose the column to be used in the raw dataset. Defaults to \code{1:ncol(data)}.
-#' @param color an option to group the dataset by the factor variable and color them by different colors. Defaults to \code{NULL}.
-#' @param alpha an option to set the transparency in scatterplots for large data. Defaults to \code{1}.
-#' @param corMethod method argument supplied to \code{\link[stats]{cor}}
-#' @author Mengjia Ni, Di Cook \email{dicook@@monash.edu}
-#' @examples
-#' data(flea)
-#' ggscatmat(flea, columns = 2:4)
-#' ggscatmat(flea, columns = 2:4, color = "species")
-ggscatmat <- function(data, columns = 1:ncol(data), color = NULL, alpha = 1, corMethod = "pearson"){
-
-  data <- upgrade_scatmat_data(data)
-  data.choose <- data[, columns]
-  dn <- data.choose[sapply(data.choose, is.numeric)]
-
-  if (ncol(dn) == 0) {
-    stop("All of your variables are factors. Need numeric variables to make scatterplot matrix.")
-  }
-  if (ncol(dn) < 2){
-    stop ("Not enough numeric variables to make a scatter plot matrix")
-  }
-
-  a <- uppertriangle(data, columns = columns, color = color, corMethod = corMethod)
-  if (is.null(color)){
-    plot <- scatmat(data, columns = columns, alpha = alpha) +
-      geom_text(data = a, aes_string(label = "r"), colour = "black")
-  } else {
-    plot <- scatmat(data, columns = columns, color = color, alpha = alpha) +
-      geom_text(data = a, aes_string(label = "r", color = "colorcolumn")) + labs(color = color)
-  }
-  factor <- data.choose[sapply(data.choose, is.factor)]
-  if (ncol(factor) == 0){
-    return(plot)
-  } else {
-    warning("Factor variables are omitted in plot")
-    return(plot)
-  }
-}
-
-
-upgrade_scatmat_data <- function(data) {
-  dataIsCharacter <- sapply(data, is.character)
-  if (any(dataIsCharacter)) {
-    dataCharacterColumns <- names(dataIsCharacter[dataIsCharacter])
-    for (dataCol in dataCharacterColumns) {
-      data[dataCol] <- as.factor(data[, dataCol])
-    }
-  }
-
-  data
 }

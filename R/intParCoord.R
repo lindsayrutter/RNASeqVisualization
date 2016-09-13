@@ -1,6 +1,7 @@
-devtools::install_github("cpsievert/pedestrians", repos = "http://cran.rstudio.com")
-devtools::install_github("ropensci/plotly", repos = "http://cran.rstudio.com")
-devtools::install_github("rstudio/crosstalk", repos = "http://cran.rstudio.com", force = TRUE)
+#devtools::install_github("cpsievert/pedestrians")
+devtools::install_github("ropensci/plotly")
+devtools::install_github("ropensci/plotly@joe/feature/crosstalk")
+devtools::install_github("hadley/tidyr")
 
 library(leaflet)
 library(plotly)
@@ -20,7 +21,7 @@ p <- ggparcoord(data = diamonds.samp)
 
 p <- diamonds.samp %>%
   plot_ly() %>%
-  data.frame(., check.names = FALSE) %>%
+  #data.frame(., check.names = FALSE) %>%
   #mutate(rnames = rownames(.)) %>%
   gather_(., "variable", "value", setdiff(colnames(.), "rnames")) %>%
   ggplot(aes(variable, value, group = variable, text = variable)) +
@@ -52,3 +53,7 @@ d <- SharedData$new(iris, ~id)
 p <- ggpairs(d, aes(colour = Species), columns = 1:4)
 ggplotly(p, c("x", "y", "colour"))
 
+d <- SharedData$new(txhousing, ~city)
+p <- qplot(data = txhousing, x = date, y = median, group = city, geom = "line")
+ggplotly(p, tooltip = "city") %>%
+  crosstalk(on = "plotly_hover", color = "red")

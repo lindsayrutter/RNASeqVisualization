@@ -1,5 +1,7 @@
 #https://github.com/jcheng5/plotly/blob/joe/feature/crosstalk/inst/examples/crosstalk/01-intro.R
+#Because all data must be loaded into the browser, Crosstalk is not appropriate for large data sets. (There's no hard limit, since HTML widgets require varying amounts of CPU cycles and memory for each data point.)
 
+devtools::install_github("ropensci/plotly@joe/feature/crosstalk")
 library(plotly)
 library(crosstalk)
 
@@ -11,11 +13,10 @@ df <- data.frame(
   patient = rep(seq(nPatients), each = nVisits),
   visit = rep(seq(nVisits), nPatients))
 
-# delare the patient variable as the "unit of interest"
+# declare the patient variable as the "unit of interest"
 sd <- SharedData$new(df, ~patient)
 
-# online used sd instead of df
-p <- plot_ly(df, x = ~visit, y = ~perc, text = ~paste("Patient:", patient)) %>%
+p <- plot_ly(sd, x = ~visit, y = ~perc, text = ~paste("Patient:", patient)) %>%
   group_by(patient) %>%
   add_lines(color = I("orange")) %>%
   add_markers(color = I("steelblue"), hoverinfo = "text") %>%
@@ -66,5 +67,3 @@ crosstalk(p, on = "plotly_hover", persistent = TRUE, dynamic = TRUE)
 # be supplied to the color argument.
 colors <- RColorBrewer::brewer.pal(4, "Dark2")
 crosstalk(p, on = "plotly_hover", color = colors, dynamic = TRUE, persistent = TRUE)
-
-

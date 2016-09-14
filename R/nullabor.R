@@ -8,9 +8,65 @@ qplot(mpg, wt, data = d) + facet_wrap(~ .sample)
 
 calc_mean_dist(lineup(null_permute('mpg'), mtcars, pos = 10), var = c('mpg', 'wt'), met = 'reg_dist', pos = 10)
 
+#################################################################
+
+# qplot(mpg, wt, data = mtcars)
+
+d <- lineup(null_permute("mpg"), mtcars, n=3)
+
+# Display different samples
+# qplot(mpg, wt, data = mtcars) %+%
+#   lineup(null_permute("mpg"), mtcars) +
+#   facet_wrap(~ .sample)
+
+# qplot(mpg, wt, data = d) + facet_wrap(~ .sample)
+
+attr(d, "pos")
+
+# Or with ggplot2
+ggplot(d, aes(mpg, wt)) +
+  geom_point() +
+  facet_wrap(~ .sample)
 
 #################################################################
 
+threept <- subset(lal, type == "3pt" &
+                    !is.na(x) & !is.na(y))
+threept <- threept[c(".id", "period", "time",
+                     "team", "etype", "player", "points", "result",
+                     "x", "y")]
+threept <- mutate(threept,
+                  x = x + runif(length(x), -0.5, 0.5),
+                  y = y + runif(length(y), -0.5, 0.5),
+                  r = sqrt((x - 25) ^ 2 + y ^ 2),
+                  angle = atan2(y, x - 25) * 180 / pi)
+
+threept <- subset(threept, r > 20 & r < 39)
+
+qplot(x, y, data = threept) + coord_equal()
+
+qplot(x, y, data = threept) %+%
+  lineup(null_permute("y"), threept) +
+  facet_wrap(~ .sample) +
+  coord_equal()
+
+#################################################################
+
+samps <- lineup(null_lm(r ~ poly(angle, 2)),
+                threept, n = 5)
+
+ggplot(samps, aes(angle, r)) +
+  geom_point(alpha = 0.5) +
+  facet_wrap(~ .sample)
+
+ggplot(samps, aes(angle, r)) +
+  geom_boxplot(aes(group = round_any(angle, 15))) +
+  facet_wrap(~ .sample)
+
+
+#################################################################
+
+library(nullabor)
 library(rtracklayer)
 library(Rsamtools)
 library(grid)
@@ -69,3 +125,4 @@ for (i in 1:100){
   print(genePlot)
   dev.off()
 }
+

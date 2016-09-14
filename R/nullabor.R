@@ -29,11 +29,9 @@ library(tidyr)
 library(gtools)
 
 rm(list=ls())
-listcond = c("DU","DU","DR","DU","DR","DR","DR","DR","DU","DU","DR","DU")
 load("All_wasp.rda")
-#listcond = rep(c("DR","DU"),each= 6)
+listcond = rep(c("DR","DU"),each= 6)
 y = DGEList(counts=countTable[,c(1:12)], group=listcond)
-colnames(y[[1]]) = listcond = c("DU.1","DU.2","DR.1","DU.3","DR.2","DR.3","DR.4","DR.5","DU.4","DU.5","DR.6","DU.6")
 
 keep <- rowSums(cpm(y)>1) >= 6
 y <- y[keep, keep.lib.sizes=FALSE]
@@ -54,9 +52,8 @@ head(nc[rn,order(listcond)],5)
 
 # just for plotting purposes
 deg = rn[tt$table$FDR < .05]
-write.csv(tt$table, file="TopDEG.csv")
-
 topInfo = cbind(nc[rn,order(listcond)], tt$table)
+write.csv(topInfo, file="TopDEG.csv")
 
 for (i in 1:100){
   gene = topInfo[i,1:12]
@@ -72,6 +69,3 @@ for (i in 1:100){
   print(genePlot)
   dev.off()
 }
-
-
-

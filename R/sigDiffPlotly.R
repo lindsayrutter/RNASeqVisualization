@@ -64,3 +64,23 @@ for (i in 1:100){
     dev.off()
 }
 
+
+
+
+
+ggplot(dat, aes(x, y)) + geom_point(aes(colour = factor(x)), shape = 20, size=5) + scale_shape(solid = FALSE) + ylab("Read Count") + ggtitle(paste("Transcript:", rownames(gene), " FDR: ", permList[[1]][i,]$FDR,3)) + scale_y_continuous(limits=c(0, max(dat$y))) + theme(axis.title.x = element_blank(), legend.position="bottom", axis.text=element_text(size=12), axis.title=element_text(size=12), legend.title=element_text(size=12), legend.text=element_text(size=12)) + labs(colour = "Group", size=12) + geom_segment(aes(x = 1, y = mean(dat$y[1:6]), xend = 2, yend = mean(dat$y[7:12])))
+
+plot_ly(data = iris, x = Sepal.Length, y = Petal.Length, mode = "markers")
+
+
+plot_ly(data = dat, x = x, y = y, mode = "markers", color = x, colors = "Set1")
+
+plot_ly(data = dat, x = x, y = y, mode = "markers", color = x, colors = "Set1")
+
+geom_point(aes(colour = factor(x)), shape = 20, size=5)
+
+ggplot(dat, aes(x, y)) + geom_point(aes(colour = factor(x)), shape = 20, size=5) + scale_shape(solid = FALSE) + ylab("Read Count")
+
+
+
+

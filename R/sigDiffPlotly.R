@@ -75,7 +75,7 @@ plot_ly(data = iris, x = Sepal.Length, y = Petal.Length, mode = "markers")
 
 plot_ly(data = dat, x = x, y = y, mode = "markers", color = x, colors = "Set1")
 
-plot_ly(data = dat, x = x, y = y, mode = "markers", color = x, colors = "Set1")
+plot_ly(data = dat, x = x, y = y, mode = "markers", marker = list(size = 12), color = x, colors = "Set1")
 
 geom_point(aes(colour = factor(x)), shape = 20, size=5)
 

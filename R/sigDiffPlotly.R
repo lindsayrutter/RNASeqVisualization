@@ -70,31 +70,20 @@ for (i in 1:100){
 
 ggplot(dat, aes(x, y)) + geom_point(aes(colour = factor(x)), shape = 20, size=5) + scale_shape(solid = FALSE) + ylab("Read Count") + ggtitle(paste("Transcript:", rownames(gene), " FDR: ", formatC(permList[[1]][i,]$FDR, format = "e", digits = 2))) + scale_y_continuous(limits=c(0, max(dat$y))) + theme(axis.title.x = element_blank(), legend.position="bottom", axis.text=element_text(size=12), axis.title=element_text(size=12), legend.title=element_text(size=12), legend.text=element_text(size=12)) + labs(colour = "Group", size=12) + geom_segment(aes(x = 1, y = mean(dat$y[1:6]), xend = 2, yend = mean(dat$y[7:12])))
 
-plot_ly(data = iris, x = Sepal.Length, y = Petal.Length, mode = "markers")
-
-
-formatC(numb, format = "e", digits = 2)
-
+#plot_ly(data = iris, x = Sepal.Length, y = Petal.Length, mode = "markers")
 
 ax <- list(title = "", showticklabels = TRUE)
-
 ay <- list(title = "Read Count")
 
-plot_ly(data = dat, x = x, y = y, mode = "markers", marker = list(size = 12), color = x, colors = "Set1") %>% layout(xaxis = ax, yaxis = ay, showlegend = FALSE)
+plot_ly(data = dat, x = x, y = y, mode = "markers", marker = list(size = 12), color = x, colors = "Set1") %>% layout(title = paste("Transcript:", rownames(gene), " FDR: ", formatC(permList[[1]][i,]$FDR, format = "e", digits = 2)), xaxis = ax, yaxis = ay, legend = list(x = 0.35, y = -.28)) %>% add_trace(x = c("DU", "DR"), y= c(mean(dat$y[7:12]),mean(dat$y[1:6])), mode = "lines")
 
-plot_ly(data = dat, x = x, y = y, mode = "markers", marker = list(size = 12), color = x, colors = "Set1") %>% layout(xaxis = ax, yaxis = ay, legend = list(x = 0.35, y = -.28)) %>% add_trace(x = c(20, 20), y= c(min(disp), max(disp)), mode = "lines")
+#plot_ly(data = dat, x = x, y = y, mode = "markers", marker = list(size = 12), color = x, colors = "Set1") %>% layout(xaxis = ax, yaxis = ay, showlegend = FALSE)
 
-plot_ly(data = dat, x = x, y = y, mode = "markers", marker = list(size = 12), color = x, colors = "Set1") %>% layout(xaxis = ax, yaxis = ay, legend = list(x = 0.35, y = -.28)) %>% add_trace(x = c("DU", "DR"), y= c(mean(dat$y[7:12]),mean(dat$y[1:6])), mode = "lines")
+#plot_ly(data = dat, x = x, y = y, mode = "markers", marker = list(size = 12), color = x, colors = "Set1") %>% layout(xaxis = ax, yaxis = ay, legend = list(x = 0.35, y = -.28)) %>% add_trace(x = c(20, 20), y= c(min(disp), max(disp)), mode = "lines")
 
-plot_ly(data = dat, x = x, y = y, mode = "markers", marker = list(size = 12), color = x, colors = "Set1") %>% layout(xaxis = ax, yaxis = ay, legendposition = "bottom")
-
-
-
-
+#plot_ly(data = dat, x = x, y = y, mode = "markers", marker = list(size = 12), color = x, colors = "Set1") %>% layout(xaxis = ax, yaxis = ay, legendposition = "bottom")
 
 # Add line segment
-plot_ly(x = c(4, 4), y = c(0, 10), mode = "lines") %>%
-  add_trace(x = c(3, 5), y = c(5, 5))
+#plot_ly(x = c(4, 4), y = c(0, 10), mode = "lines") %>% add_trace(x = c(3, 5), y = c(5, 5))
 
-plot_ly(mtcars, x = mpg, y = disp, mode = "markers") %>%
-  add_trace(x = c(20, 20), y= c(min(disp), max(disp)), mode = "lines")
+#plot_ly(mtcars, x = mpg, y = disp, mode = "markers") %>% add_trace(x = c(20, 20), y= c(min(disp), max(disp)), mode = "lines")

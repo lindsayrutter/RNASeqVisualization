@@ -68,24 +68,24 @@ for (i in 1:100){
 
 
 
-ggplot(dat, aes(x, y)) + geom_point(aes(colour = factor(x)), shape = 20, size=5) + scale_shape(solid = FALSE) + ylab("Read Count") + ggtitle(paste("Transcript:", rownames(gene), " FDR: ", permList[[1]][i,]$FDR,3)) + scale_y_continuous(limits=c(0, max(dat$y))) + theme(axis.title.x = element_blank(), legend.position="bottom", axis.text=element_text(size=12), axis.title=element_text(size=12), legend.title=element_text(size=12), legend.text=element_text(size=12)) + labs(colour = "Group", size=12) + geom_segment(aes(x = 1, y = mean(dat$y[1:6]), xend = 2, yend = mean(dat$y[7:12])))
+ggplot(dat, aes(x, y)) + geom_point(aes(colour = factor(x)), shape = 20, size=5) + scale_shape(solid = FALSE) + ylab("Read Count") + ggtitle(paste("Transcript:", rownames(gene), " FDR: ", formatC(permList[[1]][i,]$FDR, format = "e", digits = 2))) + scale_y_continuous(limits=c(0, max(dat$y))) + theme(axis.title.x = element_blank(), legend.position="bottom", axis.text=element_text(size=12), axis.title=element_text(size=12), legend.title=element_text(size=12), legend.text=element_text(size=12)) + labs(colour = "Group", size=12) + geom_segment(aes(x = 1, y = mean(dat$y[1:6]), xend = 2, yend = mean(dat$y[7:12])))
 
 plot_ly(data = iris, x = Sepal.Length, y = Petal.Length, mode = "markers")
 
 
-plot_ly(data = dat, x = x, y = y, mode = "markers", color = x, colors = "Set1")
+formatC(numb, format = "e", digits = 2)
 
 
-ax <- list(
-  title = "",
-  showticklabels = TRUE
-)
+ax <- list(title = "", showticklabels = TRUE)
 
-ay <- list(
-  title = "Read Count"
-)
+ay <- list(title = "Read Count")
 
-plot_ly(data = dat, x = x, y = y, mode = "markers", marker = list(size = 12), color = x, colors = "Set1") %>% layout(xaxis = ax, yaxis = ay)
+plot_ly(data = dat, x = x, y = y, mode = "markers", marker = list(size = 12), color = x, colors = "Set1") %>% layout(xaxis = ax, yaxis = ay, showlegend = FALSE)
+
+plot_ly(data = dat, x = x, y = y, mode = "markers", marker = list(size = 12), color = x, colors = "Set1") %>% layout(xaxis = ax, yaxis = ay, legend = list(x = 0.35, y = -.28))
+
+plot_ly(data = dat, x = x, y = y, mode = "markers", marker = list(size = 12), color = x, colors = "Set1") %>% layout(xaxis = ax, yaxis = ay, legendposition = "bottom")
+
 
 
 

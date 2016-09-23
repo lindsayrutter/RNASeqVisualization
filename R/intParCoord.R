@@ -1,3 +1,6 @@
+
+# https://plot.ly/r/legend/
+
 #devtools::install_github("cpsievert/pedestrians")
 devtools::install_github("ropensci/plotly")
 devtools::install_github("ropensci/plotly@joe/feature/crosstalk")

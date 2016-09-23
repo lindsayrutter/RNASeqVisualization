@@ -82,7 +82,9 @@ ay <- list(title = "Read Count")
 
 plot_ly(data = dat, x = x, y = y, mode = "markers", marker = list(size = 12), color = x, colors = "Set1") %>% layout(xaxis = ax, yaxis = ay, showlegend = FALSE)
 
-plot_ly(data = dat, x = x, y = y, mode = "markers", marker = list(size = 12), color = x, colors = "Set1") %>% layout(xaxis = ax, yaxis = ay, legend = list(x = 0.35, y = -.28))
+plot_ly(data = dat, x = x, y = y, mode = "markers", marker = list(size = 12), color = x, colors = "Set1") %>% layout(xaxis = ax, yaxis = ay, legend = list(x = 0.35, y = -.28)) %>% add_trace(x = c(20, 20), y= c(min(disp), max(disp)), mode = "lines")
+
+plot_ly(data = dat, x = x, y = y, mode = "markers", marker = list(size = 12), color = x, colors = "Set1") %>% layout(xaxis = ax, yaxis = ay, legend = list(x = 0.35, y = -.28)) %>% add_trace(x = c("DU", "DR"), y= c(5,10), mode = "lines")
 
 plot_ly(data = dat, x = x, y = y, mode = "markers", marker = list(size = 12), color = x, colors = "Set1") %>% layout(xaxis = ax, yaxis = ay, legendposition = "bottom")
 
@@ -90,4 +92,9 @@ plot_ly(data = dat, x = x, y = y, mode = "markers", marker = list(size = 12), co
 
 
 
+# Add line segment
+plot_ly(x = c(4, 4), y = c(0, 10), mode = "lines") %>%
+  add_trace(x = c(3, 5), y = c(5, 5))
 
+plot_ly(mtcars, x = mpg, y = disp, mode = "markers") %>%
+  add_trace(x = c(20, 20), y= c(min(disp), max(disp)), mode = "lines")

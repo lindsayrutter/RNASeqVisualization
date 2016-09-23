@@ -72,44 +72,4 @@ for (i in 1:100){
 ax <- list(title = "", showticklabels = TRUE)
 ay <- list(title = "Read Count")
 
-myPlot = dat %>% plot_ly(x = x, y = y, mode = "markers", marker = list(size = 12), color = x, colors = "Set1") %>% layout(title = paste("Transcript:", rownames(gene), " FDR: ", formatC(permList[[1]][i,]$FDR, format = "e", digits = 2)), xaxis = ax, yaxis = ay, legend = list(x = 0.35, y = -0.26), tooltip = c("x", "y", "rep")) %>% add_trace(x = c("DU", "DR"), y= c(mean(dat$y[7:12]),mean(dat$y[1:6])), mode = "lines", showlegend = FALSE)
-
-
 myPlot = dat %>% plot_ly(x = x, y = y, mode = "markers", marker = list(size = 12), color = x, colors = "Set1", hoverinfo = "text", text = paste("Read count = ", format(round(dat$y, 2), nsmall = 2))) %>% layout(title = paste("Transcript =", rownames(gene), " FDR =", formatC(permList[[1]][i,]$FDR, format = "e", digits = 2)), xaxis = ax, yaxis = ay, legend = list(x = 0.35, y = -0.26)) %>% add_trace(x = c("DU", "DR"), y= c(mean(dat$y[7:12]),mean(dat$y[1:6])), mode = "lines", showlegend = FALSE, hoverinfo = "text", text = paste(c("(DU)", "(DR)"), "Mean read count =", format(round(c(mean(dat$y[7:12]),mean(dat$y[1:6])), 2), nsmall = 2)))
-
-
-#hoverinfo = "text",
-#text = paste("Displacement = ", mtcars$disp, "Miles Per Gallon = ", mtcars$mpg))
-
-
-
-p <- mtcars %>%
-  plot_ly(x = disp, y = mpg, mode = "markers", color = cyl, size = wt,
-          hoverinfo = "text",
-          text = paste("Displacement = ", mtcars$disp, "Miles Per Gallon = ", mtcars$mpg)) %>%
-  layout(title ="Custom Hover Text")
-
-
-
-
-
-
-
-
-myPlot$x
-myPlot$y
-myPlot$rep
-myPlot$data[[1]]
-
-animatePlotTotalImage <- plotly::plotly_build(plotly::ggplotly(plotTotalImage, tooltip = c("x", "label")))
-animatePlotTotalImage$data[[1]]$hoverinfo <- "none"
-animatePlotTotalImage$data[[2]]$hoverinfo <- "none"
-animatePlotTotalImage$data[[3]]$hoverinfo <- c("x+text")
-animatePlotTotalImage$data[[4]]$hoverinfo <- c("x+text")
-animatePlotTotalImage
-
-#plot_ly(data = dat, x = x, y = y, mode = "markers", marker = list(size = 12), color = x, colors = "Set1") %>% layout(title = paste("Transcript:", rownames(gene), " FDR: ", formatC(permList[[1]][i,]$FDR, format = "e", digits = 2)), xaxis = ax, yaxis = ay, showlegend = FALSE) %>% add_trace(x = c("DU", "DR"), y= c(mean(dat$y[7:12]), mean(dat$y[1:6])), mode = "lines")
-
-plot_ly(data = iris, x = Sepal.Length, y = Petal.Length, mode = "markers", color = Species) %>% layout(legend = list(x = 0.35, y = -0.5))
-
-

@@ -47,8 +47,6 @@ p <- qplot(data = d, x = date, y = median, group = city, geom = "line")
 ggplotly(p, tooltip = "city") %>%
   crosstalk(on = "plotly_hover", color = "red")
 
-
-
 library(GGally)
 iris$id <- seq_len(nrow(iris))
 d <- SharedData$new(iris, ~id)

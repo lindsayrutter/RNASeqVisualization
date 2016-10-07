@@ -64,10 +64,10 @@ p %>%
 # a colourpicker htmlwidget (@colourpicker) will appear just above the plotly
 # visualization. At any given time, the value of this widget controls the
 # color of new selection(s).
-crosstalk(p, on = "plotly_hover", persistent = TRUE, dynamic = TRUE)
+crosstalk(p, on = "plotly_click", persistent = TRUE, dynamic = TRUE)
 
 # By default, the colourpicker widget uses colors from the "Set1"
 # colour brewer palette (@RColorBrewer), but any set of valid R colors can
 # be supplied to the color argument.
 colors <- RColorBrewer::brewer.pal(4, "Dark2")
-crosstalk(p, on = "plotly_hover", color = colors, dynamic = TRUE, persistent = TRUE)
+crosstalk(p, on = "plotly_click", color = colors, dynamic = TRUE, persistent = TRUE)

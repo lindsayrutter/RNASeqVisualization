@@ -53,6 +53,10 @@ p %>%
 # `TRUE`.
 crosstalk(p, on = "plotly_hover", persistent = TRUE)
 
+p %>%
+  crosstalk(on = "plotly_click", off = "plotly_deselect", persistent = TRUE) %>%
+  layout(dragmode = "zoom")
+
 # Sometimes its useful to compare two or more different selection sets.
 # For example, how do patients with a high response on visit 1 compare to those
 # with a low response? To make this sort of comparison, we can alter the color

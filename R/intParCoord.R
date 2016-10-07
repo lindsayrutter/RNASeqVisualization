@@ -1,4 +1,3 @@
-
 # https://plot.ly/r/legend/
 
 #devtools::install_github("cpsievert/pedestrians")

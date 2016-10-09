@@ -23,12 +23,20 @@ permList <- list()
 permInfo <- list()
 genePlot <- list()
 
-listcond = rep(c("DR","DU"),each= 6)
+ifelse(!dir.exists(file.path(mainDir, subDir)), dir.create(file.path(mainDir, subDir)), FALSE)
+
+
+listcond = rep(c("DR", "DU"), each = 6)
 permInfo[[1]] = listcond
 
 for(i in 1:3){
   if (i>1){
-    permInfo[[i]] = permute(listcond)
+    myPerm = permute(listcond)
+    if (all(table(myPerm[1:6]) == table(myPerm[7:12]))){
+      if (!all(myPerm == permInfo[[i-1]])){
+        permInfo[[i]] = myPerm
+      }
+    }
   }
 
   y = DGEList(counts=countTable[,c(1:12)], group=permInfo[[i]])
@@ -50,10 +58,8 @@ for(i in 1:3){
   write.csv(permList[[i]], file= paste("TopDEG_", i, ".csv", sep=""))
 }
 
-#for (i in 1:100){
+for (i in 1:100){
   for (j in 1:3){
-    #gene = topInfo[i,1:12]
-    i=1
     gene = permList[[j]][i,1:12]
     rep = 6
     fact = 2
@@ -62,10 +68,9 @@ for(i in 1:3){
     dat$x=as.factor(dat$x)
     levels(dat$x)=c("DR","DU")
     genePlot[[j]] = ggplot(dat, aes(x, y)) + geom_point(aes(colour = factor(x)), shape = 20, size=5) + scale_shape(solid = FALSE) + ylab("Read Count") + ggtitle(paste("Transcript:", rownames(gene), " FDR: ", formatC(permList[[j]][i,]$FDR, format = "e", digits = 2))) + scale_y_continuous(limits=c(0, max(dat$y))) + theme(axis.title.x = element_blank(), legend.position="bottom", axis.text=element_text(size=12), axis.title=element_text(size=12), legend.title=element_text(size=12), legend.text=element_text(size=12)) + labs(colour = "Group", size=12) + geom_segment(aes(x = 1, y = mean(dat$y[1:6]), xend = 2, yend = mean(dat$y[7:12])))
-  }
 
-    jpeg(file = paste(getwd(), "/Perm1/", "Gene_", i, ".jpg", sep=""), height = 700, width = 700)
-    print(genePlot)
+    jpeg(file = paste(getwd(), "/Perm", j, "/Gene", i, ".jpg", sep=""), height = 700, width = 700)
+    print(genePlot[[j]])
     dev.off()
   }
-#}
+}

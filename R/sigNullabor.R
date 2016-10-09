@@ -1,3 +1,5 @@
+# This function creates two well-shuffled permutations between the two treatment groups. It saves 3 (original + 2 permutations) .csv files of the DEGs in descending FDR value. It also saves the top 100 DEG images in 3 (original + 2 permutations) folders.
+
 library(nullabor)
 library(rtracklayer)
 library(Rsamtools)
@@ -23,20 +25,24 @@ permList <- list()
 permInfo <- list()
 genePlot <- list()
 
-ifelse(!dir.exists(file.path(mainDir, subDir)), dir.create(file.path(mainDir, subDir)), FALSE)
-
-
 listcond = rep(c("DR", "DU"), each = 6)
 permInfo[[1]] = listcond
 
 for(i in 1:3){
   if (i>1){
-    myPerm = permute(listcond)
-    if (all(table(myPerm[1:6]) == table(myPerm[7:12]))){
-      if (!all(myPerm == permInfo[[i-1]])){
-        permInfo[[i]] = myPerm
+    # Check that permutations include equal number of treatments in each group (check that permutations are thoroughly shuffled)
+    while (length(permInfo) < i){
+      myPerm = permute(listcond)
+      if (all(table(myPerm[1:6]) == table(myPerm[7:12]))){
+        if (!all(myPerm == permInfo[[i-1]])){
+          permInfo[[i]] = myPerm
+        }
       }
     }
+  }
+
+  if (!dir.exists(paste(getwd(), "/Perm", i, sep=""))){
+    dir.create(paste(getwd(), "/Perm", i, sep=""))
   }
 
   y = DGEList(counts=countTable[,c(1:12)], group=permInfo[[i]])
@@ -55,7 +61,7 @@ for(i in 1:3){
   rn = rownames(tt$table)
 
   permList[[i]] = cbind(nc[rn,order(permInfo[[i]])], tt$table)
-  write.csv(permList[[i]], file= paste("TopDEG_", i, ".csv", sep=""))
+  write.csv(permList[[i]], file= paste("TopDEG", i, ".csv", sep=""))
 }
 
 for (i in 1:100){
@@ -74,3 +80,5 @@ for (i in 1:100){
     dev.off()
   }
 }
+
+

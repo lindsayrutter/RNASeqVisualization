@@ -23,10 +23,11 @@ load("data/All_wasp.rda")
 
 permList <- list()
 permInfo <- list()
-genePlot <- list()
 correctPlace <- list()
-p <- list()
-fullDat <- data.frame()
+
+if (!dir.exists(paste(getwd(), "/Perm", i, sep=""))){
+  dir.create(paste(getwd(), "/Perm", i, sep=""))
+}
 
 listcond = rep(c("DR", "DU"), each = 6)
 permInfo[[1]] = listcond
@@ -44,8 +45,8 @@ for(i in 1:3){
     }
   }
 
-  if (!dir.exists(paste(getwd(), "/Perm", i, sep=""))){
-    dir.create(paste(getwd(), "/Perm", i, sep=""))
+  if (!dir.exists(paste(getwd(), "/PermLineup", sep=""))){
+    dir.create(paste(getwd(), "/PermLineup", sep=""))
   }
 
   y = DGEList(counts=countTable[,c(1:12)], group=permInfo[[i]])
@@ -68,11 +69,14 @@ for(i in 1:3){
 }
 
 for (i in 1:100){
+  fullDat <- data.frame()
+  lineup <- permute(seq(1:3))
+  correctPlace[i] <- which(lineup==1)
   for (j in 1:3){
     gene = permList[[j]][i,1:12]
     rep = 6
     fact = 2
-    dat = data.frame(x=rep(1:fact, each=rep),y=t(gene),z=j)
+    dat = data.frame(x=rep(1:fact, each=rep),y=t(gene),z=lineup[j])
     colnames(dat)=c("x","y","z")
     dat$x=as.factor(dat$x)
     levels(dat$x)=c("DR","DU")
@@ -80,36 +84,13 @@ for (i in 1:100){
     dat$meanDU = mean(filter(dat, x=="DU")$y)
     fullDat <- rbind(fullDat, dat)
   }
+    allPlot = ggplot(fullDat, aes(x, y)) + geom_point(aes(colour = factor(x)), shape = 20, size=5, alpha = 0.5) + scale_shape(solid = FALSE) + ggtitle(paste("Transcript: ", i)) + ylab("Read Count") + scale_y_continuous(limits=c(0, max(fullDat$y))) + theme(axis.title.x = element_blank(), legend.position="bottom", axis.text=element_text(size=12), axis.title=element_text(size=12), legend.title=element_text(size=12), legend.text=element_text(size=12), plot.title=element_text(hjust=0.5)) + labs(colour = "Group", size=12) + geom_segment(aes(x = 1, y = meanDR, xend = 2, yend = meanDU), colour="gray25", size = 0.1) + facet_grid(. ~ z)
 
-    allPlot = ggplot(fullDat, aes(x, y)) + geom_point(aes(colour = factor(x)), shape = 20, size=5) + scale_shape(solid = FALSE) + ylab("Read Count") + scale_y_continuous(limits=c(0, max(fullDat$y))) + theme(axis.title.x = element_blank(), legend.position="bottom", axis.text=element_text(size=12), axis.title=element_text(size=12), legend.title=element_text(size=12), legend.text=element_text(size=12)) + labs(colour = "Group", size=12) + geom_segment(aes(x = 1, y = meanDR, xend = 2, yend = meanDU))
-
-    allPlot + facet_grid(. ~ z)
-    + geom_segment(aes(x = 1, y = mean(filter(fullDat, x=="DR")$y), xend = 2, yend = mean(filter(fullDat, x=="DU")$y)))
-  }
-
-  lineup <- permute(seq(1:3))
-  correctPlace[i] <- which(lineup==1)
-
-  for (l in 1:3){
-    p[[l]] <- genePlot[[lineup[l]]]
-  }
-  do.call(grid.arrange, t(p))
-
-  grid.arrange(p1, arrangeGrob(p2,p3,p4, ncol=3)
-
-  jpeg(file = paste(getwd(), "/Nullabor/Gene", i, ".jpg", sep=""), height = 700, width = 700)
-  print(genePlot[[j]])
-  dev.off()
+    jpeg(file = paste(getwd(), "/PermLineup/Gene", i, ".jpg", sep=""), height = 700, width = 700)
+    print(allPlot)
+    dev.off()
 }
 
-ToothGrowth$dose <- as.factor(ToothGrowth$dose)
-df <- ToothGrowth
-head(df)
-
-bp <- ggplot(df, aes(x=dose, y=len, group=dose)) +
-  geom_boxplot(aes(fill=dose))
-
-
-
-
-ggplot(dat, aes(x, y)) + geom_point(aes(colour = factor(x)), shape = 20, size=5) + scale_shape(solid = FALSE) + ylab("Read Count") + ggtitle(paste("Transcript:", rownames(gene), " FDR: ", formatC(permList[[j]][i,]$FDR, format = "e", digits = 2))) + scale_y_continuous(limits=c(0, max(dat$y))) + theme(axis.title.x = element_blank(), legend.position="bottom", axis.text=element_text(size=12), axis.title=element_text(size=12), legend.title=element_text(size=12), legend.text=element_text(size=12)) + labs(colour = "Group", size=12) + geom_segment(aes(x = 1, y = mean(dat$y[1:6]), xend = 2, yend = mean(dat$y[7:12])))
+colnames(correctPlace) = 1:100
+correctPlace = data.frame(t(correctPlace))
+write.csv(correctPlace, file = paste(getwd(), "/PermLineup/Correct.csv", sep=""))

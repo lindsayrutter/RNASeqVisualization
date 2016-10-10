@@ -93,4 +93,5 @@ for (i in 1:100){
 
 colnames(correctPlace) = 1:100
 correctPlace = data.frame(t(correctPlace))
+colnames(correctPlace) = "CorrectPlace"
 write.csv(correctPlace, file = paste(getwd(), "/PermLineup/Correct.csv", sep=""))

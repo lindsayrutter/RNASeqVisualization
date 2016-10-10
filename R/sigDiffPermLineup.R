@@ -74,13 +74,17 @@ for (i in 1:100){
     fact = 2
     dat = data.frame(x=rep(1:fact, each=rep),y=t(gene),z=j)
     colnames(dat)=c("x","y","z")
+    dat$x=as.factor(dat$x)
+    levels(dat$x)=c("DR","DU")
+    dat$meanDR = mean(filter(dat, x=="DR")$y)
+    dat$meanDU = mean(filter(dat, x=="DU")$y)
     fullDat <- rbind(fullDat, dat)
   }
-    fullDat$x=as.factor(fullDat$x)
-    levels(fullDat$x)=c("DR","DU")
-    allPlot = ggplot(fullDat, aes(x, y)) + geom_point(aes(colour = factor(x)), shape = 20, size=5) + scale_shape(solid = FALSE) + ylab("Read Count") + scale_y_continuous(limits=c(0, max(fullDat$y))) + theme(axis.title.x = element_blank(), legend.position="bottom", axis.text=element_text(size=12), axis.title=element_text(size=12), legend.title=element_text(size=12), legend.text=element_text(size=12)) + labs(colour = "Group", size=12) #+ geom_segment(aes(x = 1, y = mean(filter(fullDat, x=="DR")$y), xend = 2, yend = mean(filter(fullDat, x=="DU")$y)))
 
-    allPlot + facet_grid(. ~ z) + geom_segment(aes(x = 1, y = mean(filter(fullDat, x=="DR")$y), xend = 2, yend = mean(filter(fullDat, x=="DU")$y)))
+    allPlot = ggplot(fullDat, aes(x, y)) + geom_point(aes(colour = factor(x)), shape = 20, size=5) + scale_shape(solid = FALSE) + ylab("Read Count") + scale_y_continuous(limits=c(0, max(fullDat$y))) + theme(axis.title.x = element_blank(), legend.position="bottom", axis.text=element_text(size=12), axis.title=element_text(size=12), legend.title=element_text(size=12), legend.text=element_text(size=12)) + labs(colour = "Group", size=12) + geom_segment(aes(x = 1, y = meanDR, xend = 2, yend = meanDU))
+
+    allPlot + facet_grid(. ~ z)
+    + geom_segment(aes(x = 1, y = mean(filter(fullDat, x=="DR")$y), xend = 2, yend = mean(filter(fullDat, x=="DU")$y)))
   }
 
   lineup <- permute(seq(1:3))

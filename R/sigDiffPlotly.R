@@ -46,7 +46,6 @@ for(i in 1:3){
   rn = rownames(tt$table)
 
   permList[[i]] = cbind(nc[rn,order(permInfo[[i]])], tt$table)
-  write.csv(permList[[i]], file= paste("TopDEG_", i, ".csv", sep=""))
 }
 
 for (i in 1:100){

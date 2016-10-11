@@ -3,6 +3,8 @@
 # 2) Correct locations in Correct.csv
 # 3) TopDEG1.csv (real data), TopDEG2.csv (permuted), TopDEG3.csv (permuted)
 
+# It is different from sigDiffPerm.R because it does not include FDR value in plot outputs.
+
 library(nullabor)
 library(rtracklayer)
 library(Rsamtools)
@@ -76,7 +78,7 @@ for (i in 1:100){
     gene = permList[[j]][i,1:12]
     rep = 6
     fact = 2
-    dat = data.frame(x=rep(1:fact, each=rep),y=t(gene),z=lineup[j])
+    dat = data.frame(x=rep(1:fact, each=rep),y=t(gene),z=which(lineup==j))
     colnames(dat)=c("x","y","z")
     dat$x=as.factor(dat$x)
     levels(dat$x)=c("DR","DU")

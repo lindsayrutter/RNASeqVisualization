@@ -2,6 +2,7 @@
 # 1) Triangle lineups of the top 100 DEGs
 # 2) Correct locations in Correct.csv
 # 3) TopDEG1.csv (real data), TopDEG2.csv (permuted), TopDEG3.csv (permuted)
+# 4) Permutations.csv tells the permutation orders
 
 # It is different from sigDiffPerm.R because it does not include FDR value in plot outputs.
 
@@ -100,3 +101,8 @@ colnames(correctPlace) = "CorrectPlot"
 correctPlace = data.frame(correctPlace)
 correctPlace <- rownames_to_column(correctPlace, "Gene")
 write.csv(correctPlace, row.names = FALSE, file = paste(getwd(), "/PermLineup/Correct.csv", sep=""))
+
+permInfo <- data.frame(t(data.frame(permInfo[[1]], permInfo[[2]], permInfo[[3]])))
+rownames(permInfo) <- c("Real data", "Permutation 1", "Permutation 2")
+write.csv(permInfo, col.names = FALSE, file = paste(getwd(), "/PermLineup/Permutations.csv", sep=""))
+write.table(permInfo, sep=",",  col.names=FALSE, file = paste(getwd(), "/PermLineup/Permutations.csv", sep=""))

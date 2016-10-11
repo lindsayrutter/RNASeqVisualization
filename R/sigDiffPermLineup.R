@@ -1,4 +1,7 @@
-# This function
+# This function outputs several items into a folder called PermLineup:
+# 1) Triangle lineups of the top 100 DEGs
+# 2) Correct locations in Correct.csv
+# 3) TopDEG1.csv (real data), TopDEG2.csv (permuted), TopDEG3.csv (permuted)
 
 library(nullabor)
 library(rtracklayer)
@@ -17,6 +20,7 @@ library(reshape2)
 library(scales)
 library(tidyr)
 library(gtools)
+library(tibble)
 
 rm(list=ls())
 load("data/All_wasp.rda")
@@ -25,15 +29,15 @@ permList <- list()
 permInfo <- list()
 correctPlace <- list()
 
-if (!dir.exists(paste(getwd(), "/Perm", i, sep=""))){
-  dir.create(paste(getwd(), "/Perm", i, sep=""))
-}
-
 listcond = rep(c("DR", "DU"), each = 6)
 permInfo[[1]] = listcond
 
+if (!dir.exists(paste(getwd(), "/PermLineup", sep=""))){
+  dir.create(paste(getwd(), "/PermLineup", sep=""))
+}
+
 for(i in 1:3){
-  if (i>1){
+    if (i>1){
     # Check that permutations include equal number of treatments in each group (check that permutations are thoroughly shuffled)
     while (length(permInfo) < i){
       myPerm = permute(listcond)
@@ -43,10 +47,6 @@ for(i in 1:3){
         }
       }
     }
-  }
-
-  if (!dir.exists(paste(getwd(), "/PermLineup", sep=""))){
-    dir.create(paste(getwd(), "/PermLineup", sep=""))
   }
 
   y = DGEList(counts=countTable[,c(1:12)], group=permInfo[[i]])
@@ -65,7 +65,7 @@ for(i in 1:3){
   rn = rownames(tt$table)
 
   permList[[i]] = cbind(nc[rn,order(permInfo[[i]])], tt$table)
-  write.csv(permList[[i]], file= paste("TopDEG", i, ".csv", sep=""))
+  write.csv(permList[[i]], file= paste(getwd(), "/PermLineup/TopDEG", i, ".csv", sep=""))
 }
 
 for (i in 1:100){
@@ -91,7 +91,10 @@ for (i in 1:100){
     dev.off()
 }
 
+correctPlace = data.frame(correctPlace)
 colnames(correctPlace) = 1:100
-correctPlace = data.frame(t(correctPlace))
-colnames(correctPlace) = "CorrectPlace"
-write.csv(correctPlace, file = paste(getwd(), "/PermLineup/Correct.csv", sep=""))
+correctPlace = t(correctPlace)
+colnames(correctPlace) = "CorrectPlot"
+correctPlace = data.frame(correctPlace)
+correctPlace <- rownames_to_column(correctPlace, "Gene")
+write.csv(correctPlace, row.names = FALSE, file = paste(getwd(), "/PermLineup/Correct.csv", sep=""))

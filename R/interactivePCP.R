@@ -1,7 +1,8 @@
 #https://github.com/jcheng5/plotly/blob/joe/feature/crosstalk/inst/examples/crosstalk/01-intro.R
-#Because all data must be loaded into the browser, Crosstalk is not appropriate for large data sets. (There's no hard limit, since HTML widgets require varying amounts of CPU cycles and memory for each data point.)
+#Because all data must be loaded into the browser, CROSSTALK IS NOT APROPRIATE FOR LARGE DATASETS. (There's no hard limit, since HTML widgets require varying amounts of CPU cycles and memory for each data point.)
 
-devtools::install_github("ropensci/plotly@joe/feature/crosstalk")
+#devtools::install_github("ropensci/plotly@joe/feature/crosstalk")
+devtools::install_github("rstudio/crosstalk", repos = "http://cran.rstudio.com")
 library(plotly)
 library(crosstalk)
 
@@ -16,7 +17,7 @@ df <- data.frame(
 # declare the patient variable as the "unit of interest"
 sd <- SharedData$new(df, ~patient)
 
-p <- plot_ly(sd, x = ~visit, y = ~perc, text = ~paste("Patient:", patient)) %>%
+p <- plot_ly(df, x = ~visit, y = ~perc, text = ~paste("Patient:", patient)) %>%
   group_by(patient) %>%
   add_lines(color = I("orange")) %>%
   add_markers(color = I("steelblue"), hoverinfo = "text") %>%

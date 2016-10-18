@@ -101,8 +101,6 @@ ggplot(sub, aes(x=C_S1_R1, xend=C_S1_R2, y=C_S2_R1, yend=C_S2_R2)) +
 - They are useful for getting a sense of the multivariate shape of the data. You can typically read association, clustering and outliers from the plot. 
 - Can handle more variables than scatterplot matrices.
 
-## Parallel coordinates, connect the dots
-
 ```{r echo=FALSE}
 ggparcoord(coty[sample(1:nrow(coty), 1000),], 
            columns=2:10, scale="globalminmax", 

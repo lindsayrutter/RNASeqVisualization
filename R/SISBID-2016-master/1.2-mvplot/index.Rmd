@@ -34,18 +34,6 @@ library(GGally)
 library(edgeR)
 ```
 
-## Your turn
-
-- What is multivariate data?
-- What makes multivariate analysis different from univariate analysis?
-
-![](lorikeets.png)
-
-```{r, eval=FALSE, echo = FALSE}
-data is multivariate, if we have more information than a single aspect for each entity/person/experimental unit.
-mutivariate analysis takes relationships between these different aspects into account.
-```
-
 ## Main types of plots
 
 - pairwise plots: explore replicates, and associations
@@ -55,7 +43,6 @@ mutivariate analysis takes relationships between these different aspects into ac
 ## GGally
 
 Classical scatterplot matrix (draftman's) plot. All variables are numeric, show all possible pairs.
-
 
 ```{r}
 data(flea)
@@ -83,24 +70,12 @@ coty <- read_delim("R/SISBID-2016-master/data/GSE61857_Cotyledon_normalized.txt.
   skip=1)
 coty <- as.data.frame(coty)
 ggscatmat(coty, columns=2:7, alpha=0.1)
-```
-
-Normalized data for the first 6 samples are shown.
-
-##
-
-```{r echo=FALSE, fig.width=6, fig.height=6}
-coty <- read_delim("../data/GSE61857_Cotyledon_normalized.txt.gz",
-  delim="\t", col_types="cddddddddd", 
-  col_names=c("ID", "C_S1_R1", "C_S1_R2", "C_S1_R3", 
-  "C_S2_R1", "C_S2_R2", "C_S2_R3", "C_S3_R1", "C_S3_R2", "C_S3_R3"),
-  skip=1)
-
-# producing the column names automatically:
-# sprintf("C_S%d_R%d", rep(1:3, each=3), rep(1:3, 3))
-
-coty <- as.data.frame(coty)
 ggscatmat(coty[sample(1:nrow(coty), 5000),], columns=2:7, alpha=0.1)
+GGally::ggscatmat(head(coty,1000), columns=2:7, alpha=0.1) # use just the first 1000 observations
+# what do we learn? 
+# - there is quite a lot of variability between pairs of samples
+# - from the densities we see that lots of values are small (skew marginal distributions)
+# - replicates (samples under the same experimental condition) are more similar (closer to the line of identity) than non-replicates
 ```
 
 ## What we learn
@@ -109,56 +84,11 @@ ggscatmat(coty[sample(1:nrow(coty), 5000),], columns=2:7, alpha=0.1)
 - There is a lot of variability in counts across stages, would indicate a lot of gene activity. 
 - There are a few genes that have some difference from one rep to another. These could be problematic when it comes to testing. To identify these it is easier to use interactive graphics - stay tuned for this tomorrow.
 
-## Your turn
-
-- Read the leaf data in from Brown and Hudson, and make a scatterplot matrix. (If it is too slow on your computer, sample the number of rows, to get a glimpse of the data to start.)
-- Summarise what you learn about the data in a couple of sentences
-
-![](lorikeets.png)
-
-```{r eval=FALSE, echo =FALSE}
-coty <- read_delim("../data/GSE61857_Cotyledon_normalized.txt.gz",
-  delim="\t", col_types="cddddddddd", 
-  col_names=c("ID", "C_S1_R1", "C_S1_R2", "C_S1_R3", 
-  "C_S2_R1", "C_S2_R2", "C_S2_R3", "C_S3_R1", "C_S3_R2", "C_S3_R2"),
-  skip=1)
-coty <- as.data.frame(coty)
-GGally::ggscatmat(head(coty,1000), columns=2:7, alpha=0.1) # use just the first 1000 observations
-# what do we learn? 
-# - there is quite a lot of variability between pairs of samples
-# - from the densities we see that lots of values are small (skew marginal distributions)
-# - replicates (samples under the same experimental condition) are more similar (closer to the line of identity) than non-replicates
-```
-
 ## Porcupine plots
 
 Compare treatment vs reps. Focus on reps 1, 2 from stages 1 and 2. 
 
-```{r eval=FALSE}
-sub <- coty %>% select(ID, C_S1_R1, C_S1_R2, C_S2_R1, C_S2_R2)
-ggplot(sub, aes(x=C_S1_R1, xend=C_S1_R2, y=C_S2_R1, yend=C_S2_R2)) +
-  geom_segment() + 
-  theme(aspect.ratio = 1)
-```
-
-##
-
 ```{r echo=FALSE}
-sub <- coty %>% select(ID, C_S1_R1, C_S1_R2, C_S2_R1, C_S2_R2)
-ggplot(sub, aes(x=C_S1_R1, xend=C_S1_R2, y=C_S2_R1, yend=C_S2_R2)) +
-  geom_segment() + xlim(c(0, 17.5)) + ylim(c(0, 17.5)) +
-  theme(aspect.ratio = 1)
-```
-
-The best prospects should be shortest lines further from the `X=Y`. 
-
-## Your turn
-
-Make a porcupine plot for the first two reps of the first two developmental stages of the leaf data.
-
-![](lorikeets.png)
-
-```{r echo=FALSE, eval = FALSE}
 sub <- coty %>% select(ID, C_S1_R1, C_S1_R2, C_S2_R1, C_S2_R2)
 ggplot(sub, aes(x=C_S1_R1, xend=C_S1_R2, y=C_S2_R1, yend=C_S2_R2)) +
   geom_segment() + xlim(c(0, 17.5)) + ylim(c(0, 17.5)) +
@@ -171,22 +101,7 @@ ggplot(sub, aes(x=C_S1_R1, xend=C_S1_R2, y=C_S2_R1, yend=C_S2_R2)) +
 - They are useful for getting a sense of the multivariate shape of the data. You can typically read association, clustering and outliers from the plot. 
 - Can handle more variables than scatterplot matrices.
 
-## Side-by-side boxplots to par coords
-
-```{r}
-ggparcoord(coty, columns=2:10, scale="globalminmax", boxplot=TRUE,
-           alphaLines=0)
-```
-
-If the data is normalised well these should be identical boxplots, or very close to that. This is not quite what we see. 
-
 ## Parallel coordinates, connect the dots
-
-
-```{r eval=F}
-ggparcoord(coty, columns=2:10, scale="globalminmax", 
-           alphaLines=0.1)
-```
 
 ```{r echo=FALSE}
 ggparcoord(coty[sample(1:nrow(coty), 1000),], 
@@ -200,14 +115,6 @@ ggparcoord(coty[sample(1:nrow(coty), 1000),],
 - *robust*: univariately, subtract median and divide by median absolute deviation
 - *uniminmax*: univariately, scale so the minimum of the variable is zero, and the maximum is one
 - *globalminmax*: no scaling is done; the range of the graphs is defined by the global minimum and the global maximum
-
-## Your turn
-
-- Make parallel coordinate plots for the 9 samples of the leaf data
-- Start with side-by-side boxplots, and then generate the lines
-- Run the different scaling options to discover how they change the appearance of the plot
-
-![](lorikeets.png)
 
 ```{r echo=FALSE, eval=FALSE}
 require(GGally)
@@ -233,6 +140,7 @@ Experiments are often displayed using interaction plots. These are similar to pa
 Process the data, and then plot
 
 ```{r}
+# gather takes multiple columns, and gathers them into key-value pairs: it makes "wide" data longer
 sub <- coty[sample(1:nrow(coty), 6),] %>% 
   gather(sample, expr, -ID) %>%
   separate(sample, c("tissue", "stage", "rep")) %>%
@@ -243,18 +151,13 @@ sub.m <- sub %>% group_by(ID, stage) %>%
 
 ##
 
-
 ```{r}
 ggplot(sub, aes(x=stage, y=expr)) + geom_point(alpha=0.4) +
   facet_wrap(~ID, ncol=3) + 
   geom_line(data=sub.m, aes(x=stage, y=expr), colour="red")
 ```
 
-## Your turn
-
 Re-make the previous plot, by overlaying them in one plot, instead of faceting, and colour by the ID. 
-
-![](lorikeets.png)
 
 ```{r eval = FALSE, echo = FALSE}
 ggplot(sub, aes(x=stage, y=expr, colour=factor(ID))) + geom_point(alpha=0.4) +
@@ -280,21 +183,6 @@ top10 <- as.data.frame(topTags(results, n=12))
 
 ## Plot
 
-```{r eval=FALSE}
-sub <- coty %>% 
-  gather(sample, expr, -ID) %>%
-  separate(sample, c("tissue", "stage", "rep")) %>%
-  mutate(stage = as.numeric(substr(stage, 2, 2)))
-top10 <- merge(top10, sub, by.x = "genes", by.y = "ID")
-top10.m <- top10 %>% group_by(genes, stage) %>% 
-  summarise(expr = mean(expr))
-ggplot(top10, aes(x=stage, y=expr, colour=genes)) + 
-  geom_point(alpha=0.4) + ylim(c(0,17.5)) +
-  geom_line(data=top10.m, aes(x=stage, y=expr, colour=genes))
-```
-
-##
-
 ```{r echo=FALSE}
 sub <- coty %>% 
   gather(sample, expr, -ID) %>%
@@ -307,22 +195,6 @@ ggplot(top10, aes(x=stage, y=expr, colour=genes)) +
   geom_point(alpha=0.4) + ylim(c(0,17.5)) +
   geom_line(data=top10.m, aes(x=stage, y=expr, colour=genes))
 ```
-
-## Your turn
-
-Plot the next 12 most significant genes. 
-
-```{r eval=FALSE, echo=FALSE}
-top10 <- as.data.frame(topTags(results, n=24))[13:24,]
-top10 <- merge(top10, sub, by.x = "genes", by.y = "ID")
-top10.m <- top10 %>% group_by(genes, stage) %>% 
-  summarise(expr = mean(expr))
-ggplot(top10, aes(x=stage, y=expr, colour=genes)) + 
-  geom_point(alpha=0.4) + ylim(c(0,17.5)) +
-  geom_line(data=top10.m, aes(x=stage, y=expr, colour=genes))
-```
-
-![](lorikeets.png)
 
 ## Extracting the significant genes
 
@@ -345,6 +217,7 @@ sig.tab <- sig.tab %>% filter(PValue < 0.01)
 ##
 
 ```{r}
+# merge is a base function that merges to DFs by common columns or row names
 sig.tab <- merge(sig.tab, coty[,1:7], by.x="genes", by.y="ID")
 ggscatmat(sig.tab, columns=5:10, alpha=0.1)
 ```
@@ -355,24 +228,6 @@ ggscatmat(sig.tab, columns=5:10, alpha=0.1)
 ggparcoord(sig.tab, columns=5:10, scale="globalminmax",
            alphaLines=0.1)
 ```
-
-## Your turn
-
-- Test the first two stages of the leaf data. 
-- Plot the genes that have a p-value of less than 0.01 as a scatterplot matrix, and as parallel coordinate plot
-
-![](lorikeets.png)
-
-```{r, echo = FALSE, eval = FALSE}
-sig.tab <- de$table
-sig.tab$genes <- coty$ID
-sig.tab <- sig.tab %>% filter(PValue < 0.01)
-sig.tab <- merge(sig.tab, coty[,1:7], by.x="genes", by.y="ID")
-ggscatmat(sig.tab, columns=5:10, alpha=0.1)
-ggparcoord(sig.tab, columns=5:10, scale="globalminmax",
-           alphaLines=0.1)
-
-```        
 
 ## Your turn
 

@@ -17,7 +17,8 @@ opts_chunk$set(concordance=TRUE)
 <<echo=FALSE,eval=TRUE>>=
 library(rtracklayer)
 library(Rsamtools)
-library(grid)
+# grid is now base R
+# library(grid)
 library(GenomicAlignments)
 library(ggplot2)
 library(GGally)
@@ -29,6 +30,14 @@ library(matrixStats)
 library(gridExtra)
 library(reshape2)
 library(scales)
+library(SummarizedExperiment)
+
+# url <- "https://cran.r-project.org/src/contrib/Archive/grid/grid_0.7-4.tar.gz"
+# pkgFile <- "grid_0.7-4.tar.gz"
+# download.file(url = url, destfile = pkgFile)
+# install.packages(c("ada", "ipred", "evd"))
+# install.packages(pkgs=pkgFile, type="source", repos=NULL)
+# unlink(pkgFile)
 
 plotName = "L120"
 outDir = "Clustering_L120"
@@ -43,6 +52,7 @@ dir.create(paste(getwd(),"/",outDir,sep=""))
 <<echo=FALSE>>=
 rm(list=ls())
 load("All_leaves040615.rda")
+
 ct <- countTable
 ct2 <- assays(ct)[[1]]
 rownames(ct2) <- ct@rowData@elementMetadata@listData$ID

@@ -139,7 +139,7 @@ Process the data, and then plot
 
 ```{r}
 # gather takes multiple columns, and gathers them into key-value pairs: it makes "wide" data longer
-sub <- coty[sample(1:nrow(coty), 6),] %>% 
+sub <- coty[1,] %>% 
   gather(sample, expr, -ID) %>%
   separate(sample, c("tissue", "stage", "rep")) %>%
   mutate(stage = as.numeric(substr(stage, 2, 2)))

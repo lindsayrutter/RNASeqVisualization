@@ -1,6 +1,8 @@
 # server.R definition
 server <- function(input, output){
 
+  data(BreastCancer)
+
   # Observes the second feature input for a change
   observeEvent(input$featureInput2,{
 

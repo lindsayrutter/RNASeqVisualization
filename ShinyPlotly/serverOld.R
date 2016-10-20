@@ -27,20 +27,15 @@ server <- function(input, output){
                plot_bgcolor = "6A446F")
     })
 
-    plot.df <- plot.df %>%
-      group_by(x, y, Class) %>%
-      summarize(Count = n()) %>%
-      filter(Class == "malignant")
-
-    plot.df <- data.frame(plot.df)
-    plot.df$x <- as.numeric(plot.df$x)
-    plot.df$y <- as.numeric(plot.df$y)
-    plot.df$Count <- as.numeric(plot.df$Count)
 
     # Create a contour plot of the number of malignant cases
     output$Plot2 <- renderPlotly({
 
-      plot_ly(plot.df, x = ~x, y = ~y, z = ~Count, type = "contour") %>%
+      plot.df %>%
+        group_by(x, y, Class) %>%
+        summarize(Count = n()) %>%
+        filter(Class == "malignant") %>%
+        plot_ly(x = ~x, y = ~y, z = ~Count, type = "contour") %>%
         layout(title = "Contour map of number of malignant cases",
                xaxis = list(title = input$featureInput1),
                yaxis = list(title = input$featureInput2))

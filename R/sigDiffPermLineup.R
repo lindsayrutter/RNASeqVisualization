@@ -6,7 +6,7 @@
 
 # It is different from sigDiffPerm.R because it does not include FDR value in plot outputs.
 
-library(nullabor)
+#library(nullabor)
 library(rtracklayer)
 library(Rsamtools)
 library(grid)
@@ -39,7 +39,7 @@ if (!dir.exists(paste(getwd(), "/PermLineup", sep=""))){
   dir.create(paste(getwd(), "/PermLineup", sep=""))
 }
 
-for(i in 1:3){
+for(i in 1:20){
     if (i>1){
     # Check that permutations include equal number of treatments in each group (check that permutations are thoroughly shuffled)
     while (length(permInfo) < i){
@@ -75,7 +75,7 @@ for (i in 1:100){
   fullDat <- data.frame()
   lineup <- permute(seq(1:3))
   correctPlace[i] <- which(lineup==1)
-  for (j in 1:3){
+  for (j in 1:20){
     gene = permList[[j]][i,1:12]
     rep = 6
     fact = 2

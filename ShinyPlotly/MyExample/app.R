@@ -9,11 +9,12 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
 
-  output$plot <- renderPlotly({
+  # Initiatlize data
+  dat <- data.frame(ID = paste0("ID",1:10), A = runif(10), B = runif(10), C = runif(10), D = runif(10), E = runif(10))
+  dat$ID <- as.character(dat$ID)
 
-    plot_ly(z = state.area, text = state.name, locations = state.abb,
-            type = 'choropleth', locationmode = 'USA-states') %>%
-      layout(geo = g)
+  output$plot <- renderPlotly({
+    plot_ly(data = dat, x = ~A, y = ~B)
   })
 
   output$click <- renderPrint({
@@ -26,11 +27,6 @@ server <- function(input, output, session) {
 shinyApp(ui, server)
 
 ##############################################################
-
-dat <- data.frame(ID = paste0("ID",1:10), A = runif(10), B = runif(10), C = runif(10), D = runif(10), E = runif(10))
-dat$ID <- as.character(dat$ID)
-
-plot_ly(data = dat, x = ~A, y = ~B)
 
 datt <- data.frame(t(dat))
 

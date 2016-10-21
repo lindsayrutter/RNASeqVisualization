@@ -1,6 +1,11 @@
 library(shiny)
 library(plotly)
 
+ui <- fluidPage(
+  plotlyOutput("plot"),
+  verbatimTextOutput("click")
+)
+
 server <- function(input, output, session) {
 
   output$plot <- renderPlotly({
@@ -21,3 +26,5 @@ server <- function(input, output, session) {
   })
 
 }
+
+shinyApp(ui, server)

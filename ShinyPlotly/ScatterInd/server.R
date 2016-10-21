@@ -4,6 +4,7 @@ library(data.table)
 
 server <- function(input, output, session) {
 
+  set.seed(1)
   dat <- data.frame(ID = paste0("ID",1:10), A = runif(10), B = runif(10), C = runif(10), D = runif(10), E = runif(10))
   dat$ID <- as.character(dat$ID)
 
@@ -12,8 +13,14 @@ server <- function(input, output, session) {
   })
 
   output$click <- renderPrint({
-    d <- event_data("plotly_click")
-    if (is.null(d)) "Click on a state to view event data" else str(d)
+    d <- event_data("plotly_selected")
+    if (is.null(d)){
+      "Click on a state to view event data"
+    }
+    else{
+      str(d)
+      d$pointNumber
+    }
   })
 
 }

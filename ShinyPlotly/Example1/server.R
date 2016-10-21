@@ -60,6 +60,10 @@ server <- function(input, output){
     # If NULL dont do anything
     if(is.null(event.data) == T) return(NULL)
 
+    # https://plot.ly/javascript/hover-events/
+    # cuverNumber = index in data of the trace associated with the selected point
+    # pointNumber = index of the selected point
+
     # Get number of malignant and benign cases from selection
     malig.class <- subset(plot.df, Class == "malignant")[subset(event.data, curveNumber == 0)$pointNumber + 1,]
     benign.class <- subset(plot.df, Class == "benign")[subset(event.data, curveNumber == 1)$pointNumber + 1,]

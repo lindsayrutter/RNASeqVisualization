@@ -15,7 +15,6 @@ server <- function(input, output, session) {
   d <- reactive(event_data("plotly_selected"))
 
   output$click <- renderPrint({
-    #d <- event_data("plotly_selected")
     if (is.null(d())){
       "Click on a state to view event data"
     }
@@ -27,8 +26,18 @@ server <- function(input, output, session) {
     }
   })
 
+  # Convert DF from scatterplot to PCP
+  datt <- data.frame(t(dat))
+  names(datt) <- as.matrix(datt[1, ])
+  datt <- datt[-1, ]
+  datt[] <- lapply(datt, function(x) type.convert(as.character(x)))
+  setDT(datt, keep.rownames = TRUE)[]
+  colnames(datt)[1] <- "x"
+  dat_long <- melt(datt, id.vars ="x" )
+
   output$plot2 <- renderPlotly({
-    plot_ly(data = dat[(d()$pointNumber+1),], x = ~A, y = ~B)
+    #plot_ly(data = dat[(d()$pointNumber+1),], x = ~A, y = ~B)
+    plot_ly(dat_long[dat_long$variable==dat[(d()$pointNumber+1),]$ID,], x= ~x, y= ~value, type = 'scatter', mode = 'lines+markers', color = ~variable)  %>% layout(dragmode="box", showlegend = FALSE)
   })
 
 }

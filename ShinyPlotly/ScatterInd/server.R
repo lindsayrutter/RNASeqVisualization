@@ -23,6 +23,7 @@ server <- function(input, output, session) {
       d()$pointNumber
       dat[(d()$pointNumber+1),]
       dat[(d()$pointNumber+1),]$ID
+      str(dat[(d()$pointNumber+1),]$ID)
     }
   })
 
@@ -36,25 +37,7 @@ server <- function(input, output, session) {
   dat_long <- melt(datt, id.vars ="x" )
 
   output$plot2 <- renderPlotly({
-    #plot_ly(data = dat[(d()$pointNumber+1),], x = ~A, y = ~B)
-    plot_ly(dat_long[dat_long$variable==dat[(d()$pointNumber+1),]$ID,], x= ~x, y= ~value, type = 'scatter', mode = 'lines+markers', color = ~variable)  %>% layout(dragmode="box", showlegend = FALSE)
+    plot_ly(dat_long[dat_long$variable %in% dat[(d()$pointNumber+1),]$ID,], x= ~x, y= ~value, type = 'scatter', mode = 'lines+markers', color = ~variable)  %>% layout(dragmode="box", showlegend = FALSE)
   })
 
 }
-
-
-
-
-
-
-# datt <- data.frame(t(dat))
-#
-# names(datt) <- as.matrix(datt[1, ])
-# datt <- datt[-1, ]
-# datt[] <- lapply(datt, function(x) type.convert(as.character(x)))
-# setDT(datt, keep.rownames = TRUE)[]
-# colnames(datt)[1] <- "x"
-#
-# dat_long <- melt(datt, id.vars ="x" )
-#
-# p <- plot_ly(dat_long, x= ~x, y= ~value, type = 'scatter', mode = 'lines+markers', color = ~variable)  %>% layout(dragmode="box", showlegend = FALSE)

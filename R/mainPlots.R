@@ -80,4 +80,7 @@ dat_long <- melt(datt, id.vars ="x" )
 p <- plot_ly(dat_long, x= ~x, y= ~value, type = 'scatter', mode = 'lines+markers', color = ~variable)  %>% layout(dragmode="box", showlegend = FALSE)
 
 # PCP for one observation
-p <- plot_ly(dat_long[dat_long$variable=="ID5",], x= ~x, y= ~value, type = 'scatter', mode = 'lines+markers', color = ~variable)  %>% layout(dragmode="box", showlegend = FALSE)
+plot_ly(dat_long[dat_long$variable==c("ID1","ID2"),], x= ~x, y= ~value, type = 'scatter', mode = 'lines+markers', color = ~variable) %>% layout(dragmode="box", showlegend = FALSE)
+
+dat_long$variable = as.character(dat_long$variable)
+

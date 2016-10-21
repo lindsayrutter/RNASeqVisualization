@@ -61,6 +61,7 @@ structure(plots, class = "animint")
 library(plotly)
 library(data.table)
 
+set.seed(1)
 dat <- data.frame(ID = paste0("ID",1:10), A = runif(10), B = runif(10), C = runif(10), D = runif(10), E = runif(10))
 dat$ID <- as.character(dat$ID)
 
@@ -78,3 +79,5 @@ dat_long <- melt(datt, id.vars ="x" )
 
 p <- plot_ly(dat_long, x= ~x, y= ~value, type = 'scatter', mode = 'lines+markers', color = ~variable)  %>% layout(dragmode="box", showlegend = FALSE)
 
+# PCP for one observation
+p <- plot_ly(dat_long[dat_long$variable=="ID5",], x= ~x, y= ~value, type = 'scatter', mode = 'lines+markers', color = ~variable)  %>% layout(dragmode="box", showlegend = FALSE)

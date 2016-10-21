@@ -12,16 +12,23 @@ server <- function(input, output, session) {
     plot_ly(data = dat, x = ~A, y = ~B)
   })
 
+  d <- reactive(event_data("plotly_selected"))
+
   output$click <- renderPrint({
-    d <- event_data("plotly_selected")
-    if (is.null(d)){
+    #d <- event_data("plotly_selected")
+    if (is.null(d())){
       "Click on a state to view event data"
     }
     else{
-      str(d)
-      d$pointNumber
-      dat[(d$pointNumber+1),]
+      str(d())
+      d()$pointNumber
+      dat[(d()$pointNumber+1),]
+      dat[(d()$pointNumber+1),]$ID
     }
+  })
+
+  output$plot2 <- renderPlotly({
+    plot_ly(data = dat[(d()$pointNumber+1),], x = ~A, y = ~B)
   })
 
 }

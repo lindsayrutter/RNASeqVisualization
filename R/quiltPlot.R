@@ -13,3 +13,5 @@ coty <- as.data.frame(coty)
 #ggplot(sub, aes(x=C_S1_R1, xend=C_S1_R2, y=C_S2_R1, yend=C_S2_R2)) +
 #  geom_segment() + xlim(c(0, 17.5)) + ylim(c(0, 17.5)) +
 #  theme(aspect.ratio = 1)
+
+sub <- coty %>% select(ID, C_S1_R1, C_S1_R2, C_S1_R3, C_S2_R1, C_S2_R2, C_S2_R3)

@@ -9,7 +9,6 @@ library(Rsamtools)
 library(grid)
 library(GenomicAlignments)
 library(ggplot2)
-#library(GGally) #
 library(edgeR)
 library(stringr)
 library(EDASeq)
@@ -42,24 +41,27 @@ server <- function(input, output, session) {
 
   d <- reactive(event_data("plotly_selected"))
 
-  output$click <- renderPrint({
-    if (is.null(d())){
-      "Click on a state to view event data"
-    }
-    else{
-      # str(d())
-      # d()$curveNumber
-      # dat[d()$curveNumber+1,]
-      # dat[d()$curveNumber+1,]$ID
-      myDat <- dat_long[variable == dat[d()$curveNumber+1,]$ID]
-      myDat <- as.data.frame(myDat)
-      #myDat
-      str(myDat)
-    }
-  })
+  # output$click <- renderPrint({
+  #   if (is.null(d())){
+  #     "Click on a state to view event data"
+  #   }
+  #   else{
+  #     # str(d())
+  #     # d()$curveNumber
+  #     # dat[d()$curveNumber+1,]
+  #     # dat[d()$curveNumber+1,]$ID
+  #     myDat <- dat_long[variable == dat[d()$curveNumber+1,]$ID]
+  #     myDat <- as.data.frame(myDat)
+  #     #myDat
+  #     str(myDat)
+  #   }
+  # })
 
   output$plot2 <- renderPlotly({
-    plot_ly(as.data.frame(dat_long[variable == dat[d()$curveNumber+1,]$ID]), x = ~group, y = ~value, type = "scatter", marker = list(size = 10), color = ~group)
+    indDat <- as.data.frame(dat_long[variable == dat[d()$curveNumber+1,]$ID])
+    indDat %>% plot_ly(x = ~group, y = ~value, type = "scatter", marker = list(size = 10), color = ~group, colors = "Set2", hoverinfo = "text", text = paste0("Read count = ", format(round(indDat$value, 2), nsmall = 2)))
     #%>% layout(xaxis = ax, yaxis = ay, legend = list(x = 0.35, y = -0.26))
   })
 }
+
+# dat %>% plot_ly(x = ~x, y = ~y, type = "scatter", marker = list(size = 10), color = ~x, colors = "Set2", hoverinfo = "text", text = paste0("Read count = ", format(round(dat$y, 2), nsmall = 2))) %>% layout(title = paste("Transcript =", rownames(gene), "<br> FDR =", formatC(geneList[i,]$FDR, format = "e", digits = 2)), xaxis = ax, yaxis = ay, legend = list(x = 0.35, y = -0.26)) %>% add_segments(x = "DU", xend = "DR", y = mean(filter(dat, x=="DU")$y), yend = mean(filter(dat, x=="DR")$y), showlegend = FALSE, line = list(color='#000000')) %>% add_trace(x = "DR", y= mean(filter(dat, x=="DR")$y), showlegend = FALSE, hoverinfo = "text", text = paste0("Mean Read Count = ", round(mean(filter(dat, x=="DR")$y), digits = 2)), marker = list(color='#000000')) %>% add_trace(x = "DU", y= mean(filter(dat, x=="DU")$y), showlegend = FALSE, hoverinfo = "text", text = paste0("Mean Read Count = ", round(mean(filter(dat, x=="DU")$y), digits = 2)), marker = list(color='#000000'))

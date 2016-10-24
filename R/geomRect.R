@@ -24,4 +24,5 @@ sig.tab <- merge(sig.tab, coty[,1:7], by.x="genes", by.y="ID")
 
 sig.tab <- mutate(sig.tab, xmin = pmin(C_S1_R1, C_S1_R2, C_S1_R3), xmax = pmax(C_S1_R1, C_S1_R2, C_S1_R3), ymin = pmin(C_S2_R1, C_S2_R2, C_S2_R3), ymax = pmax(C_S2_R1, C_S2_R2, C_S2_R3))
 
-ggplot(sig.tab, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax)) + geom_rect()
+ggplot(sig.tab, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax)) + geom_rect(fill = NA, color = 'black')
+

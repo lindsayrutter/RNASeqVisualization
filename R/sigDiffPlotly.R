@@ -1,12 +1,12 @@
 # This will interactively plot the 100 most significant DEGs in plotly.
 
-library(nullabor) #
+#library(nullabor) #
 library(rtracklayer)
 library(Rsamtools)
 library(grid)
 library(GenomicAlignments)
 library(ggplot2)
-library(GGally) #
+#library(GGally) #
 library(edgeR)
 library(stringr)
 library(EDASeq)
@@ -47,6 +47,7 @@ for (i in 1:100){
   dat$x=as.factor(dat$x)
   levels(dat$x)=c("DR","DU")
 
+  dat <- dat[,1:2]
   # changed from mode = "markers" to type = "scatter"
   # changed 1 add_trace to 2 add_trace and 1 add_segments (x and y were problem variables)
   dat %>% plot_ly(x = ~x, y = ~y, type = "scatter", marker = list(size = 10), color = ~x, colors = "Set2", hoverinfo = "text", text = paste0("Read count = ", format(round(dat$y, 2), nsmall = 2))) %>% layout(title = paste("Transcript =", rownames(gene), "<br> FDR =", formatC(geneList[i,]$FDR, format = "e", digits = 2)), xaxis = ax, yaxis = ay, legend = list(x = 0.35, y = -0.26)) %>% add_segments(x = "DU", xend = "DR", y = mean(filter(dat, x=="DU")$y), yend = mean(filter(dat, x=="DR")$y), showlegend = FALSE, line = list(color='#000000')) %>% add_trace(x = "DR", y= mean(filter(dat, x=="DR")$y), showlegend = FALSE, hoverinfo = "text", text = paste0("Mean Read Count = ", round(mean(filter(dat, x=="DR")$y), digits = 2)), marker = list(color='#000000')) %>% add_trace(x = "DU", y= mean(filter(dat, x=="DU")$y), showlegend = FALSE, hoverinfo = "text", text = paste0("Mean Read Count = ", round(mean(filter(dat, x=="DU")$y), digits = 2)), marker = list(color='#000000'))

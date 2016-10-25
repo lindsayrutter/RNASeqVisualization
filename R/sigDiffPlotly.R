@@ -46,15 +46,12 @@ for (i in 1:100){
   colnames(dat)=c("x","y","rep")
   dat$x=as.factor(dat$x)
   levels(dat$x)=c("DR","DU")
+  g1 <- levels(dat$x)[1]
+  g2 <- levels(dat$x)[2]
+  g1m <- mean(filter(dat, x==g1)$y)
+  g2m <- mean(filter(dat, x==g2)$y)
 
   dat <- dat[,1:2]
-  # changed from mode = "markers" to type = "scatter"
-  # changed 1 add_trace to 2 add_trace and 1 add_segments (x and y were problem variables)
-  dat %>% plot_ly(x = ~x, y = ~y, type = "scatter", marker = list(size = 10), color = ~x, colors = "Set2", hoverinfo = "text", text = paste0("Read count = ", format(round(dat$y, 2), nsmall = 2))) %>% layout(title = paste("Transcript =", rownames(gene), "<br> FDR =", formatC(geneList[i,]$FDR, format = "e", digits = 2)), xaxis = ax, yaxis = ay, legend = list(x = 0.35, y = -0.26)) %>% add_segments(x = levels(dat$x)[1], xend = levels(dat$x)[2], y = mean(filter(dat, x==levels(dat$x)[1])$y), yend = mean(filter(dat, x==levels(dat$x)[2])$y), showlegend = FALSE, line = list(color='#000000'))
 
-
-  # %>% add_segments(x = "DU", xend = "DR", y = mean(filter(dat, x=="DU")$y), yend = mean(filter(dat, x=="DR")$y), showlegend = FALSE, line = list(color='#000000'))
-
-
-  %>% add_trace(x = "DR", y= mean(filter(dat, x=="DR")$y), showlegend = FALSE, hoverinfo = "text", text = paste0("Mean Read Count = ", round(mean(filter(dat, x=="DR")$y), digits = 2)), marker = list(color='#000000')) %>% add_trace(x = "DU", y= mean(filter(dat, x=="DU")$y), showlegend = FALSE, hoverinfo = "text", text = paste0("Mean Read Count = ", round(mean(filter(dat, x=="DU")$y), digits = 2)), marker = list(color='#000000'))
+  dat %>% plot_ly(x = ~x, y = ~y, type = "scatter", marker = list(size = 10), color = ~x, colors = "Set2", hoverinfo = "text", text = paste0("Read count = ", format(round(dat$y, 2), nsmall = 2))) %>% layout(title = paste("Transcript =", rownames(gene), "<br> FDR =", formatC(geneList[i,]$FDR, format = "e", digits = 2)), xaxis = ax, yaxis = ay, legend = list(x = 0.35, y = -0.26)) %>% add_segments(x = g1, xend = g2, y = g1m, yend = g2m, showlegend = FALSE, line = list(color='#000000')) %>% add_trace(x = g1, y= g1m, showlegend = FALSE, hoverinfo = "text", text = paste0("Mean Read Count = ", round(g1m, digits = 2)), marker = list(color='#000000')) %>% add_trace(x = g2, y= g2m, showlegend = FALSE, hoverinfo = "text", text = paste0("Mean Read Count = ", round(g2m, digits = 2)), marker = list(color='#000000'))
 }

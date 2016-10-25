@@ -6,7 +6,9 @@ library(tidyr)
 library(ggplot2)
 
 ui <- fluidPage(
-  plotlyOutput("plot"),
-  verbatimTextOutput("click"),
-  plotlyOutput("plot2")
+  fluidRow(
+    column(8, plotlyOutput("plot")),
+  # verbatimTextOutput("click"),
+    column(4, plotlyOutput("plot2"))
+  )
 )

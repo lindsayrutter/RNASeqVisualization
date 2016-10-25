@@ -147,7 +147,7 @@ plot(hc,main=paste(plotName, "Dendogram"), xlab=NA, sub=NA)
 %%%%%%%%%%%%%%%%%%%% PLOT CLUSTERS %%%%%%%%%%%%%%%%%%%%%
 
 <<echo=FALSE,eval=TRUE,results='asis'>>=
-getPCP <- function(nC){
+getPCP <- function(nC, alphaVal){
 
 plotName = "L120"
 outDir = "Clustering_L120"
@@ -164,9 +164,9 @@ plot_clusters = lapply(1:nC, function(i){
   x$cluster2 = factor(x$cluster)
   xNames = rownames(x)
   write.table(xNames, file = paste(getwd(), "/", outDir, "/", plotName, "_", nC, "_", i, ".txt", sep=""), sep=",", row.names=FALSE, col.names=FALSE, quote=FALSE)
-  p = ggparcoord(x, columns=1:6, groupColumn=8, scale="globalminmax", alphaLines = 0.2) + xlab(paste("Cluster ", i, " (n=", format(nGenes, big.mark=",", scientific=FALSE), ")",sep="")) + ylab("Count") + theme(legend.position = "none", axis.title=element_text(size=12), axis.text=element_text(size=12)) + scale_colour_manual(values = c("color" = colList[i+1]))
+  p = ggparcoord(x, columns=1:6, groupColumn=8, scale="globalminmax", alphaLines = alphaVal) + xlab(paste("Cluster ", i, " (n=", format(nGenes, big.mark=",", scientific=FALSE), ")",sep="")) + ylab("Count") + theme(legend.position = "none", axis.title=element_text(size=12), axis.text=element_text(size=12)) + scale_colour_manual(values = c("color" = colList[i+1]))
   fileName = paste(getwd(), "/", outDir, "/", plotName, "_", nC, "_", i, ".jpg", sep="")
-  jpeg(fileName)
+  jpeg(fileName, width = 1200, height = 200)
   plot(p)
   invisible(dev.off())
   p
@@ -176,7 +176,7 @@ plot_clusters = lapply(1:nC, function(i){
   filts$cluster = "color"
   filts$cluster2 = factor(filts$cluster)
   nGenes = nrow(filts)
-  plot_filtered = ggparcoord(filts, columns=1:6, groupColumn=8, scale="globalminmax", alphaLines = 0.01) + xlab(paste("Filtered (n=", format(nGenes, big.mark=",", scientific=FALSE), ")",sep="")) + ylab("Count") + theme(legend.position = "none", axis.title=element_text(size=12), axis.text=element_text(size=12)) + scale_colour_manual(values = c("color" = colList[1]))
+  plot_filtered = ggparcoord(filts, columns=1:6, groupColumn=8, scale="globalminmax", alphaLines = alphaVal) + xlab(paste("Filtered (n=", format(nGenes, big.mark=",", scientific=FALSE), ")",sep="")) + ylab("Count") + theme(legend.position = "none", axis.title=element_text(size=12), axis.text=element_text(size=12)) + scale_colour_manual(values = c("color" = colList[1]))
 ###########################
   nRow = ceiling((nC+1)/4)
   jpeg(file = paste(getwd(), "/", outDir, "/", plotName, "_", nC, ".jpg", sep=""), width = 1200, height = (nRow*200))
@@ -190,7 +190,7 @@ plot_clusters = lapply(1:nC, function(i){
 
 <<echo=FALSE,eval=TRUE,results='asis'>>=
 for (i in 2:15){
-  getPCP(i)
+  getPCP(i, alphaVal)
 }
 @
 

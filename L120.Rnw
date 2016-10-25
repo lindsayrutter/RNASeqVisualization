@@ -180,7 +180,9 @@ plot_clusters = lapply(1:nC, function(i){
 ###########################
   jpeg(file = paste(getwd(), "/", outDir, "/", plotName, "_", nC, ".jpg", sep=""))
   # We allow up to 4 plots in each column
-  p = do.call("grid.arrange", c(append(plot_clusters, list(plot_filtered)), ncol=ceiling(nC/4)))
+  #p = do.call("grid.arrange", c(append(plot_clusters, list(plot_filtered)), ncol=ceiling(nC/4)))
+  plist = append(plot_clusters, list(plot_filtered))
+  p = do.call("grid.arrange", c(plist, ncol=4))
   invisible(dev.off())
 }
 @

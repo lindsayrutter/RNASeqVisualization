@@ -114,16 +114,16 @@ L120q1 = L120q1[which(sign(model$residuals) == 1),]
 
 L120q1 = L120q1[,1:6]
 L120q1s = t(apply(as.matrix(L120q1), 1, scale))
-colnames(L120q1s)=c("[1]Fe-","[2]Fe-","[3]Fe-","[1]Fe+","[2]Fe+","[3]Fe+")
-colnames(L120q1)=c("[1]Fe-","[2]Fe-","[3]Fe-","[1]Fe+","[2]Fe+","[3]Fe+")
+colnames(L120q1s)=c("N.1","N.2","N.3","P.1","P.2","P.3")
+colnames(L120q1)=c("N.1","N.2","N.3","P.1","P.2","P.3")
 filt = filt[,1:6]
-colnames(filt)=c("[1]Fe-","[2]Fe-","[3]Fe-","[1]Fe+","[2]Fe+","[3]Fe+")
+colnames(filt)=c("N.1","N.2","N.3","P.1","P.2","P.3")
 # filt (17116, 8)
 filt = rbind(filt,L120q1[which(sign(model$residuals) == -1),])
 # filt (29311, 6)
 filts = t(apply(as.matrix(filt), 1, scale))
-colnames(filts)=c("[1]Fe-","[2]Fe-","[3]Fe-","[1]Fe+","[2]Fe+","[3]Fe+")
-colnames(filt)=c("[1]Fe-","[2]Fe-","[3]Fe-","[1]Fe+","[2]Fe+","[3]Fe+")
+colnames(filts)=c("N.1","N.2","N.3","P.1","P.2","P.3")
+colnames(filt)=c("N.1","N.2","N.3","P.1","P.2","P.3")
 @
 
 <<echo=FALSE>>=

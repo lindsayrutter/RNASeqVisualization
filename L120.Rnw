@@ -178,7 +178,8 @@ plot_clusters = lapply(1:nC, function(i){
   nGenes = nrow(filts)
   plot_filtered = ggparcoord(filts, columns=1:6, groupColumn=8, scale="globalminmax", alphaLines = 0.01) + xlab(paste("Filtered (n=", format(nGenes, big.mark=",", scientific=FALSE), ")",sep="")) + ylab("Count") + theme(legend.position = "none", axis.title=element_text(size=12), axis.text=element_text(size=12)) + scale_colour_manual(values = c("color" = colList[1]))
 ###########################
-  jpeg(file = paste(getwd(), "/", outDir, "/", plotName, "_", nC, ".jpg", sep=""))
+  nRow = ceiling((nC+1)/4)
+  jpeg(file = paste(getwd(), "/", outDir, "/", plotName, "_", nC, ".jpg", sep=""), width = 1200, height = (nRow*200))
   # We allow up to 4 plots in each column
   #p = do.call("grid.arrange", c(append(plot_clusters, list(plot_filtered)), ncol=ceiling(nC/4)))
   plist = append(plot_clusters, list(plot_filtered))

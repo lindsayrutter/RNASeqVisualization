@@ -7,6 +7,6 @@ library(ggplot2)
 
 ui <- fluidPage(
   plotlyOutput("plot"),
-  #verbatimTextOutput("click"),
+  verbatimTextOutput("click"),
   plotlyOutput("plot2")
 )

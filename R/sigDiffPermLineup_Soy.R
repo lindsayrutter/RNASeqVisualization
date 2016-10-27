@@ -23,40 +23,50 @@ library(scales)
 library(tidyr)
 library(gtools)
 library(tibble)
+library(readr)
 
 rm(list=ls())
-load("data/All_wasp.rda")
+coty <- read_delim("R/SISBID-2016-master/data/GSE61857_Cotyledon_normalized.txt.gz", delim="\t", col_types="cddddddddd", col_names=c("ID", "C_S1_R1", "C_S1_R2", "C_S1_R3", "C_S2_R1", "C_S2_R2", "C_S2_R3", "C_S3_R1", "C_S3_R2", "C_S3_R3"), skip=1)
+coty <- as.data.frame(coty)
+colnames(coty) <- c("ID","CS1.1","CS1.2","CS1.3","CS2.1","CS2.2","CS2.3","CS3.1","CS3.2","CS3.3")
+countTable <- coty
 
-nPerm <- 20
-nRep <- 6
+nPerm <- 10
+nRep <- 3
+allComb <- getPerms(2*nRep)
+allComb[which(allComb == 1)] = "CS1.1"
+allComb[which(allComb == 2)] = "CS1.2"
+allComb[which(allComb == 3)] = "CS1.3"
+allComb[which(allComb == 4)] = "CS2.1"
+allComb[which(allComb == 5)] = "CS2.2"
+allComb[which(allComb == 6)] = "CS2.3"
+
 permList <- list()
-permInfo <- list()
+#permInfo <- list()
 correctPlace <- list()
 
-listcond = rep(c("DR", "DU"), each = nRep)
-permInfo[[1]] = listcond
+#listcond = rep(c("CS1", "CS2"), each = nRep)
+#permInfo[[1]] = listcond
 
-if (!dir.exists(paste(getwd(), "/PermLineup", sep=""))){
-  dir.create(paste(getwd(), "/PermLineup", sep=""))
+if (!dir.exists(paste(getwd(), "/PermLineup_CS1CS2", sep=""))){
+  dir.create(paste(getwd(), "/PermLineup_CS1CS2", sep=""))
 }
-
-
 
 for(i in 1:nPerm){
 
   # Check that permutations include equal number of treatments in each group (check that permutations are thoroughly shuffled)
-  if (i>1){
-    while (length(permInfo) < i){
-      myPerm = permute(listcond)
-      if (all(table(myPerm[1:nRep]) == table(myPerm[(nRep+1):(2*nRep)]))){
-        if (!all(myPerm == permInfo[[i-1]])){
-          permInfo[[i]] = myPerm
-        }
-      }
-    }
-  }
+  # if (i>1){
+  #   while (length(permInfo) < i){
+  #     myPerm = permute(listcond)
+  #     if (all(table(myPerm[1:nRep]) == table(myPerm[(nRep+1):(2*nRep)]))){
+  #       if (!all(myPerm == permInfo[[i-1]])){
+  #         permInfo[[i]] = myPerm
+  #       }
+  #     }
+  #   }
+  # }
 
-  y = DGEList(counts=countTable[,c(1:(2*nRep))], group=permInfo[[i]])
+  y = DGEList(counts=countTable[,c(2:7)], group=allComb[i,])
 
   keep <- rowSums(cpm(y)>1) >= nRep
   y <- y[keep, keep.lib.sizes=FALSE]
@@ -65,14 +75,14 @@ for(i in 1:nPerm){
   y = estimateCommonDisp(y)
   y = estimateTagwiseDisp(y)
 
-  de = exactTest(y, pair=c("DR","DU"))
+  de = exactTest(y, pair=c("CS1","CS2"))
   tt = topTags(de, n=nrow(y))
 
   nc = cpm(y, normalized.lib.sizes=TRUE)
   rn = rownames(tt$table)
 
-  permList[[i]] = cbind(nc[rn,order(permInfo[[i]])], tt$table)
-  write.csv(permList[[i]], file= paste(getwd(), "/PermLineup/TopDEG", i, ".csv", sep=""))
+  permList[[i]] = cbind(nc[rn,order(allComb[i,])], tt$table)
+  write.csv(permList[[i]], file= paste(getwd(), "/PermLineup_CS1CS2/TopDEG", i, ".csv", sep=""))
 }
 
 for (i in 1:100){
@@ -93,7 +103,7 @@ for (i in 1:100){
   }
     allPlot = ggplot(fullDat, aes(x, y)) + geom_point(aes(colour = factor(x)), shape = 20, size=5, alpha = 0.5) + scale_shape(solid = FALSE) + ggtitle(paste("Transcript: ", i)) + ylab("Read Count") + scale_y_continuous(limits=c(0, max(fullDat$y))) + theme(axis.title.x = element_blank(), legend.position="bottom", axis.text=element_text(size=12), axis.title=element_text(size=12), legend.title=element_text(size=12), legend.text=element_text(size=12), plot.title=element_text(hjust=0.5)) + labs(colour = "Group", size=12) + geom_segment(aes(x = 1, y = meanDR, xend = 2, yend = meanDU), colour="gray25", size = 0.1) + facet_wrap(~ z, ncol = 5)
 
-    jpeg(file = paste(getwd(), "/PermLineup/Gene", i, ".jpg", sep=""), height = ceiling(nPerm/5)*175, width = 700)
+    jpeg(file = paste(getwd(), "/PermLineup_CS1CS2/Gene", i, ".jpg", sep=""), height = ceiling(nPerm/5)*175, width = 700)
     print(allPlot)
     dev.off()
 }
@@ -104,8 +114,9 @@ correctPlace = t(correctPlace)
 colnames(correctPlace) = "PlotWithData"
 correctPlace = data.frame(correctPlace)
 correctPlace <- rownames_to_column(correctPlace, "Gene")
-write.csv(correctPlace, row.names = FALSE, file = paste(getwd(), "/PermLineup/Correct.csv", sep=""))
+write.csv(correctPlace, row.names = FALSE, file = paste(getwd(), "/PermLineup_CS1CS2/Correct.csv", sep=""))
 
+# permInfo --> allComb[1,]
 permInfo <- data.frame(matrix(unlist(permInfo), nrow = nPerm))
 rownames(permInfo) <- c("Data", paste0(rep("Permute",(nPerm-1)),1:(nPerm-1)))
-write.table(permInfo, sep=",",  col.names=FALSE, file = paste(getwd(), "/PermLineup/Permutations.csv", sep=""))
+write.table(permInfo, sep=",",  col.names=FALSE, file = paste(getwd(), "/PermLineup_CS1CS2/Permutations.csv", sep=""))

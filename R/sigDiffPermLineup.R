@@ -6,7 +6,6 @@
 
 # It is different from sigDiffPerm.R because it does not include FDR value in plot outputs.
 
-#library(nullabor)
 library(rtracklayer)
 library(Rsamtools)
 library(grid)

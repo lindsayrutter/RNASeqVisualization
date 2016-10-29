@@ -30,59 +30,50 @@ coty <- read_delim("R/SISBID-2016-master/data/GSE61857_Cotyledon_normalized.txt.
 coty <- as.data.frame(coty)
 colnames(coty) <- c("ID","CS1.1","CS1.2","CS1.3","CS2.1","CS2.2","CS2.3","CS3.1","CS3.2","CS3.3")
 countTable <- coty
-
 nPerm <- 10
 nRep <- 3
+outDir <- "PermLineup_CS1CS2"
+
+group1 = unlist(strsplit(colnames(countTable)[2], "[.]"))[1]
+group2 = unlist(strsplit(colnames(countTable)[2+nRep], "[.]"))[1]
+listCond = rep(c(group1, group2), each = nRep)
+
+countTable <- countTable[,1:(2*nRep+1)]
+# countTable should be a dataframe with first column (type "chr") named "ID" and rest of columns (type "num") named sample names. Have no extra columns. The sample names must be in the format groupName.repNumber (ex: DU.1).
+
 allComb <- getPerms(2*nRep)
-allComb[which(allComb == 1)] = "CS1.1"
-allComb[which(allComb == 2)] = "CS1.2"
-allComb[which(allComb == 3)] = "CS1.3"
-allComb[which(allComb == 4)] = "CS2.1"
-allComb[which(allComb == 5)] = "CS2.2"
-allComb[which(allComb == 6)] = "CS2.3"
+allCombLab <- allComb
+for (i in 1: (2*nRep)){
+  allCombLab[which(allCombLab == i)] = colnames(countTable)[i + 1]
+}
 
 permList <- list()
-#permInfo <- list()
 correctPlace <- list()
 
-#listcond = rep(c("CS1", "CS2"), each = nRep)
-#permInfo[[1]] = listcond
-
-if (!dir.exists(paste(getwd(), "/PermLineup_CS1CS2", sep=""))){
-  dir.create(paste(getwd(), "/PermLineup_CS1CS2", sep=""))
+if (!dir.exists(paste0(getwd(), "/", outDir))){
+  dir.create(paste0(getwd(), "/", outDir))
 }
 
 for(i in 1:nPerm){
 
-  # Check that permutations include equal number of treatments in each group (check that permutations are thoroughly shuffled)
-  # if (i>1){
-  #   while (length(permInfo) < i){
-  #     myPerm = permute(listcond)
-  #     if (all(table(myPerm[1:nRep]) == table(myPerm[(nRep+1):(2*nRep)]))){
-  #       if (!all(myPerm == permInfo[[i-1]])){
-  #         permInfo[[i]] = myPerm
-  #       }
-  #     }
-  #   }
-  # }
+  y = DGEList(counts=countTable[,c(allComb[i,]+1)], group=listCond)
 
-  y = DGEList(counts=countTable[,c(2:7)], group=allComb[i,])
-
-  keep <- rowSums(cpm(y)>1) >= nRep
+  keep <- rowSums(cpm(y)>1) >= 2*nRep
   y <- y[keep, keep.lib.sizes=FALSE]
 
   y <- calcNormFactors(y)
   y = estimateCommonDisp(y)
   y = estimateTagwiseDisp(y)
 
-  de = exactTest(y, pair=c("CS1","CS2"))
+  de = exactTest(y, pair=c(group1,group2))
   tt = topTags(de, n=nrow(y))
 
   nc = cpm(y, normalized.lib.sizes=TRUE)
-  rn = rownames(tt$table)
+  ID = rownames(tt$table)
 
-  permList[[i]] = cbind(nc[rn,order(allComb[i,])], tt$table)
-  write.csv(permList[[i]], file= paste(getwd(), "/PermLineup_CS1CS2/TopDEG", i, ".csv", sep=""))
+  test = cbind(ID, nc,tt$table)
+  permList[[i]] = cbind(ID, nc,tt$table)
+  write.csv(permList[[i]], file= paste(getwd(), "/", outDir, "/TopDEG", i, ".csv", sep=""))
 }
 
 for (i in 1:100){

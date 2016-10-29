@@ -55,24 +55,18 @@ if (!dir.exists(paste0(getwd(), "/", outDir))){
 }
 
 for(i in 1:nPerm){
-
   y = DGEList(counts=countTable[,c(allComb[i,]+1)], group=listCond)
-
+  rownames(y[[1]]) <- countTable[,1]
   keep <- rowSums(cpm(y)>1) >= 2*nRep
   y <- y[keep, keep.lib.sizes=FALSE]
-
   y <- calcNormFactors(y)
   y = estimateCommonDisp(y)
   y = estimateTagwiseDisp(y)
-
   de = exactTest(y, pair=c(group1,group2))
   tt = topTags(de, n=nrow(y))
-
   nc = cpm(y, normalized.lib.sizes=TRUE)
-  ID = rownames(tt$table)
-
-  test = cbind(ID, nc,tt$table)
-  permList[[i]] = cbind(ID, nc,tt$table)
+  permList[[i]] = arrange(merge(nc, tt[[1]], by=0, all=TRUE), FDR)
+  colnames(permList[[i]])[1] <- "ID"
   write.csv(permList[[i]], file= paste(getwd(), "/", outDir, "/TopDEG", i, ".csv", sep=""))
 }
 
@@ -81,20 +75,18 @@ for (i in 1:100){
   lineup <- permute(seq(1:nPerm))
   correctPlace[i] <- which(lineup==1)
   for (j in 1:nPerm){
-    gene = permList[[j]][i,1:(2*nRep)]
-    rep = nRep
-    fact = 2
-    dat = data.frame(x=rep(1:fact, each=rep),y=t(gene),z=which(lineup==j))
+    gene = permList[[j]][i,2:(2*nRep+1)]
+    dat = data.frame(x=rep(1:2, each=nRep),y=t(gene),z=which(lineup==j))
     colnames(dat)=c("x","y","z")
     dat$x=as.factor(dat$x)
-    levels(dat$x)=c("DR","DU")
-    dat$meanDR = mean(filter(dat, x=="DR")$y)
-    dat$meanDU = mean(filter(dat, x=="DU")$y)
+    levels(dat$x)=c(group1,group2)
+    dat$meanG1 = mean(filter(dat, x==group1)$y)
+    dat$meanG2 = mean(filter(dat, x==group2)$y)
     fullDat <- rbind(fullDat, dat)
   }
-    allPlot = ggplot(fullDat, aes(x, y)) + geom_point(aes(colour = factor(x)), shape = 20, size=5, alpha = 0.5) + scale_shape(solid = FALSE) + ggtitle(paste("Transcript: ", i)) + ylab("Read Count") + scale_y_continuous(limits=c(0, max(fullDat$y))) + theme(axis.title.x = element_blank(), legend.position="bottom", axis.text=element_text(size=12), axis.title=element_text(size=12), legend.title=element_text(size=12), legend.text=element_text(size=12), plot.title=element_text(hjust=0.5)) + labs(colour = "Group", size=12) + geom_segment(aes(x = 1, y = meanDR, xend = 2, yend = meanDU), colour="gray25", size = 0.1) + facet_wrap(~ z, ncol = 5)
+    allPlot = ggplot(fullDat, aes(x, y)) + geom_point(aes(colour = factor(x)), shape = 20, size=5, alpha = 0.5) + scale_shape(solid = FALSE) + ggtitle(paste("Transcript: ", i)) + ylab("Read Count") + scale_y_continuous(limits=c(0, max(fullDat$y))) + theme(axis.title.x = element_blank(), legend.position="bottom", axis.text=element_text(size=12), axis.title=element_text(size=12), legend.title=element_text(size=12), legend.text=element_text(size=12), plot.title=element_text(hjust=0.5)) + labs(colour = "Group", size=12) + geom_segment(aes(x = 1, y = meanG1, xend = 2, yend = meanG2), colour="gray25", size = 0.1) + facet_wrap(~ z, ncol = 5)
 
-    jpeg(file = paste(getwd(), "/PermLineup_CS1CS2/Gene", i, ".jpg", sep=""), height = ceiling(nPerm/5)*175, width = 700)
+    jpeg(file = paste0(getwd(), "/", outDir, "/", "Gene", i, ".jpg"), height = ceiling(nPerm/5)*175, width = 700)
     print(allPlot)
     dev.off()
 }
@@ -102,10 +94,10 @@ for (i in 1:100){
 correctPlace = data.frame(correctPlace)
 colnames(correctPlace) = 1:100
 correctPlace = t(correctPlace)
-colnames(correctPlace) = "PlotWithData"
+colnames(correctPlace) = "DataPlot"
 correctPlace = data.frame(correctPlace)
 correctPlace <- rownames_to_column(correctPlace, "Gene")
-write.csv(correctPlace, row.names = FALSE, file = paste(getwd(), "/PermLineup_CS1CS2/Correct.csv", sep=""))
+write.csv(correctPlace, row.names = FALSE, file = paste0(getwd(), "/", outDir, "/Correct.csv"))
 
 # permInfo --> allComb[1,]
 permInfo <- data.frame(matrix(unlist(permInfo), nrow = nPerm))

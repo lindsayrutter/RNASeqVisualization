@@ -37,8 +37,11 @@ getLineups <- function(countTable, nRep, nPerm, outDir){
     y = DGEList(counts=countTable[,c(allComb[i,]+1)], group=listCond)
     rownames(y[[1]]) <- countTable[,1]
     keep <- rowSums(cpm(y)>1) >= 2*nRep
-    y <- y[keep, keep.lib.sizes=FALSE]
-    y <- calcNormFactors(y)
+    y <- y[keep, keep.lib.sizes=FALSE] # change to true?
+    #y <- calcNormFactors(y) # Option 1
+    y <- cpm(y, TRUE, TRUE) # Option 2
+    y <- betweenLaneNormalization(y, which="full", round=FALSE) #Option 2
+
     y = estimateCommonDisp(y)
     y = estimateTagwiseDisp(y)
     de = exactTest(y, pair=c(group1,group2))

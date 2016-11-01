@@ -1,0 +1,459 @@
+---
+title: "Exploring the 2011 Census data"
+author: "Nicholas Tierney and Rob J Hyndman"
+date: "`r Sys.Date()`"
+output: 
+    rmarkdown::html_vignette:
+        toc: true
+vignette: >
+  %\VignetteIndexEntry{Exploring the 2011 Census data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\usepackage[utf8]{inputenc}
+---
+
+
+```{r setup, echo=FALSE}
+
+knitr::opts_chunk$set(fig.width = 6,
+                      fig.height = 4,
+                      fig.align='center',
+                      dev = "png")
+
+```
+
+# Introduction
+
+`eechidna` (Exploring Election and Census Highly Informative Data Nationally for Australia) is an R package that makes it easy to look at the data from the 2011 Australian Census, and the 2013 Federal Election.
+
+This vignette documents how to access the data from the 2011 Census. We show a few typical methods to explore the data.
+
+## 2011 Census data
+
+The data is loaded as `abs2011` when you load `eechidna`. Let's look take a brief glimpse of the data.
+
+```{r load-read, message=FALSE, error = FALSE}
+library(eechidna)
+library(plyr)
+library(dplyr)
+
+glimpse(abs2011)
+
+```
+
+Here we see that we have 150 observations and 35 variables.
+
+Each observation is data pertaining to a particular federal electorate as described by http://www.aec.gov.au/profiles/.
+
+Each column is now described here:
+
+```{r make-data-dictionary, include = FALSE}
+
+data_dictionary <- data_frame(
+  Variable = c(
+    "ID",
+    "Electorate",
+    "State",
+    "Population",
+    "Area",
+    "MedianIncome",
+    "Unemployed",
+    "Bachelor",
+    "Postgraduate",
+    "Christianity",
+    "Catholic",
+    "Buddhism",
+    "Islam",
+    "Judaism",
+    "NoReligion",
+    "Age00_04",
+    "Age05_14",
+    "Age15_19",
+    "Age20_24",
+    "Age25_34",
+    "Age35_44",
+    "Age45_54",
+    "Age55_64",
+    "Age65_74",
+    "Age75_84",
+    "Age85plus",
+    "BornOverseas",
+    "Indigenous",
+    "EnglishOnly",
+    "OtherLanguageHome",
+    "Married",
+    "DeFacto",
+    "FamilyRatio",
+    "Internet", 
+    "NotOwned"
+    ), 
+  Details = c(
+    "Commonwealth Electoral District identifier",
+    "Name of electorate",
+    "State containing electorate",
+    "Total population of electorate",
+    "Area of electorate in square kilometres",
+    "Median income of people within electorate",
+    "Percentage of people unemployed",
+    "Percentage of people whose highest qualification is a Bachelor degree",
+    "Percentage of people whose highest qualification is a postgraduate degree",
+    "Percentage of people affiliated with the Christian religion (of all denominations)",
+    "Percentage of people affiliated with the Catholic denomimation.",
+    "Percentage of people affiliated with the Buddhist religion.",
+    "Percentage of people affiliated with the Islam religion.",
+    "Percentage of people affiliated with the Jewish religion. ",
+    "Percentage of people with no religion.",
+    "Percentage of people aged 0-4.",
+    "Percentage of people aged 5-9.",
+    "Percentage of people aged 15-19.",
+    "Percentage of people aged 20-24.",
+    "Percentage of people aged 25-34.",
+    "Percentage of people aged 35-44.",
+    "Percentage of people aged 45-54.",
+    "Percentage of people aged 55-64.",
+    "Percentage of people aged 65-74.",
+    "Percentage of people aged 75-84.",
+    "Percentage of people aged 85 or higher.",
+    "Percentage of people born outside Australia.",
+    "Percentage of people who are Indigenous",
+    "Percentage of people who speak only English",
+    "Percentage of people who speak a language other than English at home",
+    "Percentage of people who are married",
+    "Percentage of people who are in a de facto marriage",
+    "Total number of families to total number of people (times 100)",
+    "Percentage of people with home internet",
+    "Percentage of dwellings not owned (either outright or with a mortgage)")
+) # close data_frame
+```
+
+```{r display-data-dictionary, echo = FALSE}
+library(knitr)
+kable(data_dictionary)
+
+```
+
+So let's just look at some nice and simple plots using `ggplot2`.
+
+## Unemployment 
+
+```{r}
+
+library(ggplot2)
+
+ggplot(data = abs2011,
+       aes(x = Unemployed)) + 
+  geom_density(fill = "salmon", 
+               bw = "SJ",
+               colour = NA) + 
+  geom_rug(colour = "salmon") +
+  theme_minimal() +
+  xlim(0, 12)
+
+```
+
+
+## Unemployment by state
+
+```{r}
+
+ggplot(data = abs2011,
+       aes(x = reorder(State, -Unemployed),
+           y = Unemployed,
+           colour = State)) + 
+  geom_boxplot() + 
+  labs(x = "State",
+       y = "% Unemployment") + 
+  theme_minimal() + 
+  theme(legend.position = "none") 
+  
+           
+```
+
+## Age
+
+
+```{r}
+
+ggplot(data = abs2011,
+       aes(x = Age00_04)) +
+   geom_density(fill = "steelblue",
+               bw = "SJ",
+               colour = NA) + 
+  xlim(3,11) +
+  geom_rug(colour = "steelblue") + 
+  theme_minimal() +
+  labs(x = "% Aged between 0 and 4")
+
+```
+
+
+```{r}
+
+ggplot(data = abs2011,
+       aes(x = reorder(State, -Age00_04),
+           y = Age00_04,
+           colour = State)) +
+  geom_boxplot() + 
+  theme_minimal() +
+  labs(x = "State",
+       y = "% Aged between 0 and 4") +
+  theme(legend.position = "none") + 
+  coord_flip()
+
+```
+
+However, there are many age groups. To look at all of them at once, we can gather them into a dataframe ready for plotting using `tidyr`.
+
+```{r}
+
+library(tidyr)
+
+abs2011 %>%
+  select(starts_with("Age"), 
+         Electorate) %>%
+  gather(key = "Age",
+         value = "Percent_in_electorate",
+         -Electorate) %>% 
+  ggplot(data = .,
+         aes(x = reorder(Age, - Percent_in_electorate),
+             y = Percent_in_electorate,
+             colour = Age)) +
+  geom_boxplot() + 
+  coord_flip() + 
+  theme_minimal() + 
+  theme(legend.position = "none") +
+  labs(x = "Age Groups",
+       y = "% in Electorate")
+
+
+```
+
+## Income
+
+```{r}
+
+ggplot(data = abs2011,
+       aes(x = MedianIncome)) + 
+  geom_density(fill = "salmon",
+               bw = "SJ",
+               colour = NA) + 
+  xlim(250,1100) +
+  geom_rug(colour = "salmon") + 
+  theme_minimal()
+  
+```
+
+## Income by State
+
+```{r}
+
+ggplot(data = abs2011,
+       aes(x = reorder(State, -MedianIncome),
+           y = MedianIncome,
+           colour = State)) + 
+  geom_boxplot() + 
+  theme_minimal() + 
+  theme(legend.position = "none") + 
+  labs(x = "State")
+
+```
+
+If you're intersted in getting a sense of the distribution of the data, you can add in the points to get a bit more of a sense on the distribution.
+
+```{r}
+
+ggplot(data = abs2011,
+       aes(x = reorder(State, -MedianIncome),
+           y = MedianIncome,
+           colour = State)) + 
+  geom_boxplot() + 
+  geom_jitter(alpha = 0.35, 
+              size = 2,
+              width = 0.3) +
+  theme_minimal() + 
+  theme(legend.position = "none") + 
+  labs(x = "State")
+
+```
+
+## Education
+
+##### Bachelor
+
+```{r}
+
+ggplot(data = abs2011,
+       aes(x = Bachelor)) +
+  geom_density(fill = "salmon",
+               bw = "SJ",
+               colour = NA) + 
+  geom_rug(colour = "salmon") + 
+  theme_minimal() + 
+  labs(x = "% of electorate with a Bachelor degree") +
+  xlim(0, 30)
+           
+
+```
+
+##### Bachelor by state
+
+```{r}
+
+ggplot(data = abs2011,
+       aes(x = reorder(State, -Bachelor),
+           y = Bachelor,
+           colour = State)) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(x = "State") + 
+  theme(legend.position = "none")
+
+```
+
+##### Bachelor and income
+
+```{r}
+
+ggplot(data = abs2011,
+       aes(x = Bachelor,
+           y = MedianIncome)) + 
+  geom_point(colour = "steelblue",
+             alpha = 0.75) + 
+  theme_minimal()
+
+```
+
+
+## Postgraduate
+
+
+```{r}
+
+ggplot(data = abs2011,
+       aes(x = reorder(State, -Postgraduate),
+           y = Postgraduate,
+           colour = State)) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(x = "State") + 
+  theme(legend.position = "none")
+
+```
+
+##### Postgraduate and income
+
+```{r}
+
+ggplot(data = abs2011,
+       aes(x = Postgraduate,
+           y = MedianIncome)) + 
+  geom_point(colour = "steelblue",
+             alpha = 0.75) + 
+  theme_minimal()
+  
+```
+
+##### Comparing income across Bachelors and postgraduate
+
+```{r}
+
+abs2011 %>%
+  select(Postgraduate,
+         Bachelor,
+         MedianIncome) %>% 
+  gather(key = "Education",
+         value = "Prop_Educated",
+         -MedianIncome) %>%
+ggplot(data = ,
+       aes(x = Prop_Educated,
+           y = MedianIncome,
+           colour = Education)) + 
+  geom_point() + 
+  geom_smooth() +
+  theme_minimal() +
+  scale_color_brewer(type = "qual", palette = "Set1")
+  # theme(legend.position = "bottom",
+  #       legend.direction = "vertical")
+
+```
+
+## Religion
+
+Let's look at all of the religions
+
+```{r}
+
+abs2011 %>%
+  select(Christianity,
+         Catholic,
+         Buddhism,
+         Islam,
+         Judaism,
+         NoReligion) %>%
+  gather(key = "ReligionType",
+         value = "Percent") %>%
+  ggplot(data = .,
+         aes(x = reorder(ReligionType, -Percent),
+             y = Percent,
+             colour = ReligionType)) + 
+  geom_boxplot() + 
+  theme_minimal() + 
+  theme(legend.position = "none") +
+  coord_flip() + 
+  labs(x = "Religion")
+             
+
+```
+
+##### Christianity by State
+
+
+```{r}
+
+ggplot(data = abs2011,
+       aes(x = reorder(State, -Christianity),
+           y = Christianity,
+           colour = State)) + 
+  geom_boxplot() +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  coord_flip() + 
+  labs(x = "State")
+  
+           
+
+```
+
+## Internet
+
+```{r}
+
+ggplot(data = abs2011,
+       aes(x = Internet)) +
+  geom_density(fill = "steelblue",
+               bw = "SJ",
+               colour = NA) + 
+  geom_rug(colour = "steelblue") + 
+  theme_minimal() + 
+  labs(x = "% of electorate with Internet") +
+  xlim(85, 100)
+
+```
+
+
+## Internet by state
+
+```{r}
+
+ggplot(data = abs2011,
+       aes(x = reorder(State, -Internet),
+           y = Internet,
+           colour = State)) + 
+  geom_boxplot() +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  coord_flip() + 
+  labs(x = "State")
+
+```
+
+

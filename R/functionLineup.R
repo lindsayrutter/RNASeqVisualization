@@ -6,12 +6,13 @@
 
 # It is different from sigDiffPerm.R because it does not include FDR value in plot outputs.
 
-library(ggplot2)#
-library(edgeR)#
-library(dplyr)#
-library(gtools)#
-library(tibble)#
-library(readr)#
+library(ggplot2)
+library(edgeR)
+library(dplyr)
+library(gtools)
+library(tibble)
+library(readr)
+library(EDASeq)
 
 # countTable should be a dataframe with first column (type "chr") named "ID" and rest of columns (type "num") named sample names. Have no extra columns. The sample names must be in the format groupName.repNumber (ex: DU.1).
 
@@ -39,10 +40,11 @@ getLineups <- function(countTable, nRep, nPerm, outDir){
     keep <- rowSums(cpm(y)>1) >= 2*nRep
     y <- y[keep, keep.lib.sizes=FALSE] # change to true?
     #y <- calcNormFactors(y) # Option 1
-    y <- cpm(y, TRUE, TRUE) # Option 2
-    y <- betweenLaneNormalization(y, which="full", round=FALSE) #Option 2
 
-    y = estimateCommonDisp(y)
+    y <- cpm(y, TRUE, TRUE) # Option 2 (edgeR)
+    y <- betweenLaneNormalization(y, which="full", round=FALSE) #Option 2 (EDASeq)
+
+    y = estimateCommonDisp(y) #(edgeR)
     y = estimateTagwiseDisp(y)
     de = exactTest(y, pair=c(group1,group2))
     tt = topTags(de, n=nrow(y))

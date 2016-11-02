@@ -1,3 +1,8 @@
+library(dplyr)
+library(shiny)
+library(plotly)
+library(eechidna)
+
 age = c("Age00_04", "Age05_14", "Age15_19", "Age20_24", "Age25_34","Age35_44", "Age45_54", "Age55_64", "Age65_74",  "Age75_84", "Age85plus")
 religion = c("Christianity", "Catholic", "Buddhism", "Islam", "Judaism", "NoReligion")
 other = c("Population", "MedianIncome", "Unemployed", "Bachelor", "Postgraduate", "BornOverseas", "Indigenous", "EnglishOnly", "OtherLanguageHome", "Married", "DeFacto", "FamilyRatio", "Internet", "NotOwned")
@@ -48,7 +53,7 @@ aec13$PartyAb <- factor(aec13$PartyAb, levels = lvls)
 voteProps$PartyAb <- factor(voteProps$PartyAb, levels = lvls)
 
 # 2 party preferred data
-aec13pp <- aec2013_2cp_electorate %>%
+aec13pp <- eechidna::aec2013_2cp_electorate %>%
   mutate(FullName = paste(GivenNm, Surname)) %>%
   group_by(Electorate) %>%
   summarise(
@@ -112,27 +117,6 @@ ui <- fluidPage(
       width = 4,
       plotlyOutput("map")
     )
-  ),
-
-  fluidRow(
-    column(
-      width = 4,
-      plotOutput(
-        "ages", height = 150 * length(age), brush = brush_opts("brushAge")
-      )
-    ),
-    column(
-      width = 4,
-      plotOutput(
-        "religion", height = 150 * length(religion), brush = brush_opts("brushReligion")
-      )
-    ),
-    column(
-      width = 4,
-      plotOutput(
-        "densities", height = 150 * length(other), brush = brush_opts("brushDen")
-      )
-    )
   )
 )
 
@@ -141,6 +125,13 @@ server <- function(input, output) {
 
   # initiate selection data and *input brushes* as reactive values so we can
   # "clear the world" - http://stackoverflow.com/questions/30588472/is-it-possible-to-clear-the-brushed-area-of-a-plot-in-shiny/36927826#36927826
+  # Creates data frame called data as follows:
+  #Electorate  fill
+  #1          Lingiari black
+  #2           Solomon black
+  #3         Fremantle black
+  #4          Wide Bay black
+  #5            Wright black
   rv <- reactiveValues(
     data = data.frame(
       Electorate = nat_data_cart$Electorate,
@@ -172,30 +163,6 @@ server <- function(input, output) {
       rv$data$fill <- fill
     }
   }
-
-  observeEvent(input$brushAge, {
-    b <- input$brushAge
-    idx <- (b$xmin <= longAbs$value & longAbs$value <= b$xmax) &
-      (longAbs$variable %in% b$panelvar1)
-    selected <- rv$data$Electorate %in% unique(longAbs[idx, "Electorate"])
-    updateRV(selected)
-  })
-
-  observeEvent(input$brushReligion, {
-    b <- input$brushReligion
-    idx <- (b$xmin <= longAbs$value & longAbs$value <= b$xmax) &
-      (longAbs$variable %in% b$panelvar1)
-    selected <- rv$data$Electorate %in% unique(longAbs[idx, "Electorate"])
-    updateRV(selected)
-  })
-
-  observeEvent(input$brushDen, {
-    b <- input$brushDen
-    idx <- (b$xmin <= longAbs$value & longAbs$value <= b$xmax) &
-      (longAbs$variable %in% b$panelvar1)
-    selected <- rv$data$Electorate %in% unique(longAbs[idx, "Electorate"])
-    updateRV(selected)
-  })
 
   observeEvent(event_data("plotly_selected"), {
     selected <- rv$data$Electorate %in% event_data("plotly_selected")$key
@@ -258,39 +225,6 @@ server <- function(input, output) {
             axis.ticks.y = element_blank(),
             panel.grid.major.y = element_blank())
     ggplotly(p, tooltip = "text") %>% layout(dragmode = "select")
-  })
-
-  output$ages <- renderPlot({
-    dat <- dplyr::left_join(ageDat, rv$data, by = "Electorate")
-    ggplot(dat, aes(value, fill = fill)) +
-      geom_dotplot(binwidth = 0.25, dotsize = 1.2, alpha = 0.5) +
-      facet_wrap(~ variable, ncol = 1) +
-      scale_fill_identity() +
-      labs(x = NULL, y = NULL) +
-      theme(legend.position = "none") +
-      theme_bw()
-  })
-
-  output$densities <- renderPlot({
-    dat <- dplyr::left_join(otherDat, rv$data, by = "Electorate")
-    ggplot(dat, aes(value, fill = fill)) +
-      geom_dotplot(dotsize = 0.5, alpha = 0.5) +
-      scale_fill_identity() +
-      facet_wrap(~variable, scales = "free", ncol = 1) +
-      labs(x = NULL, y = NULL) +
-      theme(legend.position = "none") +
-      theme_bw()
-  })
-
-  output$religion <- renderPlot({
-    dat <- dplyr::left_join(religionDat, rv$data, by = "Electorate")
-    ggplot(dat, aes(value, fill = fill)) +
-      geom_dotplot(dotsize = 0.5, alpha = 0.5) +
-      scale_fill_identity() +
-      facet_wrap(~variable, ncol = 1) +
-      labs(x = NULL, y = NULL) +
-      theme(legend.position = "none") +
-      theme_bw()
   })
 
   output$map <- renderPlotly({

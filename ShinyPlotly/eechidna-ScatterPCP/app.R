@@ -55,7 +55,6 @@ server <- function(input, output) {
   # initiate selection data and *input brushes* as reactive values so we can
   # "clear the world" - http://stackoverflow.com/questions/30588472/is-it-possible-to-clear-the-brushed-area-of-a-plot-in-shiny/36927826#36927826
   rv <- reactiveValues(
-    set.seed(1),
     data = data.frame(ID = as.character(paste0("ID",1:10)), A = runif(10), B = runif(10), C = runif(10), D = runif(10), E = runif(10), fill = factor(rep("gray", 10), levels = c("gray", palette)))
   )
 

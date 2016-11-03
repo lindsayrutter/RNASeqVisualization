@@ -11,14 +11,6 @@ library(gtools)
 
 palette = c('#1B9E77', '#F0027F', '#E6AB02', '#66A61E', '#7570B3', '#D95F02', '#3690C0')
 
-
-
-
-
-
-
-
-
 brush_opts <- function(id, ...) {
   brushOpts(id = id, direction = "x", resetOnNew = TRUE, ...)
 }
@@ -59,7 +51,7 @@ ui <- fluidPage(
 
 
 server <- function(input, output) {
-  
+
   # initiate selection data and *input brushes* as reactive values so we can
   # "clear the world" - http://stackoverflow.com/questions/30588472/is-it-possible-to-clear-the-brushed-area-of-a-plot-in-shiny/36927826#36927826
   # Creates data frame called data as follows:
@@ -75,12 +67,12 @@ server <- function(input, output) {
     data <- data.frame(ID = paste0("ID",1:10), A = runif(10), B = runif(10), C = runif(10), D = runif(10), E = runif(10), fill = factor(rep("gray", 10), levels = c("gray", palette))),
     data$ID <- as.character(data$ID)
   )
-  
+
   # clear brush values and remove the div from the page
   observeEvent(input$clear, {
     rv$data$fill <- "gray"
   })
-  
+
   # reusable function for "telling the world" about the selection
   # it should modify the reactive value _once_ since shiny will send messages
   # on every modification
@@ -96,31 +88,34 @@ server <- function(input, output) {
       rv$data$fill <- fill
     }
   }
-  
+
   observeEvent(event_data("plotly_selected"), {
     selected <- rv$data$Electorate %in% event_data("plotly_selected")$key
     updateRV(selected)
   })
 
   # Convert DF from scatterplot to PCP
-  datt <- data.frame(t(data))
-  fillVec <- datt[]
-  #datt <- data.frame(t(select(data, -fill)))
-  names(datt) <- as.matrix(datt[1, ])
-  datt <- datt[-1, ]
-  datt[] <- lapply(datt, function(x) type.convert(as.character(x)))
-  setDT(datt, keep.rownames = TRUE)[]
-  colnames(datt)[1] <- "x"
-  dat_long <- melt(datt, id.vars ="x" )
-    
+  data2 <- melt(data, id.vars = c("ID", "fill"),measure.vars = c("A","B","C","D","E"))
+  data3 <- data2[mixedorder(data2$ID),]
+
   output$ScatterPlot <- renderPlotly({
-    plot_ly(data = data, x = ~A, y = ~B)
+    p <- ggplot(data, aes(A, B, colour = fill,
+                         text = ID)) +
+      scale_colour_identity() + theme_bw() +
+      theme(legend.position = "none") +
+      geom_point(alpha = 0.5) + ylab(NULL) +
+      xlab("Read Count A") +
+      ylab("Read Count B") +
+      theme(axis.text = element_blank(),
+            axis.ticks = element_blank(),
+            panel.grid.major = element_blank())
+    ggplotly(p, tooltip = "text") %>% layout(dragmode = "select")
   })
-  
+
   output$PCP <- renderPlotly({
-    plot_ly(dat_long, x= ~x, y= ~value, type = 'scatter', mode = 'lines+markers', color = ~variable)  %>% layout(dragmode="box", showlegend = FALSE)
+    p <- ggplot(data3, aes(x = variable, y = value, colour = fill, text = ID)) + geom_line(aes(group = ID), alpha = 0.8) + geom_point(alpha = 0.5, size = 0.001) + scale_colour_identity() + theme_bw() + theme(legend.position = "none") + xlab(NULL) + ylab("Read count")
+    ggplotly(p, tooltip = "text") %>% layout(dragmode = "select")
   })
-  
 }
 
 shinyApp(ui, server)

@@ -29,6 +29,10 @@ ui <- fluidPage(
     column(
       width = 2,
       actionButton("delete", "Delete Selections")
+    ),
+    column(
+      width = 2,
+      downloadButton('downloadData', 'Download')
     )
   ),
   conditionalPanel(
@@ -115,6 +119,13 @@ server <- function(input, output) {
     p <- ggplot(data3, aes(x = variable, y = value, colour = fill, text = ID, key = ID)) + geom_line(aes(group = ID), alpha = 0.8) + geom_point(alpha = 0.5, size = 0.001) + scale_colour_identity() + theme_bw() + theme(legend.position = "none") + xlab(NULL) + ylab("Read count")
     ggplotly(p, tooltip = "text") %>% layout(dragmode = "select")
   })
+
+  output$downloadData <- downloadHandler(
+    filename = function() { 'Test.csv' },
+    content = function(file) {
+      write.csv(rv$data, file)
+    }
+  )
 }
 
 shinyApp(ui, server)

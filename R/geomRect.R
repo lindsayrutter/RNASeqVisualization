@@ -26,3 +26,5 @@ sig.tab <- mutate(sig.tab, xmin = pmin(C_S1_R1, C_S1_R2, C_S1_R3), xmax = pmax(C
 
 ggplot(sig.tab, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax)) + geom_rect(fill = NA, color = 'black') #+ geom_rect(aes(sig.tab[200,]), fill = NA, color = 'purple')
 
+p <- ggplot(sig.tab, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, text = genes)) + geom_rect(fill = NA, color = 'black')
+ggplotly(p, tooltip = "text") %>% layout(dragmode = "select")

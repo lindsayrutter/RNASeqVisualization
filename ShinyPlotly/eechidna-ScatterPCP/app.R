@@ -19,12 +19,16 @@ ui <- fluidPage(
   shinyjs::useShinyjs(),
   fluidRow(
     column(
-      width = 1,
+      width = 2,
       checkboxInput("show", "Show Controls")
     ),
     column(
-      width = 1,
+      width = 2,
       actionButton("clear", "Clear Selections")
+    ),
+    column(
+      width = 2,
+      actionButton("delete", "Delete Selections")
     )
   ),
   conditionalPanel(
@@ -39,16 +43,15 @@ ui <- fluidPage(
   ),
   fluidRow(
     column(
-      width = 3,
+      width = 6,
       plotlyOutput("ScatterPlot")
     ),
     column(
-      width = 3,
+      width = 6,
       plotlyOutput("PCP")
     )
   )
 )
-
 
 server <- function(input, output) {
 
@@ -61,6 +64,14 @@ server <- function(input, output) {
   # clear brush values and remove the div from the page
   observeEvent(input$clear, {
     rv$data$fill <- "gray"
+  })
+
+  # clear brush values and remove the div from the page
+  observeEvent(input$delete, {
+    selected <- rv$data$ID %in% event_data("plotly_selected")$key
+    # selected is format: logi [1:10] TRUE FALSE FALSE FALSE FALSE FALSE FALSE
+    # cat(file=stderr(), "selected", selected, str(selected))
+    rv$data <- filter(rv$data,!selected)
   })
 
   # reusable function for "telling the world" about the selection
@@ -91,8 +102,8 @@ server <- function(input, output) {
       geom_point(alpha = 0.5) + ylab(NULL) +
       xlab("Read Count A") +
       ylab("Read Count B") +
-      theme(axis.text = element_blank(),
-            axis.ticks = element_blank(),
+      theme(#axis.text = element_blank(),
+            #axis.ticks = element_blank(),
             panel.grid.major = element_blank())
     ggplotly(p, tooltip = "text") %>% layout(dragmode = "select")
   })

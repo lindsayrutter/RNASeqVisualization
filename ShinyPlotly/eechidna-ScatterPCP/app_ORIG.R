@@ -1,3 +1,7 @@
+# setwd("~/RNASeqVisualization/ShinyPlotly/eechidna-master")
+# library(shiny)
+# runApp("App")
+
 library(dplyr)
 library(shiny)
 library(plotly)
@@ -109,27 +113,6 @@ ui <- fluidPage(
       width = 3,
       plotlyOutput("voteProps")
     )
-  ),
-
-  fluidRow(
-    column(
-      width = 4,
-      plotOutput(
-        "ages", height = 150 * length(age), brush = brush_opts("brushAge")
-      )
-    ),
-    column(
-      width = 4,
-      plotOutput(
-        "religion", height = 150 * length(religion), brush = brush_opts("brushReligion")
-      )
-    ),
-    column(
-      width = 4,
-      plotOutput(
-        "densities", height = 150 * length(other), brush = brush_opts("brushDen")
-      )
-    )
   )
 )
 
@@ -138,7 +121,7 @@ server <- function(input, output) {
 
   # initiate selection data and *input brushes* as reactive values so we can
   # "clear the world" - http://stackoverflow.com/questions/30588472/is-it-possible-to-clear-the-brushed-area-of-a-plot-in-shiny/36927826#36927826
-  # Creates data frame called data as follows:
+  # Creates data frame (150 observations) called data as follows:
   #Electorate  fill
   #1          Lingiari black
   #2           Solomon black
@@ -148,17 +131,14 @@ server <- function(input, output) {
   rv <- reactiveValues(
     data = data.frame(
       Electorate = nat_data_cart$Electorate,
-      fill = factor(rep("black", nrow(nat_data_cart)), levels = c("black", palette)),
+      fill = factor(rep("gray", nrow(nat_data_cart)), levels = c("gray", palette)),
       stringsAsFactors = FALSE
     )
   )
 
   # clear brush values and remove the div from the page
   observeEvent(input$clear, {
-    rv$data$fill <- "black"
-    shinyjs::runjs("document.getElementById('ages_brush').remove()")
-    shinyjs::runjs("document.getElementById('densities_brush').remove()")
-    shinyjs::runjs("document.getElementById('densities_brush').remove()")
+    rv$data$fill <- "gray"
   })
 
   # reusable function for "telling the world" about the selection
@@ -170,12 +150,17 @@ server <- function(input, output) {
       rv$data$fill[selected] <- input$color
     } else {
       fill <- rv$data$fill
-      fill[rv$data$fill %in% input$color] <- "black"
+      fill[rv$data$fill %in% input$color] <- "gray"
       print(input$color)
       fill[selected] <- input$color
       rv$data$fill <- fill
     }
   }
+
+  observeEvent(event_data("plotly_selected"), {
+    selected <- rv$data$Electorate %in% event_data("plotly_selected")$key
+    updateRV(selected)
+  })
 
   output$voteProps <- renderPlotly({
     voteProps <- voteProps[voteProps$PartyAb %in% input$parties, ]

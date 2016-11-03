@@ -1,3 +1,7 @@
+# setwd("~/RNASeqVisualization/ShinyPlotly/eechidna-master
+# library(shiny)
+# runApp("App")
+
 library(dplyr)
 library(shiny)
 library(plotly)

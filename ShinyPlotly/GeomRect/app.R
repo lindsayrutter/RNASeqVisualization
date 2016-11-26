@@ -95,9 +95,19 @@ server <- function(input, output) {
   output$RectPlot <- renderPlotly({
     # p <- ggplot(rv$data, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, text = genes, key = genes, colour = fill)) + geom_rect(fill = 'purple', colour = 'black', size = 0.3, alpha = 0.1)
 
-    p <- ggplot(rv$data, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, text = genes, key = genes, colour = fill)) + geom_rect(fill = fill, colour = fill, size = 0.3, alpha = 0.1) + scale_colour_identity() + theme_bw()
+    p <- ggplot(rv$data, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, colour = fill, text = genes, key = genes)) + geom_rect(size = 0.3, fill = NA) + scale_colour_identity() + theme_bw()
     ggplotly(p, tooltip = "text") %>% layout(dragmode = "select")
   })
 }
 
 shinyApp(ui, server)
+
+library(ggplot2)
+library(dplyr)
+library(plotly)
+set.seed(1)
+data <- data.frame(Name = paste0("Name",seq(1:10)), xmin = runif(10, 0, 1), xmax = runif(10, 1, 2), ymin = runif(10, 0, 1), ymax = runif(10, 1, 2), fill = sample(c("black","purple"),10, replace=TRUE) )
+
+p <- ggplot(data, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = NULL, colour = fill, text = Name)) + geom_rect(size = 0.3, alpha = 0.5) + scale_colour_identity() + theme_bw()
+ggplotly(p, tooltip = "text") %>% layout(dragmode = "select")
+

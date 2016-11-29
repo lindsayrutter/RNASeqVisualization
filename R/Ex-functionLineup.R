@@ -65,27 +65,6 @@ outDir <- "PermLineup_NP"
 getLineups(countTable, nRep, nPerm, outDir)
 
 ############################################################################
-# L120 Fe+ v. Fe- (Option 2)
-
-rm(list=ls())
-load("All_leaves040615.rda")
-ct <- countTable
-ct2 <- assays(ct)[[1]]
-rownames(ct2) <- ct@rowRanges@elementMetadata@listData$ID
-colnames(ct2) <- unlist(strsplit(colnames(ct2), "\\."))[seq(1, 17*3, 3)]
-countTable <- as.data.frame(ct2)
-countTable = countTable[,c("ML08R","ML14R","ML22R","ML11R","ML27R","ML33R")]
-setDT(countTable, keep.rownames = TRUE)[]
-colnames(countTable)=c("ID", "N.1","N.2","N.3","P.1","P.2","P.3")
-countTable <- as.data.frame(countTable)
-
-nRep <- 3
-nPerm <- 10
-outDir <- "PermLineup_NP_2"
-
-getLineups(countTable, nRep, nPerm, outDir)
-
-############################################################################
 # Pmet R v. U (Option 1)
 
 load("data/Pmet.rda")
@@ -96,9 +75,8 @@ outDir <- "PermLineup_Pmet_UR"
 
 getLineups(countTable, nRep, nPerm, outDir)
 
-
 ############################################################################
-# Pmet R v. U (Option 1)
+# Pmet F v. W (Option 1)
 
 load("data/Pmet.rda")
 nRep <- 4
@@ -109,14 +87,6 @@ outDir <- "PermLineup_Pmet_FW"
 getLineups(countTable, nRep, nPerm, outDir)
 
 ############################################################################
-# Pmet R v. U (Option 2)
 
-load("data/Pmet.rda")
-nRep <- 4
-nPerm <- 20
-countTable <- countTable[,c(1:9)]
-outDir <- "PermLineup_Pmet_UR_2"
-
-getLineups(countTable, nRep, nPerm, outDir)
 
 

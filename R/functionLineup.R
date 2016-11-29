@@ -16,7 +16,7 @@ library(EDASeq)
 
 # countTable should be a dataframe with first column (type "chr") named "ID" and rest of columns (type "num") named sample names. Have no extra columns. The sample names must be in the format groupName.repNumber (ex: DU.1).
 
-getLineups <- function(countTable, nRep, nPerm, outDir){
+getLineups <- function(countTable, nRep, nPerm, outDir, indScale=FALSE){
   group1 = unlist(strsplit(colnames(countTable)[2], "[.]"))[1]
   group2 = unlist(strsplit(colnames(countTable)[2+nRep], "[.]"))[1]
   listCond = rep(c(group1, group2), each = nRep)
@@ -37,16 +37,14 @@ getLineups <- function(countTable, nRep, nPerm, outDir){
   for(i in 1:nPerm){
     y = DGEList(counts=countTable[,c(allComb[i,]+1)], group=listCond)
     rownames(y[[1]]) <- countTable[,1]
-    keep <- rowSums(cpm(y)>1) >= 2*nRep
-    # y <- y[keep, keep.lib.sizes=FALSE] # Option 1
-    #y <- calcNormFactors(y) # Option 1
+    keep <- rowSums(cpm(y)>3) >= nRep
+    y <- y[keep, keep.lib.sizes=FALSE] # Option 1
+    y$samples$lib.size <- colSums(y$counts)
+    y <- calcNormFactors(y) # Option 1
 
-    y <- y[keep,] # Option 2
-    y <- cpm(y, TRUE, TRUE) # Option 2 (edgeR)
-    y <- betweenLaneNormalization(y, which="full", round=FALSE) #Option 2 (EDASeq)
-
-    cpm.L120.new <- cpm(L120, TRUE, TRUE)
-    cpm.L120.norm <- betweenLaneNormalization(cpm.L120.new, which="full", round=FALSE)
+    #y <- y[keep,] # Option 2
+    #y <- cpm(y, TRUE, TRUE) # Option 2 (edgeR)
+    #y <- betweenLaneNormalization(y, which="full", round=FALSE) #Option 2 (EDASeq)
 
     y = estimateCommonDisp(y) #(edgeR)
     y = estimateTagwiseDisp(y)
@@ -72,8 +70,12 @@ getLineups <- function(countTable, nRep, nPerm, outDir){
       dat$meanG2 = mean(filter(dat, x==group2)$y)
       fullDat <- rbind(fullDat, dat)
     }
-    allPlot = ggplot(fullDat, aes(x, y)) + geom_point(aes(colour = factor(x)), shape = 20, size=5, alpha = 0.5) + scale_shape(solid = FALSE) + ggtitle(paste("Transcript: ", i)) + ylab("Read Count") + scale_y_continuous(limits=c(0, max(fullDat$y))) + theme(axis.title.x = element_blank(), legend.position="bottom", axis.text=element_text(size=12), axis.title=element_text(size=12), legend.title=element_text(size=12), legend.text=element_text(size=12), plot.title=element_text(hjust=0.5)) + labs(colour = "Group", size=12) + geom_segment(aes(x = 1, y = meanG1, xend = 2, yend = meanG2), colour="gray25", size = 0.1) + facet_wrap(~ z, ncol = 5)
-
+    if (indScale){
+      allPlot = ggplot(fullDat, aes(x, y)) + geom_point(aes(colour = factor(x)), shape = 20, size=5, alpha = 0.5) + scale_shape(solid = FALSE) + ggtitle(paste("Transcript: ", i)) + ylab("Read Count") + scale_y_continuous(limits=c(0, max(fullDat$y))) + theme(axis.title.x = element_blank(), legend.position="bottom", axis.text=element_text(size=12), axis.title=element_text(size=12), legend.title=element_text(size=12), legend.text=element_text(size=12), plot.title=element_text(hjust=0.5)) + labs(colour = "Group", size=12) + geom_segment(aes(x = 1, y = meanG1, xend = 2, yend = meanG2), colour="gray25", size = 0.1) + facet_wrap(~ z, ncol = 5, scales = "free_y")
+    }
+    else{
+      allPlot = ggplot(fullDat, aes(x, y)) + geom_point(aes(colour = factor(x)), shape = 20, size=5, alpha = 0.5) + scale_shape(solid = FALSE) + ggtitle(paste("Transcript: ", i)) + ylab("Read Count") + scale_y_continuous(limits=c(0, max(fullDat$y))) + theme(axis.title.x = element_blank(), legend.position="bottom", axis.text=element_text(size=12), axis.title=element_text(size=12), legend.title=element_text(size=12), legend.text=element_text(size=12), plot.title=element_text(hjust=0.5)) + labs(colour = "Group", size=12) + geom_segment(aes(x = 1, y = meanG1, xend = 2, yend = meanG2), colour="gray25", size = 0.1) + facet_wrap(~ z, ncol = 5)
+    }
     jpeg(file = paste0(getwd(), "/", outDir, "/", "Gene", i, ".jpg"), height = ceiling(nPerm/5)*175, width = 700)
     print(allPlot)
     dev.off()

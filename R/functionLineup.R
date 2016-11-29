@@ -38,11 +38,15 @@ getLineups <- function(countTable, nRep, nPerm, outDir){
     y = DGEList(counts=countTable[,c(allComb[i,]+1)], group=listCond)
     rownames(y[[1]]) <- countTable[,1]
     keep <- rowSums(cpm(y)>1) >= 2*nRep
-    y <- y[keep, keep.lib.sizes=FALSE] # change to true?
+    # y <- y[keep, keep.lib.sizes=FALSE] # Option 1
     #y <- calcNormFactors(y) # Option 1
 
+    y <- y[keep,] # Option 2
     y <- cpm(y, TRUE, TRUE) # Option 2 (edgeR)
     y <- betweenLaneNormalization(y, which="full", round=FALSE) #Option 2 (EDASeq)
+
+    cpm.L120.new <- cpm(L120, TRUE, TRUE)
+    cpm.L120.norm <- betweenLaneNormalization(cpm.L120.new, which="full", round=FALSE)
 
     y = estimateCommonDisp(y) #(edgeR)
     y = estimateTagwiseDisp(y)

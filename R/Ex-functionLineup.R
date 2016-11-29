@@ -85,4 +85,38 @@ outDir <- "PermLineup_NP_2"
 
 getLineups(countTable, nRep, nPerm, outDir)
 
+############################################################################
+# Pmet R v. U (Option 1)
+
+load("data/Pmet.rda")
+nRep <- 4
+nPerm <- 20
+countTable <- countTable[,c(1:9)]
+outDir <- "PermLineup_Pmet_UR"
+
+getLineups(countTable, nRep, nPerm, outDir)
+
+
+############################################################################
+# Pmet R v. U (Option 1)
+
+load("data/Pmet.rda")
+nRep <- 4
+nPerm <- 20
+countTable <- countTable[,c(1,10:17)]
+outDir <- "PermLineup_Pmet_FW"
+
+getLineups(countTable, nRep, nPerm, outDir)
+
+############################################################################
+# Pmet R v. U (Option 2)
+
+load("data/Pmet.rda")
+nRep <- 4
+nPerm <- 20
+countTable <- countTable[,c(1:9)]
+outDir <- "PermLineup_Pmet_UR_2"
+
+getLineups(countTable, nRep, nPerm, outDir)
+
 

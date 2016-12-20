@@ -1,0 +1,327 @@
+\documentclass{article}
+\usepackage{float, hyperref}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{caption}
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+
+\author{Lindsay Rutter}
+\title{Cluster Analysis of PMeth}
+
+\maketitle
+
+<<options, echo=FALSE>>=
+library(knitr)
+opts_chunk$set(cache=TRUE)
+@
+
+\section*{Introduction}
+
+<<echo=FALSE,eval=TRUE>>=
+library(knitr)
+library(rtracklayer)
+library(Rsamtools)
+library(grid)
+library(GenomicAlignments)
+library(ggplot2)
+library(GGally)
+library(edgeR)
+library(stringr)
+library(EDASeq)
+library(dplyr)
+library(matrixStats)
+library(gridExtra)
+library(reshape2)
+library(scales)
+library(tidyr)
+@
+
+<<echo=FALSE>>=
+rm(list=ls())
+load("../data/Pmet.rda")
+system.file("data/Pmet.rda", package = "RNASeqVisualization")
+
+listcond = rep(c("U","R","F","W"),each= 4)
+# create DGEList object
+d = DGEList(counts=countTable[2:ncol(countTable)], group=listcond)
+@
+
+\begin{figure}[H]
+\centering
+<<fig=TRUE, echo=TRUE>>=
+ggparcoord(data.frame(d[[1]]), columns=1:16, alphaLines=0, boxplot=TRUE, scale="globalminmax") + coord_flip()
+@
+\caption{Boxplot of all samples. F1. and U.2 have some large outliers. Looking at random 1 in 10 drastically changes this plot.}
+\label{BoxAll}
+\end{figure}
+
+<<>>=
+myVec = c("U", "R", "F", "W")
+myCol = c(which(colnames(countTable) %in% grep('U', colnames(countTable), value=TRUE)), which(colnames(countTable) %in% grep('R', colnames(countTable), value=TRUE)), which(colnames(countTable) %in% grep('F', colnames(countTable), value=TRUE)), which(colnames(countTable) %in% grep('W', colnames(countTable), value=TRUE)))
+@
+
+<<eval=FALSE>>=
+scatmat(countTable, columns=myCol, alpha = 0.01)
+@
+
+\begin{figure}[H]
+\centering
+    \begin{framed}
+    \includegraphics[width=0.8\textwidth]{porcupine}
+    \end{framed}
+\caption{Scatterplot matrix of DU and DR.}
+\label{BoxAll}
+\end{figure}
+
+<<>>=
+# estimate normalization factors
+d = calcNormFactors(d)
+@
+
+\begin{figure}[H]
+\centering
+<<fig=TRUE, echo=TRUE>>=
+plotMDS(d, labels=colnames(countTable)[2:ncol(countTable)], col = c("red","green","blue","purple")[factor(listcond)])
+@
+\caption{MDS of all samples. F.4 looks separated}
+\label{plotMDS}
+\end{figure}
+
+<<>>=
+# estimate tagwise dispersion
+d = estimateCommonDisp(d)
+d = estimateTagwiseDisp(d)
+@
+
+\begin{figure}[H]
+\centering
+<<fig=TRUE, echo=TRUE>>=
+plotMeanVar(d, show.tagwise.vars=TRUE, NBline=TRUE)
+@
+\caption{This function is useful for exploring the mean-variance relationship in the data. Raw variances are, for each gene, the pooled variance of the counts from each sample, divided by a scaling factor (by default the effective library size). The function will plot the average raw variance for genes split into nbins bins by overall expression level. The averages are taken on the square-root scale as for count data the arithmetic mean is upwardly biased. A line showing the Poisson mean-variance relationship (mean equals variance) is always shown.}
+\label{plotMeanVar}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+<<fig=TRUE, echo=TRUE>>=
+plotBCV(d)
+@
+\caption{Plots the tagwise biological coefficient of variation (square root of dispersions) against log2-CPM.}
+\label{plotBCV}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%% U. vs. R %%%%%%%%%%%%%%%%%%%%%%%%%
+
+<<>>=
+# Test for differential expression U vs. R
+de = exactTest(d, pair=c("U","R"))
+tt = topTags(de, n=nrow(d))
+nc = cpm(d, normalized.lib.sizes=TRUE)
+rn = rownames(tt$table)
+@
+
+\begin{figure}[H]
+\centering
+<<fig=TRUE, echo=TRUE>>=
+deg = rn[tt$table$FDR < .05]
+plotSmear(d, de.tags=deg)
+@
+\caption{Create a graphical summary, such as an M (log-fold change) versus A (log-average expression) plot, here showing the genes selected as differentially expressed with a 5\% false discovery rate. There were 63 in this dataset of U versus R.}
+\label{plotSmear}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%% W. vs. F %%%%%%%%%%%%%%%%%%%%%%%%%
+
+<<>>=
+# Test for differential expression W vs. F
+de = exactTest(d, pair=c("W","F"))
+tt = topTags(de, n=nrow(d))
+nc = cpm(d, normalized.lib.sizes=TRUE)
+rn = rownames(tt$table)
+@
+
+\begin{figure}[H]
+\centering
+<<fig=TRUE, echo=TRUE>>=
+deg = rn[tt$table$FDR < .05]
+plotSmear(d, de.tags=deg)
+@
+\caption{Create a graphical summary, such as an M (log-fold change) versus A (log-average expression) plot, here showing the genes selected as differentially expressed with a 5\% false discovery rate. There were 406 in this dataset of W versus F.}
+\label{plotSmear}
+\end{figure}
+
+<<>>=
+# Would save file
+# write.csv(tt$table, file="toptags_edgeR_UR.csv")
+@
+
+<<>>=
+########## Is there any step in the edgeR package where genes are eliminated for low mean and/or stdev read counts? ##########
+# 74517
+d2 <- DGEList(counts=countTable[,2:ncol(countTable)])
+
+# Keep gene names
+rownames(d2) <- countTable[,1]
+
+# 36344 - In edgeR, it is recommended to remove features without at least 1 read per million in n of the samples, where n is the size of the smallest group of replicates. Also, should filter on CPM!
+mil <- ceiling(min(d2[[2]]$lib.size)/1000000)
+d2 <- d2[rowSums(d2$counts)>=mil*ncol(d2)/4,]
+
+# Now positive and negative, and much smaller values
+cpm.d2.new <- cpm(d2, TRUE, TRUE)
+cpm.d2.norm <- betweenLaneNormalization(cpm.d2.new, which="full", round=FALSE)
+d2 = cpm.d2.norm
+
+RowSD = function(x) {
+  sqrt(rowSums((x - rowMeans(x))^2)/(dim(x)[2] - 1))
+}
+
+d2t = d2
+d2 = as.data.frame(d2t)
+d2 = mutate(d2, mean = (R.1+R.2+R.3+R.4+U.1+U.2+U.3+U.4+F.1+F.2+F.3+F.4+W.1+W.2+W.3+W.4)/ncol(d2), stdev = RowSD(cbind(R.1,R.2,R.3,R.4,U.1,U.2,U.3,U.4,F.1,F.2,F.3,F.4,W.1,W.2,W.3,W.4)))
+rownames(d2)=rownames(d2t)
+
+# The first quartile threshold of mean counts across the 5 samples
+q1T = as.numeric(summary(d2$mean)["1st Qu."])
+# (27257, 18)
+d2q1 = subset(d2,mean>q1T)
+# The first quartile threshold of standard deviation across the 5 samples
+q1Ts = as.numeric(summary(d2q1$stdev)["1st Qu."])
+# (20443, 18)
+d2q1 = subset(d2q1,stdev>q1Ts)
+# filt (15901, 18) These are genes filtered because in bottom quartile of means and stdevs
+filt = subset(d2,mean<=q1T|stdev<=q1Ts)
+
+model = loess(mean ~ stdev, data=d2q1)
+# (8578, 18)
+d2q1 = d2q1[which(sign(model$residuals) == 1),]
+colnames(filt)=colnames(d2q1)
+filt = filt[,1:(ncol(filt)-2)]
+d2q1 = d2q1[,1:(ncol(d2q1)-2)]
+# filt (27766, 16) - Now inclused genes fitlered because in bottom quartile of means and stdevs, and negative residuals
+filt = rbind(filt,d2q1[which(sign(model$residuals) == -1),])
+
+d2q1s = t(apply(as.matrix(d2q1), 1, scale))
+colnames(d2q1s)=colnames(d2q1)
+@
+
+\begin{figure}[H]
+\centering
+<<fig=TRUE, echo=TRUE>>=
+ggparcoord(d2q1, columns=1:ncol(d2q1), alphaLines=0, boxplot=TRUE, scale="globalminmax") + coord_flip() + scale_y_log10()
+@
+\caption{This is d2q1. Looks better than d2q1s.png}
+\label{Boxd2q1}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+<<fig=TRUE, echo=TRUE>>=
+d2q1s_Plot = as.data.frame(d2q1s)
+ggparcoord(d2q1s_Plot, columns=1:ncol(d2q1s_Plot), alphaLines=0, boxplot=TRUE, scale="globalminmax") + scale_y_log10() + coord_flip()
+@
+\caption{This is d2q1s. Does not look as good as d2q1.png}
+\label{Boxd2q1s}
+\end{figure}
+
+<<eval=FALSE>>=
+#### Print pairwise scat matrix
+dev.off()
+
+makeScat = function(type1, type2){
+  myCol = c(grep(type1, colnames(d2q1)), grep(type2, colnames(d2q1)))
+  jpeg(file = paste(getwd(), "/", type1, "_", type2, "_ALPHA10.jpg", sep=""), height = 700, width = 700)
+  print(scatmat(d2q1, columns=myCol, alpha = 0.01))
+  dev.off()
+  jpeg(file = paste(getwd(), "/", type1, "_", type2, "_ALPHA7.jpg", sep=""), height = 700, width = 700)
+  print(scatmat(d2q1, columns=myCol, alpha = 0.007))
+  dev.off()
+  jpeg(file = paste(getwd(), "/", type1, "_", type2, "_ALPHA3.jpg", sep=""), height = 700, width = 700)
+  print(scatmat(d2q1, columns=myCol, alpha = 0.003))
+  dev.off()
+  jpeg(file = paste(getwd(), "/", type1, "_", type2, "_ALPHA1.jpg", sep=""), height = 700, width = 700)
+  print(scatmat(d2q1, columns=myCol, alpha = 0.001))
+  dev.off()
+}
+
+makeScat("R","U")
+makeScat("F","W")
+@
+
+<<>>=
+############ Significance testing for normalized no NU.3 ###########
+# estimate normalization factors
+listcond = rep(c("U","R","F","W"), each = 4)
+
+# Get 8578 genes and return their raw values (right now they are already logged and normalized with betweenLaneNormalization which cannot be used for DEG)
+d3 = countTable[which(countTable[,1] %in% rownames(d2q1)),]
+d3 = DGEList(counts=d3[2:ncol(d3)], group=listcond)
+@
+
+\begin{figure}[H]
+\centering
+<<fig=TRUE, echo=TRUE>>=
+ggparcoord(data.frame(d3[[1]]), columns=1:16, alphaLines=0, boxplot=TRUE, scale="globalminmax") + coord_flip()
+@
+\caption{Boxplot of all samples. F1. and U.2 have some large outliers.}
+\label{BoxAll}
+\end{figure}
+
+<<eval=FALSE>>=
+scatmat(d3, columns=myCol, alpha = 0.01)
+@
+
+<<>>=
+d3 = calcNormFactors(d3)
+@
+
+
+
+
+\begin{figure}[H]
+\centering
+<<fig=TRUE, echo=TRUE>>=
+plotMDS(d3, labels=colnames(d3), col = c("red","orange","green","blue","purple")[factor(listcond)])
+@
+\caption{MDS plot. F.4 and W.2 away from rest.}
+\label{MDS-NONU3}
+\end{figure}
+
+<<>>=
+# Estimate tagwise dispersion
+d3 = estimateCommonDisp(d3)
+d3 = estimateTagwiseDisp(d3)
+@
+
+\begin{figure}[H]
+\centering
+<<fig=TRUE, echo=TRUE>>=
+plotMeanVar(d, show.tagwise.vars=TRUE, NBline=TRUE)
+@
+\caption{MDS plot.}
+\label{MeanVarPlot-NONU3}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+<<fig=TRUE, echo=TRUE>>=
+plotBCV(d)
+@
+\caption{MDS plot.}
+\label{BCV-NONU3}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+<<fig=TRUE, echo=TRUE>>=
+ggparcoord(d3[[1]], columns=1:ncol(d3), alphaLines=0, boxplot=TRUE, scale="globalminmax") + coord_flip() + scale_y_log10()
+@
+\caption{This is d2q1. Looks better than d2q1s.png}
+\label{Boxd2q1}
+\end{figure}
+
+\end{document}

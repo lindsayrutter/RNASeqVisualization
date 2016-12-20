@@ -37,9 +37,10 @@ getLineups <- function(countTable, nRep, nPerm, outDir, indScale=FALSE){
   for(i in 1:nPerm){
     y = DGEList(counts=countTable[,c(allComb[i,]+1)], group=listCond)
     rownames(y[[1]]) <- countTable[,1]
-    keep <- rowSums(cpm(y)>3) >= nRep
+    keep <- rowSums(cpm(y)>ceiling(min(y$samples$lib.size)/10000000)) >= nRep
     y <- y[keep, keep.lib.sizes=FALSE] # Option 1
     y$samples$lib.size <- colSums(y$counts)
+    y <- cpm(y, TRUE, TRUE) #added!
     y <- calcNormFactors(y) # Option 1
 
     #y <- y[keep,] # Option 2

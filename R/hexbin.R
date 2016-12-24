@@ -41,5 +41,14 @@ p <- ggplot(bindata, aes(x=x, y=y)) + geom_hex()
 # ggplot(bindata, aes(x=x, y=y)) + geom_hex() + facet_wrap(~factor)
 ggplotly(p)
 
+#################################################################
+#making scatterplot matrix interactive
+library(GGally)
+#data(flea)
+#p <- ggpairs(flea[2:7])
+dat = mtcars[,1:4]
+p <- ggpairs(dat)
+ggplotly(p)
 
+p <- ggplot(dat[,1:2], aes(x=x, y=y)) + geom_hex()
 

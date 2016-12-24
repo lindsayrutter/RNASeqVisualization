@@ -46,7 +46,7 @@ ggplotly(p)
 library(GGally)
 #data(flea)
 #p <- ggpairs(flea[2:7])
-dat = mtcars[,1:4]
+dat = mtcars[,1:3]
 p <- ggpairs(dat)
 ggplotly(p)
 

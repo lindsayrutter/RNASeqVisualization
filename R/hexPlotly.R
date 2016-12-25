@@ -29,6 +29,25 @@ ggplot(hexdf, aes(x=x, y=y, fill = counts)) + geom_hex(stat="identity") + facet_
 hexdf$counts [hexdf$counts == 0] <- NA
 ggplot(hexdf, aes(x=x, y=y, fill = counts)) + geom_hex(stat="identity") + facet_wrap(~factor) + coord_equal () + scale_fill_continuous (low = "grey80", high = "#000040", na.value = "#00000000")
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+###########################################################
+
 # Can do ggplotly(p)
 
 # This strategy works as long as the binwidths are correct without facetting. If the binwidths are set very small, the resolution may still yield too large dx and dy. In that case, we can supply hexGrob with two adjacent bins (but differing in both x and y) with NA counts for each facet.

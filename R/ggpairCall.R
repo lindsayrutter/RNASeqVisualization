@@ -1,3 +1,20 @@
+# Making scatterplot matrix interactive
+library(GGally)
+dat = mtcars[,1:3]
+#p <- ggpairs(dat)
+#ggplotly(p)
+
+my_fn <- function(data, mapping, ...){
+  p <- ggplot(data = data, mapping = mapping) + geom_hex(...)
+  p
+}
+p <- ggpairs(dat, lower = list(continuous = my_fn))
+ggplotly(p)
+
+
+
+
+####################################################################
 data = dat;
 mapping = NULL;
 columns = 1:ncol(data);

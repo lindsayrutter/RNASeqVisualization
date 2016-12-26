@@ -50,5 +50,10 @@ dat = mtcars[,1:3]
 p <- ggpairs(dat)
 ggplotly(p)
 
+my_fn <- function(data, mapping, ...){
+  p <- ggplot(data = data, mapping = mapping) + geom_hex(...)
+  p
+}
+ggpairs(dat, lower = list(continuous = my_fn))
 p <- ggplot(dat[,1:2], aes(x=x, y=y)) + geom_hex()
 

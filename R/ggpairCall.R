@@ -125,8 +125,23 @@ ggplotly(p)
 
 # Zoom in one subplot
 datSub <- select(data, p2, p3)
-p2 <- ggplot(data = datSub, aes(p2, p3)) + geom_hex(binwidth=1)
-ggplotly(p2)
+p2 <- ggplot(data = datSub, aes(p2, p3)) + geom_hex(binwidth=1) + geom_abline(intercept = 0, color = "red", size = 1)
+p3 <- ggplotly(p2)
+
+
+
+#add_segments(x = 0, xend = 12, y = 0, yend = 12, showlegend = FALSE, line = list(color='#000000'))
+
+
+
+
+
+p <- plot_ly(diamonds[1:1000, ], x = ~x, y = ~cut, color = ~color) %>% add_bars()
+p <- layout(p, shapes = list(type = "line", fillcolor = "red",
+                             line = list(color = "red"),
+                             opacity = 1,
+                             x0 = 3, x1 = 3, xref = 'x',
+                             y0 = -0.5, y1 = 4.5, yref = 'y'))
 
 ####################################################################
 data = dat;

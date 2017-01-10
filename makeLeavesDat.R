@@ -88,4 +88,8 @@ dat3 = data[which(data$cluster ==3),]
 data = rbind(dat2, dat3, dat1)
 data$cluster = factor(data$cluster)
 levels(data$cluster) = c(colList)
+
+setDT(data, keep.rownames = TRUE)[]
+colnames(data) <- c("ID","M.1","M.2","M.3","P.1","P.2","P.3","cluster")
+
 save(data,file="leavesDat.Rda")

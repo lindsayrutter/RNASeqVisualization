@@ -4,8 +4,6 @@ library(GGally)
 library(ggplot2)
 library(plotly)
 dat = mtcars[,1:3]
-#p <- ggpairs(dat)
-#ggplotly(p)
 
 p <- ggpairs(dat)
 ggplotly(p)
@@ -118,7 +116,7 @@ levels(data$cluster) = c(colList)
 p <- scatmat(data, columns=1:6, color="cluster") + scale_alpha(trans = reverse) + scale_color_manual(values = levels(data$cluster), labels = c("Clusters 1-2","Cluster 3")) + theme(legend.position=c("bottom"), legend.text=element_text(size=12)) + ggtitle("L120 Replicates Fe+/-") +theme(legend.title=element_blank())
 
 my_fn <- function(data, mapping, ...){
-  p <- ggplot(data = data, mapping = mapping) + geom_point(aes(alpha=-variableB) + geom_abline(intercept = 0, color = "red", size = 0.25)
+  p <- ggplot(data = data, mapping = mapping) + geom_point(aes(alpha=-variableB)) + geom_abline(intercept = 0, color = "red", size = 0.25)
   p
 }
 
@@ -129,8 +127,27 @@ my_fn <- function(data, mapping, ...){
 }
 colnames(data) <- c("m1","m2","m3","p1","p2","p3","cluster")
 p <- ggpairs(data[,1:6], lower = list(continuous = my_fn))
-ggplotly(p)
+pp <- ggplotly(p)
 
+# Remove interactivity in diagonal
+for (x in c(1,4,5,7:9)) pp$x$data[[x]]$hoverinfo <- "none"
+pp
+
+# Can erase diagonal, but does not seem to speed up and looks weird
+ggpairs(data[,2:7], lower = list(continuous = my_fn), diag = NULL)
+
+# Get x=y on same scale across individual plots
+p <- ggpairs(data[,2:7], lower = list(continuous = my_fn))
+myMax = max(data[,2:7])
+myMin = 0
+pS <- p
+for(i in 2:p$nrow) {
+  for(j in 1:(i-1)) {
+    pS[i,j] <- p[i,j] +
+      scale_x_continuous(limits = c(myMin, myMax)) +
+      scale_y_continuous(limits = c(myMin, myMax))
+  }
+}
 
 # Zoom in one subplot
 datSub <- select(data, p2, p3, cluster)
@@ -158,9 +175,9 @@ p3 <- ggplotly(p2)
 
 #####################################################################
 
-plt<- ggplot(hives,aes(x=Temp,y=Humidity)) + geom_hex(bins=20) 
+plt<- ggplot(hives,aes(x=Temp,y=Humidity)) + geom_hex(bins=20)
 plt + facet_grid( ~ Hive)
-ggplotly() 
+ggplotly()
 
 
 

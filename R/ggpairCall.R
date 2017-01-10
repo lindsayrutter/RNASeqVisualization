@@ -1,3 +1,4 @@
+#############################################
 # Making scatterplot matrix interactive
 library(GGally)
 library(ggplot2)
@@ -5,6 +6,9 @@ library(plotly)
 dat = mtcars[,1:3]
 #p <- ggpairs(dat)
 #ggplotly(p)
+
+p <- ggpairs(dat)
+ggplotly(p)
 
 my_fn <- function(data, mapping, ...){
   #p <- ggplot(data = data, mapping = mapping) + geom_hex(bins=3)
@@ -107,30 +111,66 @@ data = rbind(dat2, dat3, dat1)
 data$cluster = factor(data$cluster)
 levels(data$cluster) = c(colList)
 
-scatmat(data, columns=1:6, color="cluster") + scale_color_manual(values = levels(data$cluster), labels = c("Clusters 1-2","Cluster 3")) + theme(legend.position=c("bottom"), legend.text=element_text(size=12)) + ggtitle("L120 Replicates Fe+/-") +theme(legend.title=element_blank())
+
+
+# If try to do ggplotly(p) here, just get rainbow circle. Way too much data!
+# Problem with adding alpha = 0.01 (scatmat(data, columns=1:6, color="cluster", alpha = 0.01)) is that it makes the outliers very light
+p <- scatmat(data, columns=1:6, color="cluster") + scale_alpha(trans = reverse) + scale_color_manual(values = levels(data$cluster), labels = c("Clusters 1-2","Cluster 3")) + theme(legend.position=c("bottom"), legend.text=element_text(size=12)) + ggtitle("L120 Replicates Fe+/-") +theme(legend.title=element_blank())
+
+my_fn <- function(data, mapping, ...){
+  p <- ggplot(data = data, mapping = mapping) + geom_point(aes(alpha=-variableB) + geom_abline(intercept = 0, color = "red", size = 0.25)
+  p
+}
 
 my_fn <- function(data, mapping, ...){
   #p <- ggplot(data = data, mapping = mapping) + geom_hex(...)
-  p <- ggplot(data = data, mapping = mapping) + geom_hex(binwidth=1)
+  p <- ggplot(data = data, mapping = mapping) + geom_hex(binwidth=1) + geom_abline(intercept = 0, color = "red", size = 0.25)
   p
 }
 colnames(data) <- c("m1","m2","m3","p1","p2","p3","cluster")
 p <- ggpairs(data[,1:6], lower = list(continuous = my_fn))
 ggplotly(p)
 
-# Zoom in one subplot
-datSub <- select(data, m2, m3)
-p <- ggplot(data = datSub, aes(m2, m3)) + geom_hex(binwidth=1)
-ggplotly(p)
 
 # Zoom in one subplot
-datSub <- select(data, p2, p3)
-p2 <- ggplot(data = datSub, aes(p2, p3)) + geom_hex(binwidth=1) + geom_abline(intercept = 0, color = "red", size = 1)
+datSub <- select(data, p2, p3, cluster)
+
+# Regular
+#p2 <- ggplot(data = datSub, aes(p2, p3)) + geom_hex(binwidth=0.5) + geom_abline(intercept = 0, color = "red", size = 1)
+
+# Split each bin in half, and keep count color on same scale regardless of group
+#p2 <- ggplot(data = datSub, aes(p2, p3, group=cluster)) + geom_hex(binwidth=0.5) + geom_abline(intercept = 0, color = "red", size = 1)
+
+# Lose count information, separate bins into two separate colors
+#p2 <- ggplot(data = datSub, aes(p2, p3, fill=cluster)) + geom_hex(binwidth=0.5) + geom_abline(intercept = 0, color = "red", size = 1)
+
+# Pretty good, has both counts and groups are entirely separate. If change bandwith=1, then have no hover information
+#p2 <- ggplot(data = datSub, aes(p2, p3, colour=cluster)) + geom_hex(binwidth=1) + geom_abline(intercept = 0, color = "red", size = 1)
+
+# Lose count information
+#p2 <- ggplot(data = datSub, aes(p2, p3, fill=cluster, colour=cluster)) + geom_hex(binwidth=1) + geom_abline(intercept = 0, color = "red", size = 1)
+
+#p2 <- ggplot(data = datSub, aes(p2, p3, alpha=cluster)) + geom_hex(binwidth=0.5) + geom_abline(intercept = 0, color = "red", size = 1)
+
+#p2 <- ggplot(data = datSub, aes(p2, p3, alpha=cluster)) + geom_hex(binwidth=0.5) + geom_abline(intercept = 0, color = "red", size = 1)
+
 p3 <- ggplotly(p2)
 
+#####################################################################
+
+plt<- ggplot(hives,aes(x=Temp,y=Humidity)) + geom_hex(bins=20) 
+plt + facet_grid( ~ Hive)
+ggplotly() 
 
 
-#add_segments(x = 0, xend = 12, y = 0, yend = 12, showlegend = FALSE, line = list(color='#000000'))
+
+
+
+
+
+
+
+
 
 
 

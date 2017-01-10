@@ -3,7 +3,6 @@ library(plotly)
 library(data.table)
 library(dplyr)
 library(tidyr)
-
 library(rtracklayer)
 library(Rsamtools)
 library(grid)

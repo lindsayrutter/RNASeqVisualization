@@ -23,7 +23,9 @@ colnames (counts)  <- c ("ID", "factor", "counts")
 hexdf <- data.frame (hcell2xy (h),  ID = h@cell)
 hexdf <- merge (counts, hexdf)
 
-ggplot(hexdf, aes(x=x, y=y, fill = counts)) + geom_hex(stat="identity") + facet_wrap(~factor) + coord_equal () + scale_fill_continuous (low = "grey80", high = "#000040", na.value = "#00000000")
+p <- ggplot(hexdf, aes(x=x, y=y, fill = counts)) + geom_hex(stat="identity") + facet_wrap(~factor) + coord_equal () + scale_fill_continuous (low = "grey80", high = "#000040", na.value = "#00000000")
+
+ggplotly(p)
 
 # This yields the correct bin sizes, but the figure has a bit weird appearance: 0 count hexagons are drawn, but only where some other facet has this bin populated. To suppres the drawing, we can set the counts there to NA and make the na.value completely transparent (it defaults to grey50)
 hexdf$counts [hexdf$counts == 0] <- NA
@@ -70,4 +72,20 @@ ggplotly(p) # doesn't work (ggplotly can't work for trellis)
 #######################################################
 p <- ggplot(bindata, aes(x=x, y=y, group=factor)) + facet_wrap(~factor) + stat_bin2d(binwidth=c(0.6, 0.6))
 ggplotly(p)
+
+#######################################################
+set.seed(100)
+d <- diamonds[sample(nrow(diamonds), 1000), ]
+
+p <- ggplot(data = d, aes(x = carat, y = price)) + 
+  geom_point(size = 1) +
+  facet_wrap(~ cut)
+ggplotly(p)
+
+p <- ggplot(hexdf, aes(x=x, y=y, fill = counts)) +
+  geom_hex(stat="identity") +
+  facet_wrap(~factor)
+
+(gg <- ggplotly(p))
+
 

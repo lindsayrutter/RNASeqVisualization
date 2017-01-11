@@ -4,6 +4,6 @@ library(data.table)
 
 ui <- fluidPage(
   plotlyOutput("plot"),
-  verbatimTextOutput("click"),
-  plotlyOutput("plot2")
+  verbatimTextOutput("click")
+  #plotlyOutput("plot2")
 )

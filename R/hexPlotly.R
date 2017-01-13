@@ -32,22 +32,6 @@ hexdf$counts [hexdf$counts == 0] <- NA
 ggplot(hexdf, aes(x=x, y=y, fill = counts)) + geom_hex(stat="identity") + facet_wrap(~factor) + coord_equal () + scale_fill_continuous (low = "grey80", high = "#000040", na.value = "#00000000")
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ###########################################################
 
 # Can do ggplotly(p)

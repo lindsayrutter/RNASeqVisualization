@@ -1,5 +1,4 @@
 library(shiny)
-library(dplyr)
 
 ui <- basicPage(
   plotOutput("plot1", click = "plot_click"),
@@ -7,9 +6,10 @@ ui <- basicPage(
 )
 
 server <- function(input, output) {
-  myData <-
+  data <- select(mtcars,wt,mpg,qsec)
+
   output$plot1 <- renderPlot({
-    qplot(mtcars$wt, mtcars$mpg)
+    ggpairs(data)
   })
 
   output$info <- renderText({

@@ -1,4 +1,4 @@
-# This app is for one plot with geom_hex, where eucliden distance and nearPoints() is used to determine the obervations that fall in a hex of interest
+# This app is for ggpairs with geom_hex, where eucliden distance and nearPoints() is used to determine the obervations that fall in a hex of interest
 
 library(fields)
 library(dplyr)
@@ -10,13 +10,19 @@ ui <- basicPage(
 
 server <- function(input, output) {
 
-  p <- ggplot(mtcars, aes(x=wt, y=mpg)) + geom_hex()
+  dat <-select(mtcars,wt,mpg,hp)
+
+  my_fn <- function(data, mapping, ...){
+    p <- ggplot(data = dat, mapping = mapping) + geom_hex(binwidth=3)
+    p
+  }
+  p <- ggpairs(dat, lower = list(continuous = my_fn))
 
   output$plot1 <- renderPlot({
     p
   })
 
-  pB <- ggplot_build(p)
+  pB <- ggplot_build(p$plots[[4]])
   B = as.matrix(select(pB$data[[1]],x,y),ncol=2)
 
   hexInd = c()

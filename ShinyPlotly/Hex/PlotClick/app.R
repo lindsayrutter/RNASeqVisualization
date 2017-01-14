@@ -1,3 +1,5 @@
+library(shiny)
+
 ui <- basicPage(
   plotOutput("plot1", click = "plot_click"),
   verbatimTextOutput("info")
@@ -8,8 +10,8 @@ server <- function(input, output) {
     plot(mtcars$wt, mtcars$mpg)
   })
 
-  output$info <- renderPrint({
-    nearPoints(mtcars, input$plot_click, xvar = "wt", yvar = "mpg")
+  output$info <- renderText({
+    paste0("x=", input$plot_click$x, "\ny=", input$plot_click$y)
   })
 }
 

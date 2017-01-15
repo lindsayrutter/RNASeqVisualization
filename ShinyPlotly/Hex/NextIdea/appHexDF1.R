@@ -22,20 +22,21 @@ server <- function(input, output, session) {
 
   h <- hexbin (bindata, xbins = 5, IDs = TRUE, xbnds = range (bindata$x), ybnds = range (bindata$y))
 
-  counts <- hexTapply (h, bindata$factor, table)
-  counts <- t (simplify2array (counts))
-  counts <- melt (counts)
+  #counts <- hexTapply (h, bindata$factor, table)
+  #counts <- t (simplify2array (counts))
+  #counts <- melt (counts)
   # Each of the 20 facets has 26 IDs (with values between 3 and 40) (20*26=520)
   # Counts between 0 and 5
-  colnames (counts)  <- c ("ID", "factor", "counts")
+  #colnames (counts)  <- c ("ID", "factor", "counts")
 
   # As we have the cell IDs, we can merge this data.frame with the proper coordinates
-  hexdf <- data.frame (hcell2xy (h),  ID = h@cell)
-  hexdf <- merge (counts, hexdf)
+  hexdf <- data.frame (hcell2xy (h),  ID = h@cell, counts = h@count)
+  #hexdf <- merge (counts, hexdf)
   # ggplotting (use the command below) this yields the correct bin sizes, but the figure has a bit weird appearance: 0 count hexagons are drawn, but only where some other facet has this bin populated.
-  hexdf$counts [hexdf$counts == 0] <- NA
+  #hexdf$counts [hexdf$counts == 0] <- NA
+  #hexdf$counts <- h@count
 
-  p <- ggplot(hexdf, aes(x=x, y=y, fill = counts)) + geom_hex(stat="identity") + facet_wrap(~factor) + coord_equal () + scale_fill_continuous (low = "grey80", high = "#000040", na.value = "#00000000")
+  p <- ggplot(hexdf, aes(x=x, y=y, fill = counts)) + geom_hex(stat="identity")
 
   output$plot <- renderPlotly({
     ggplotly(p)

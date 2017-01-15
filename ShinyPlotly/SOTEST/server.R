@@ -1,6 +1,6 @@
 library(shiny)
 library(plotly)
-library(data.table)
+library(dtplyr)
 
 server <- function(input, output, session) {
 

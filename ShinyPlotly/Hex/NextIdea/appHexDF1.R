@@ -27,10 +27,15 @@ server <- function(input, output, session) {
   h <- hexbin (bindata, xbins = 5, IDs = TRUE, xbnds = range (bindata$x), ybnds = range (bindata$y))
   hexdf <- data.frame (hcell2xy (h),  ID = h@cell, counts = h@count)
   p <- ggplot(hexdf, aes(x=x, y=y, fill = counts, ID=ID)) + geom_hex(stat="identity")
+  #p <- ggplot(hexdf, aes(x=x, y=y, fill = counts), ID=ID) + geom_hex(stat="identity")
   cnID <- cnToID(h)
 
   output$plot <- renderPlotly({
-    ggplotly(p)
+    p2 <- ggplotly(p)
+    for (i in 1:nrow(hexdf)){
+      p2$x$data[[i]]$text <- gsub("<.*$", "", p2$x$data[[i]]$text)
+    }
+    p2
   })
 
   d <- reactive(event_data("plotly_click"))

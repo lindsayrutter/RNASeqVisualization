@@ -11,21 +11,23 @@ ui <- fluidPage(
 )
 
 server <- function(input, output, session) {
-  #Create data
+
+  # Curve number to ID
+  cnToID <- function(h){
+    df <- data.frame(table(h@cID))
+    colnames(df) <- c("ID","count")
+    cnID <- df[order(df$count,as.character(df$ID)),]
+    cnID$curveNumber <- seq(0, nrow(cnID)-1)
+    return(cnID)
+  }
+
+  # Create data
   set.seed(1)
   bindata <- data.frame(x=rnorm(100), y=rnorm(100))
-
   h <- hexbin (bindata, xbins = 5, IDs = TRUE, xbnds = range (bindata$x), ybnds = range (bindata$y))
-
-  # As we have the cell IDs, we can merge this data.frame with the proper coordinates
   hexdf <- data.frame (hcell2xy (h),  ID = h@cell, counts = h@count)
-
-  # I have tried different methods of generating the ggplot object
-  #p <- ggplot(hexdf, aes(x=x, y=y, fill = counts)) + geom_hex(stat="identity")
-  #p <- ggplot(hexdf, aes(x=x, y=y, fill = ID)) + geom_hex(stat="identity")
-  #p <- ggplot(hexdf, aes(x=x, y=y, fill = counts, colours = ID)) + geom_hex(stat="identity")
-  #p <- ggplot(hexdf, colours = ID, aes(x=x, y=y, colours = ID, fill = counts)) + geom_hex(stat="identity")
   p <- ggplot(hexdf, aes(x=x, y=y, fill = counts, ID=ID)) + geom_hex(stat="identity")
+  cnID <- cnToID(h)
 
   output$plot <- renderPlotly({
     ggplotly(p)
@@ -38,9 +40,9 @@ server <- function(input, output, session) {
       "Click on a state to view event data"
     }
     else{
-      str(d())
-      #Next line would deliver all observations from original data frame (bindata) that are in the clicked hexbin... if d() from event_data() was returning ID instead of curveNumber
-      #bindata[which(h@cID==d()$curveNumber),]
+      clickID <- as.numeric(as.character(cnID[which(cnID$curveNumber==d()$curveNumber),]$ID))
+      clickID
+      bindata[which(h@cID==clickID),]
     }
   })
 }

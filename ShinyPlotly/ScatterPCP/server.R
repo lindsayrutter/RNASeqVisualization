@@ -33,11 +33,10 @@ server <- function(input, output, session) {
   datt <- datt[-1, ]
   datt[] <- lapply(datt, function(x) type.convert(as.character(x)))
   setDT(datt, keep.rownames = TRUE)[]
-  colnames(datt)[1] <- "x"
-  dat_long <- melt(datt, id.vars ="x" )
+  dat_long <- melt(datt, id.vars ="rn" )
 
   output$plot2 <- renderPlotly({
-    plot_ly(dat_long[dat_long$variable %in% dat[(d()$pointNumber+1),]$ID,], x= ~x, y= ~value, type = 'scatter', mode = 'lines+markers', color = ~variable)  %>% layout(dragmode="box", showlegend = FALSE)
+    plot_ly(dat_long[dat_long$variable %in% dat[(d()$pointNumber+1),]$ID,], x= ~rn, y= ~value, type = 'scatter', mode = 'lines+markers', color = ~variable)  %>% layout(dragmode="box", showlegend = FALSE)
   })
 
 }

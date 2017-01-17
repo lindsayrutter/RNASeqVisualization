@@ -8,6 +8,8 @@ library(hexbin)
 ui <- fluidPage(
   plotlyOutput("plot"),
   verbatimTextOutput("click")
+  # HTML("Check the work:"),
+  # plotlyOutput("plot1")
 )
 
 server <- function(input, output, session) {
@@ -27,7 +29,6 @@ server <- function(input, output, session) {
   h <- hexbin (bindata, xbins = 5, IDs = TRUE, xbnds = range (bindata$x), ybnds = range (bindata$y))
   hexdf <- data.frame (hcell2xy (h),  ID = h@cell, counts = h@count)
   p <- ggplot(hexdf, aes(x=x, y=y, fill = counts, ID=ID)) + geom_hex(stat="identity")
-  #p <- ggplot(hexdf, aes(x=x, y=y, fill = counts), ID=ID) + geom_hex(stat="identity")
   cnID <- cnToID(h)
 
   output$plot <- renderPlotly({
@@ -46,10 +47,22 @@ server <- function(input, output, session) {
     }
     else{
       clickID <- as.numeric(as.character(cnID[which(cnID$curveNumber==d()$curveNumber),]$ID))
-      clickID
-      bindata[which(h@cID==clickID),]
+      #clickID
+      clickHex <- bindata[which(h@cID==clickID),]
+      clickHex
     }
   })
-}
+
+  # output$plot1 <- renderPlot({
+  #   clickID <- as.numeric(as.character(cnID[which(cnID$curveNumber==d()$curveNumber),]$ID))
+  #   clickHex <- bindata[which(h@cID==clickID),]
+  #
+  #   #Check your work: plot raw data over hexagons
+  #   p.check <- ggplot(hexdf, aes(x=x, y=y, fill = counts)) + geom_hex(stat="identity") +
+  #     geom_point(data = clickHex, aes(x=x, y=y)) + coord_equal()
+  #   ggplotly(p.check)# + aes(label= myIndex) )
+  # })
+
+  }
 
 shinyApp(ui, server)

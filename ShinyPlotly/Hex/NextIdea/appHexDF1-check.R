@@ -9,7 +9,8 @@ ui <- fluidPage(
   checkboxInput("squarePoints", label = "Switch to points?"),
   verbatimTextOutput("click"),
   HTML("Check the work:"),
-  plotlyOutput("plot1")
+  plotOutput("plot0")
+  #plotlyOutput("plot1")
 )
 
 server <- function(input, output, session) {
@@ -76,6 +77,10 @@ server <- function(input, output, session) {
   #Check your work: plot raw data over hexagons
   p.check <- ggplot(hexdf, aes(x=x, y=y, fill = counts)) + geom_hex(stat="identity") +
     geom_point(data = somehex, aes(x=x, y=y)) + coord_equal()
+
+  output$plot0 <- renderPlot({
+    p.check
+  })
 
   output$plot1 <- renderPlotly({
     ggplotly(p.check + aes(label= myIndex) )

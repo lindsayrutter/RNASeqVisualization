@@ -1,4 +1,4 @@
-# This script succesfully allows user to click on a geom_hex and obtain the observations from the original data frame that were in that geom_hex. Only for ONE plot.
+# SO question
 
 library(shiny)
 library(plotly)
@@ -9,10 +9,10 @@ library(hexbin)
 
 ui <- fluidPage(
   plotlyOutput("plot"),
-  verbatimTextOutput("click"),
-  # verbatimTextOutput("newDF"),
-  # verbatimTextOutput("newDF2"),
-  # plotlyOutput("plot2")
+  #verbatimTextOutput("click"),
+  verbatimTextOutput("newDF"),
+  verbatimTextOutput("newDF2"),
+  plotlyOutput("plot2")
 )
 
 server <- function(input, output, session) {
@@ -33,7 +33,7 @@ server <- function(input, output, session) {
   bindata$ID <- as.character(bindata$ID)
   h <- hexbin (bindata[,-1], xbins = 5, IDs = TRUE, xbnds = range (bindata$x), ybnds = range (bindata$y))
   hexdf <- data.frame (hcell2xy (h),  hexID = h@cell, counts = h@count)
-  p <- ggplot(hexdf, aes(x=x, y=y, fill = counts, hexID=hexID)) + geom_hex(stat="identity")s
+  p <- ggplot(hexdf, aes(x=x, y=y, fill = counts, hexID=hexID)) + geom_hex(stat="identity")
   cnID <- cnToID(h)
 
   p2 <- ggplotly(p)
@@ -76,19 +76,18 @@ server <- function(input, output, session) {
   dat_long <- melt(datt, id.vars ="rn" )
 
   output$newDF <- renderPrint({
-    #head(dat_long)
-    head(dat_long[dat_long$variable %in% bindata[(d()$pointNumber+1),]$ID,])
+    (dat_long[dat_long$variable %in% clickHex()$ID,])
   })
 
   output$newDF2 <- renderPrint({
     #str(dat_long)
-    str(dat_long[dat_long$variable %in% bindata[(d()$pointNumber+1),]$ID,])
+    str(dat_long[dat_long$variable %in% clickHex()$ID,])
   })
 
   output$plot2 <- renderPlotly({
-    plot_ly(dat_long[dat_long$variable %in% bindata[(d()$pointNumber+1),]$ID,], x= ~rn, y= ~value, type = 'scatter', mode = 'lines+markers', color = ~variable)  %>% layout(dragmode="box", showlegend = FALSE)
-   })
+    plot_ly(dat_long[dat_long$variable %in% clickHex()$ID,], x= ~rn, y= ~value, type = 'scatter', mode = 'lines+markers', color = ~variable)  %>% layout(dragmode="box", showlegend = FALSE)
+  })
 
-  }
+}
 
 shinyApp(ui, server)

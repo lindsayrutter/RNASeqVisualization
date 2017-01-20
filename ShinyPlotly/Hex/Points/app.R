@@ -18,6 +18,20 @@ server <- function(input, output, session) {
   ciVal = 0.5
 
   my_fn <- function(data, mapping, ...){
+    #x <- data[,c(as.character(mapping$x))]
+    #y <- data[,c(as.character(mapping$y))]
+    x <- data[,c("A")]
+    y <- data[,c("B")]
+    ggplot(data = data, aes(x=A,y=B)) + geom_point() + geom_abline(intercept = 0, color = "red", size = 0.25) + geom_abline(intercept = ciVal, color ="blue", size = 0.25) + geom_abline(intercept = -1*ciVal, color ="blue", size = 0.25)
+
+    df <- data.frame(x=x,y=y)
+
+    resid(lm(y-x-ciVal ~ 0))
+    resid(lm(y-x+ciVal ~ 0))
+    sign(resid(lm(y-x-ciVal ~ 0)))==1 | sign(resid(lm(y-x+ciVal ~ 0)))==-1
+
+    #p <- ggplot(data = data, x=A,y=B) + geom_point() + geom_abline(intercept = 0, color = "red", size = 0.25) + geom_abline(intercept = ciVal, color ="blue", size = 0.25) + geom_abline(intercept = -1*ciVal, color ="blue", size = 0.25)
+
     p <- ggplot(data = data, mapping = mapping) + geom_point() + geom_abline(intercept = 0, color = "red", size = 0.25) + geom_abline(intercept = ciVal, color ="blue", size = 0.25) + geom_abline(intercept = -1*ciVal, color ="blue", size = 0.25)
     p
   }

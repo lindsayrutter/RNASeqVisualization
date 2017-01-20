@@ -16,40 +16,41 @@ server <- function(input, output, session) {
   data <- dat
 
   ciVal = 0.5
+  myMax = max(data[,2:6])
+  myMin = min(data[,2:6])
 
   my_fn <- function(data, mapping, ...){
-    #x <- data[,c(as.character(mapping$x))]
-    #y <- data[,c(as.character(mapping$y))]
-    x <- data[,c("A")]
-    y <- data[,c("B")]
-    ggplot(data = data, aes(x=A,y=B)) + geom_point() + geom_abline(intercept = 0, color = "red", size = 0.25) + geom_abline(intercept = ciVal, color ="blue", size = 0.25) + geom_abline(intercept = -1*ciVal, color ="blue", size = 0.25)
+    x <- data[,c(as.character(mapping$x))]
+    y <- data[,c(as.character(mapping$y))]
+    keep <- sign(resid(lm(y-x-ciVal ~ 0)))==1 | sign(resid(lm(y-x+ciVal ~ 0)))==-1
+    df <- data.frame(x = x[keep], y = y[keep])
+    p <- ggplot(data = df, aes(x=x,y=y)) + geom_point(size=0.5) + geom_abline(intercept = 0, color = "red", size = 0.25) + geom_abline(intercept = ciVal, color ="blue", size = 0.25) + geom_abline(intercept = -1*ciVal, color ="blue", size = 0.25) + scale_x_continuous(limits = c(myMin, myMax)) + scale_y_continuous(limits = c(myMin, myMax))
+    p
+  }
 
-    df <- data.frame(x=x,y=y)
+  # Works okay
+  my_fn <- function(data, mapping, ...){
+    x <- data[,c(as.character(mapping$x))]
+    y <- data[,c(as.character(mapping$y))]
+    df <- data.frame(x,y)
+    p <- ggplot(data = df, aes(x=x,y=y)) + geom_point(size=0.5) #+ geom_abline(intercept = 0, color = "red", size = 0.25) + geom_abline(intercept = ciVal, color ="blue", size = 0.25) + geom_abline(intercept = -1*ciVal, color ="blue", size = 0.25) + scale_x_continuous(limits = c(myMin, myMax)) + scale_y_continuous(limits = c(myMin, myMax))
+    p
+  }
 
-    resid(lm(y-x-ciVal ~ 0))
-    resid(lm(y-x+ciVal ~ 0))
-    sign(resid(lm(y-x-ciVal ~ 0)))==1 | sign(resid(lm(y-x+ciVal ~ 0)))==-1
 
-    #p <- ggplot(data = data, x=A,y=B) + geom_point() + geom_abline(intercept = 0, color = "red", size = 0.25) + geom_abline(intercept = ciVal, color ="blue", size = 0.25) + geom_abline(intercept = -1*ciVal, color ="blue", size = 0.25)
-
-    p <- ggplot(data = data, mapping = mapping) + geom_point() + geom_abline(intercept = 0, color = "red", size = 0.25) + geom_abline(intercept = ciVal, color ="blue", size = 0.25) + geom_abline(intercept = -1*ciVal, color ="blue", size = 0.25)
+  # Works okay!
+  my_fn <- function(data, mapping, ...){
+    x <- data[,c(as.character(mapping$x))]
+    y <- data[,c(as.character(mapping$y))]
+    df <- data.frame(x,y)
+    p <- ggplot(data = df, aes(x=x,y=y)) + geom_point(size=0.5) + geom_abline(intercept = 0, color = "red", size = 0.25) + geom_abline(intercept = ciVal, color ="blue", size = 0.25) + geom_abline(intercept = -1*ciVal, color ="blue", size = 0.25) + scale_x_continuous(limits = c(myMin, myMax)) + scale_y_continuous(limits = c(myMin, myMax))
     p
   }
 
   p <- ggpairs(data[,2:6], lower = list(continuous = my_fn))
-  myMax = max(data[,2:6])
-  myMin = min(data[,2:6])
-  pS <- p
-  for(i in 2:p$nrow) {
-    for(j in 1:(i-1)) {
-      pS[i,j] <- p[i,j] +
-        scale_x_continuous(limits = c(myMin, myMax)) +
-        scale_y_continuous(limits = c(myMin, myMax))
-    }
-  }
 
   output$plot <- renderPlotly({
-    ggplotly(pS)
+    ggplotly(p)
   })
 
   d <- reactive(event_data("plotly_click"))

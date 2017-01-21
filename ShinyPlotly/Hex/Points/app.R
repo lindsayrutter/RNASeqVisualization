@@ -1,17 +1,20 @@
+# This script shows that deletion of points in the ggpairs causes the problem with squashing subplots together
+
 library(shiny)
 library(plotly)
 library(data.table)
 library(GGally)
 
 ui <- fluidPage(
-  plotlyOutput("plot"),
-  plotlyOutput("plot2"),
+  plotlyOutput("plot2", height = "300px"),
+  plotlyOutput("plot", height = "300px"),
   verbatimTextOutput("click")
 )
 
 server <- function(input, output, session) {
 
-  set.seed(1)
+  # If change to set.seed(2), then it starts working
+  set.seed(5)
   dat <- data.frame(ID = paste0("ID",1:10), A = runif(10), B = runif(10), C = runif(10), D = runif(10), E = runif(10))
   dat$ID <- as.character(dat$ID)
   data <- dat

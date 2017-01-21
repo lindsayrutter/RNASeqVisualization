@@ -22,7 +22,7 @@ server <- function(input, output, session) {
   ciVal = 0.5
   myMax = max(data[,2:6])
   myMin = min(data[,2:6])
-
+  myMid = (myMax-myMin)/2
 
   # Works okay!
   my_fn <- function(data, mapping, ...){
@@ -32,7 +32,7 @@ server <- function(input, output, session) {
     df <- data.frame(x = x[keep], y = y[keep])
 
     if (nrow(df)==0){
-      df <- data.frame(x = (myMax-myMin)/2, y = (myMax-myMin)/2)
+      df <- data.frame(x = myMid, y = myMid)
       p <- ggplot(data = df, aes(x=x,y=y)) + geom_point(size=0.5, alpha=0) + geom_abline(intercept = 0, color = "red", size = 0.25) + geom_abline(intercept = ciVal, color ="blue", size = 0.25) + geom_abline(intercept = -1*ciVal, color ="blue", size = 0.25)
     }
     else{
@@ -53,6 +53,23 @@ server <- function(input, output, session) {
         scale_y_continuous(limits = c(myMin, myMax))
     }
   }
+
+  ggPS$x$data2 <- lapply(ggPS$x$data, as.character)
+  which(ggPS$x$data[[seq(1,55,1)]]$marker$opacity==0)
+
+  which(sapply(ggPS$x$data, FUN=function(X) if (exists(marker))marker$opacity==0))
+
+  alpha0 = c()
+  myLength <- length(ggPS[["x"]][["data"]])
+  for (i in 1:myLength){
+    if (is.numeric(ggPS[["x"]][["data"]][[i]]$marker$opacity)){
+      if (ggPS[["x"]][["data"]][[i]]$marker$opacity==0){
+        alpha0 = c(alpha0,i)
+    }
+    }
+  }
+
+
 
   #bottomDig = sqrt(length(pS$plots))
 

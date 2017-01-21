@@ -5,6 +5,7 @@ library(GGally)
 
 ui <- fluidPage(
   plotlyOutput("plot"),
+  plotlyOutput("plot2"),
   verbatimTextOutput("click")
 )
 
@@ -19,25 +20,6 @@ server <- function(input, output, session) {
   myMax = max(data[,2:6])
   myMin = min(data[,2:6])
 
-  my_fn <- function(data, mapping, ...){
-    x <- data[,c(as.character(mapping$x))]
-    y <- data[,c(as.character(mapping$y))]
-    keep <- sign(resid(lm(y-x-ciVal ~ 0)))==1 | sign(resid(lm(y-x+ciVal ~ 0)))==-1
-    df <- data.frame(x = x[keep], y = y[keep])
-    p <- ggplot(data = df, aes(x=x,y=y)) + geom_point(size=0.5) + geom_abline(intercept = 0, color = "red", size = 0.25) + geom_abline(intercept = ciVal, color ="blue", size = 0.25) + geom_abline(intercept = -1*ciVal, color ="blue", size = 0.25) + scale_x_continuous(limits = c(myMin, myMax)) + scale_y_continuous(limits = c(myMin, myMax))
-    p
-  }
-
-  # Works okay
-  my_fn <- function(data, mapping, ...){
-    x <- data[,c(as.character(mapping$x))]
-    y <- data[,c(as.character(mapping$y))]
-    df <- data.frame(x,y)
-    p <- ggplot(data = df, aes(x=x,y=y)) + geom_point(size=0.5) #+ geom_abline(intercept = 0, color = "red", size = 0.25) + geom_abline(intercept = ciVal, color ="blue", size = 0.25) + geom_abline(intercept = -1*ciVal, color ="blue", size = 0.25) + scale_x_continuous(limits = c(myMin, myMax)) + scale_y_continuous(limits = c(myMin, myMax))
-    p
-  }
-
-
   # Works okay!
   my_fn <- function(data, mapping, ...){
     x <- data[,c(as.character(mapping$x))]
@@ -47,10 +29,25 @@ server <- function(input, output, session) {
     p
   }
 
+  # Doesn't work
+  my_fn2 <- function(data, mapping, ...){
+    x <- data[,c(as.character(mapping$x))]
+    y <- data[,c(as.character(mapping$y))]
+    keep <- sign(resid(lm(y-x-ciVal ~ 0)))==1 | sign(resid(lm(y-x+ciVal ~ 0)))==-1
+    df <- data.frame(x = x[keep], y = y[keep])
+    p2 <- ggplot(data = df, aes(x=x,y=y)) + geom_point(size=0.5) + geom_abline(intercept = 0, color = "red", size = 0.25) + geom_abline(intercept = ciVal, color ="blue", size = 0.25) + geom_abline(intercept = -1*ciVal, color ="blue", size = 0.25) + scale_x_continuous(limits = c(myMin, myMax)) + scale_y_continuous(limits = c(myMin, myMax))
+    p2
+  }
+
   p <- ggpairs(data[,2:6], lower = list(continuous = my_fn))
+  p2 <- ggpairs(data[,2:6], lower = list(continuous = my_fn2))
 
   output$plot <- renderPlotly({
     ggplotly(p)
+  })
+
+  output$plot2 <- renderPlotly({
+    ggplotly(p2)
   })
 
   d <- reactive(event_data("plotly_click"))

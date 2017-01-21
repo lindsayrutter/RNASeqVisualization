@@ -14,7 +14,7 @@ ui <- fluidPage(
 server <- function(input, output, session) {
 
   # If change to set.seed(2), then it starts working
-  set.seed(5)
+  set.seed(1)
   dat <- data.frame(ID = paste0("ID",1:10), A = runif(10), B = runif(10), C = runif(10), D = runif(10), E = runif(10))
   dat$ID <- as.character(dat$ID)
   data <- dat

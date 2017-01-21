@@ -1,4 +1,4 @@
-# This script shows that deletion of points in the ggpairs causes the problem with squashing subplots together (when interaction is involved)
+# This script shows that deletion of points in the ggpairs causes the problem with squashing subplots together (when interaction is involved). It is a problem if the bottom plot has no points left. In this script, the densities look strange because they are only plotted for x axis values where there are points
 
 library(shiny)
 library(plotly)
@@ -14,14 +14,14 @@ ui <- fluidPage(
 server <- function(input, output, session) {
 
   # If change to set.seed(2), then it starts working
-  set.seed(8)
-  dat <- data.frame(ID = paste0("ID",1:5), A = runif(5), B = runif(5), C = runif(5), D = runif(5))
+  set.seed(1)
+  dat <- data.frame(ID = paste0("ID",1:10), A = runif(10), B = runif(10), C = runif(10), D = runif(10), E = runif(10))
   dat$ID <- as.character(dat$ID)
   data <- dat
 
   ciVal = 0.5
-  myMax = max(data[,2:5])
-  myMin = min(data[,2:5])
+  myMax = max(data[,2:6])
+  myMin = min(data[,2:6])
 
   # Works okay!
   my_fn <- function(data, mapping, ...){
@@ -33,7 +33,7 @@ server <- function(input, output, session) {
     p
   }
 
-  p <- ggpairs(data[,2:5], lower = list(continuous = my_fn))
+  p <- ggpairs(data[,2:6], lower = list(continuous = my_fn))
 
   output$plot <- renderPlot({
     p

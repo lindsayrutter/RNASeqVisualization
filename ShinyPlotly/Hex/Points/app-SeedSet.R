@@ -1,4 +1,4 @@
-# This script shows that deletion of points in the ggpairs causes the problem with squashing subplots together (when interaction is involved). It is a problem if the bottom plot has no points left. In this script, the densities look strange because they are only plotted for x axis values where there are points
+# This script shows that deletion of points in the ggpairs causes the problem with squashing subplots together (when interaction is involved). It is a problem if the bottom plot has no points left. In this script, the densities look strange because they are only plotted for x axis values where there are points.
 
 library(shiny)
 library(plotly)

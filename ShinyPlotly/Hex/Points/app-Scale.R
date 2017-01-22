@@ -14,7 +14,7 @@ ui <- fluidPage(
 server <- function(input, output, session) {
 
   # If change to set.seed(2), then it starts working
-  set.seed(1)
+  set.seed(3)
   dat <- data.frame(ID = paste0("ID",1:10), A = runif(10), B = runif(10), C = runif(10), D = runif(10), E = runif(10))
   dat$ID <- as.character(dat$ID)
   data <- dat
@@ -31,6 +31,7 @@ server <- function(input, output, session) {
     keep <- sign(resid(lm(y-x-ciVal ~ 0)))==1 | sign(resid(lm(y-x+ciVal ~ 0)))==-1
     df <- data.frame(x = x[keep], y = y[keep])
 
+    # Create one alpha transparent point in a plot if it otherwise has no dataframe. This is needed to prevent the plots from squishing together.
     if (nrow(df)==0){
       df <- data.frame(x = myMid, y = myMid)
       p <- ggplot(data = df, aes(x=x,y=y)) + geom_point(size=0.5, alpha=0) + geom_abline(intercept = 0, color = "red", size = 0.25) + geom_abline(intercept = ciVal, color ="blue", size = 0.25) + geom_abline(intercept = -1*ciVal, color ="blue", size = 0.25)
@@ -38,8 +39,6 @@ server <- function(input, output, session) {
     else{
       p <- ggplot(data = df, aes(x=x,y=y)) + geom_point(size=0.5) + geom_abline(intercept = 0, color = "red", size = 0.25) + geom_abline(intercept = ciVal, color ="blue", size = 0.25) + geom_abline(intercept = -1*ciVal, color ="blue", size = 0.25)
     }
-    # Not work
-    #p <- ggplot(data = df, aes(x=x,y=y)) + geom_point(size=0.5) + geom_point(data=df2, colour = "gray") + geom_abline(intercept = 0, color = "red", size = 0.25) + geom_abline(intercept = ciVal, color ="blue", size = 0.25) + geom_abline(intercept = -1*ciVal, color ="blue", size = 0.25)
     p
   }
 
@@ -54,31 +53,26 @@ server <- function(input, output, session) {
     }
   }
 
-  ggPS$x$data2 <- lapply(ggPS$x$data, as.character)
-  which(ggPS$x$data[[seq(1,55,1)]]$marker$opacity==0)
+  ggPS <- ggplotly(pS)
 
-  which(sapply(ggPS$x$data, FUN=function(X) if (exists(marker))marker$opacity==0))
-
-  alpha0 = c()
+  # Find the alpha transparent points, and ensure they have no interactivity
   myLength <- length(ggPS[["x"]][["data"]])
   for (i in 1:myLength){
     if (is.numeric(ggPS[["x"]][["data"]][[i]]$marker$opacity)){
       if (ggPS[["x"]][["data"]][[i]]$marker$opacity==0){
-        alpha0 = c(alpha0,i)
-    }
+        ggPS[["x"]][["data"]][[i]]$hoverinfo <- "none"
+      }
     }
   }
 
 
-
-  #bottomDig = sqrt(length(pS$plots))
 
   output$plot <- renderPlot({
     pS
   })
 
   output$plot2 <- renderPlotly({
-    ggplotly(pS)
+    ggPS
   })
 
   d <- reactive(event_data("plotly_click"))

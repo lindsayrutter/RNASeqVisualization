@@ -6,8 +6,7 @@ library(data.table)
 library(GGally)
 
 ui <- fluidPage(
-  plotOutput("plot", height = "300px"),
-  plotlyOutput("plot2", height = "300px"),
+  plotlyOutput("plot", height = "500px"),
   verbatimTextOutput("click")
 )
 
@@ -63,15 +62,12 @@ server <- function(input, output, session) {
         ggPS[["x"]][["data"]][[i]]$hoverinfo <- "none"
       }
     }
+    if (startsWith(ggPS[["x"]][["data"]][[i]]$text[1], "intercept") || startsWith(ggPS[["x"]][["data"]][[i]]$text[1], "density") || startsWith(ggPS[["x"]][["data"]][[i]]$text[1], "Corr")){
+      ggPS[["x"]][["data"]][[i]]$hoverinfo <- "none"
+    }
   }
 
-
-
-  output$plot <- renderPlot({
-    pS
-  })
-
-  output$plot2 <- renderPlotly({
+  output$plot <- renderPlotly({
     ggPS
   })
 

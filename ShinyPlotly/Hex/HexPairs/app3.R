@@ -15,7 +15,10 @@ ui <- fluidPage(
   #verbatimTextOutput("test4"),
   #verbatimTextOutput("test5"),
   #verbatimTextOutput("test6"),
-  verbatimTextOutput("test7")
+  verbatimTextOutput("test7"),
+  verbatimTextOutput("test8"),
+  verbatimTextOutput("test9"),
+  verbatimTextOutput("test10")
 )
 
 server <- function(input, output, session) {
@@ -94,11 +97,11 @@ server <- function(input, output, session) {
   d <- reactive(event_data("plotly_click"))
   curveN <- reactive(d()$curveNumber)
   cnP <- reactive(cnToPlot[which(cnToPlot$curveNumber==curveN()),])
-  cnPKI <- reactive(cnP()$ki)
   cnH <- reactive(cnToID(attr(pS[cnP()$ki,cnP()$kj]$data, "cID")))
   cnHex <- reactive(cbind(cnH()[,c(1,2)], curveNumber = cnToPlot[intersect(which(cnToPlot$ki==cnP()$ki), which(cnToPlot$kj==cnP()$kj)),]$curveNumber))
   hexVal <- reactive(as.numeric(as.character(cnHex()[which(cnHex()$curveNumber==curveN()),]$hexID)))
   obsns <- reactive(which(attr(pS[cnP()$ki,cnP()$kj]$data, "cID")==hexVal()))
+  dat <- reactive(bindata[obsns(),])
 
   output$test <- renderPrint({
     print("curveN")
@@ -131,8 +134,43 @@ server <- function(input, output, session) {
   })
 
   output$test7 <- renderPrint({
-    print("Data")
-    bindata[obsns(),]
+    print("dat")
+    dat()
+  })
+
+
+
+  # Convert DF from scatterplot to PCP
+  datt <- reactive(data.frame(t(dat())))
+
+  output$test8 <- renderPrint({
+    print("datt")
+    str(datt())
+  })
+
+  nameChange <- reactive(as.matrix(datt()[1, ]))
+
+  output$test9 <- renderPrint({
+    print("nameChange")
+    str(nameChange())
+  })
+
+  reactive(names(datt()) <- nameChange)
+
+  output$test10 <- renderPrint({
+    print("datt")
+    str(datt())
+  })
+
+
+
+  #datt <- datt[-1, ]
+  #datt[] <- lapply(datt, function(x) type.convert(as.character(x)))
+  #setDT(datt, keep.rownames = TRUE)[]
+  #dat_long <- melt(datt, id.vars ="rn" )
+
+  output$plot2 <- renderPlotly({
+    plot_ly(dat_long, x= ~rn, y= ~value, type = 'scatter', mode = 'lines+markers', color = ~variable)  %>% layout(dragmode="box", showlegend = FALSE)
   })
 
 }

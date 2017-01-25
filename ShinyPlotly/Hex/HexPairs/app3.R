@@ -1,3 +1,5 @@
+# Saving individual h@cID
+
 library(shiny)
 library(plotly)
 library(data.table)
@@ -13,14 +15,12 @@ server <- function(input, output, session) {
 
   # Curve number to ID
   cnToID <- function(h){
-    df <- data.frame(table(h@cID))
+    df <- data.frame(table(h)) #h@cID
     colnames(df) <- c("hexID","count")
     cnID <- df[order(df$count,as.character(df$hexID)),]
     cnID$curveNumber <- seq(1, nrow(cnID))
     return(cnID)
   }
-
-  cN = 1
 
   set.seed(1)
   bindata <- data.frame(ID = paste0("ID",1:100), A=rnorm(100), B=rnorm(100), C=rnorm(100), D=rnorm(100), E=rnorm(100))
@@ -29,15 +29,12 @@ server <- function(input, output, session) {
   maxVal = max(abs(bindata[,2:6]))
   maxRange = c(-1*maxVal, maxVal)
 
-  listCID = c()
-
   my_fn <- function(data, mapping, ...){
     x = data[,c(as.character(mapping$x))]
     y = data[,c(as.character(mapping$y))]
     h <- hexbin(x=x, y=y, xbins=5, shape=1, IDs=TRUE, xbnds=maxRange, ybnds=maxRange)
     hexdf <- data.frame (hcell2xy (h),  hexID = h@cell, counts = h@count)
-    listCID <-c(listCID,h@cID)
-    print(listCID)
+    attr(hexdf, "cID") <- h@cID
     p <- ggplot(hexdf, aes(x=x, y=y, fill = counts, hexID=hexID)) + geom_hex(stat="identity")
     p
   }
@@ -50,6 +47,26 @@ server <- function(input, output, session) {
         scale_x_continuous(limits = maxRange) +
         scale_y_continuous(limits = maxRange)
     }
+  }
+
+  #attr(pS[2,1]$data, "cID")
+
+  pi=1 #plotIndex
+  cnToPlot = data.frame()
+  cN=1
+  i=2; n=ncol(bindata)-1
+  while (i<=n){
+    ki=i
+    kj=i-1
+    while (ki<=n){
+      #print(attr(pS[ki,kj]$data, "cID"))
+      myLength <- length(table(attr(pS[ki,kj]$data, "cID")))
+      cnToPlot = rbind(pi = pi, curveNumber = cN)
+      ki=ki+1
+      pi=pi+1
+      cN=cN+myLength
+    }
+    i=i+1
   }
 
   output$plot <- renderPlotly({

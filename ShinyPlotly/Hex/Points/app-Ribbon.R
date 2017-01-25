@@ -1,4 +1,4 @@
-# This script is same as app-SeedSet.R, only now min max are scaled for all subplots (not just bottom-left)
+# This script is same as app-Scale.R, only now the confidence band is shaded region.
 
 library(shiny)
 library(plotly)
@@ -40,6 +40,50 @@ server <- function(input, output, session) {
     }
     p
   }
+
+  ggplot(data = df, aes(x=x,y=y)) + geom_point(size=0.5) + geom_abline(intercept = 0, color = "red", size = 0.25) + geom_ribbon(ymin = geom_abline(intercept = ciVal), ymax = geom_abline(intercept = -1*ciVal), alpha = "0.2")
+
+
+
+  geom_ribbon(data=subset(x, 2 <= x & x <= 3), aes(ymin=twox,ymax=x2), fill="blue", alpha="0.5")
+
+  # geom_ribbon
+  pl = data.frame(Time = 0:10, menle = rnorm(11))
+  pl$menlelb = pl$menle -1
+  pl$menleub = pl$menle +1
+  ggplot(pl, aes(Time)) +
+    geom_line(aes(y=menle), colour="blue") +
+    geom_ribbon(aes(ymin=menlelb, ymax=menleub), alpha=0.2)
+
+  dat <- data.frame(cond1=c("a","a","b","b"),
+                    cond2=c("c","d","c","d"),
+                    x=c(1,5),
+                    y=c(1,5),
+                    sl=c(1,1.2,0.9,1.1),
+                    int=c(0,0.1,0.1,0),
+                    slopeU=c(1.1,1.3,1.2,1.2),
+                    slopeL=c(.9,1,0.7,1))
+  p <- ggplot(dat,aes(x=x,y=y,colour=cond1))
+  p <- p + facet_grid(. ~ cond2)
+  p <- p + geom_blank()
+  p <- p + geom_abline(aes(intercept=int,slope=sl,colour=cond1),data=dat)
+  p
+
+  # create data #
+  x<-as.data.frame(c(1,2,3,4))
+  colnames(x)<-"x"
+  x$twox<-2*x$x
+  x$x2<-x$x^2
+  # Set colours #
+  blue<-rgb(0.8, 0.8, 1, alpha=0.25)
+  clear<-rgb(1, 0, 0, alpha=0.0001)
+  # Define region to fill #
+  x$fill <- "no fill"
+  x$fill[(x$x2 > x$twox) & (x$x <= 3 & x$x >= 2)] <- "fill"
+  ggplot(x, aes(x=x, y=twox)) + geom_line(aes(y = twox)) + geom_line(aes(y = x2)) +
+    geom_ribbon(data=subset(x, 2 <= x & x <= 3), aes(ymin=twox,ymax=x2), fill="blue", alpha="0.5") +
+    scale_y_continuous(expand = c(0, 0), limits=c(0,20)) +
+    scale_x_continuous(expand = c(0, 0), limits=c(0,5)) + scale_fill_manual(values=c(clear,blue))
 
   p <- ggpairs(data[,2:6], lower = list(continuous = my_fn))
 

@@ -8,7 +8,12 @@ library(hexbin)
 
 ui <- fluidPage(
   plotlyOutput("plot"),
-  verbatimTextOutput("click")
+  verbatimTextOutput("click"),
+  verbatimTextOutput("test"),
+  verbatimTextOutput("test2"),
+  verbatimTextOutput("test3"),
+  verbatimTextOutput("test4"),
+  verbatimTextOutput("test5")
 )
 
 server <- function(input, output, session) {
@@ -51,21 +56,22 @@ server <- function(input, output, session) {
 
   #attr(pS[2,1]$data, "cID")
 
-  pi=1 #plotIndex
+
   cnToPlot = data.frame()
   cN=1
-  i=2; n=ncol(bindata)-1
+  i=2
+  n=ncol(bindata)-1
   while (i<=n){
     ki=i
     kj=i-1
     while (ki<=n){
       #print(attr(pS[ki,kj]$data, "cID"))
       myLength <- length(table(attr(pS[ki,kj]$data, "cID")))
-      cnToPlot = rbind(pi = pi, curveNumber = cN)
+      cnToPlot = rbind(cnToPlot, cbind(ki = rep(ki, myLength), kj = rep(kj, myLength), curveNumber = cN:(cN+myLength-1)))
       ki=ki+1
-      pi=pi+1
-      cN=cN+myLength
+      cN=cN+myLength+1
     }
+    cN=cN+i
     i=i+1
   }
 
@@ -73,16 +79,50 @@ server <- function(input, output, session) {
     ggplotly(pS)
   })
 
-  d <- reactive(event_data("plotly_click"))
-
   output$click <- renderPrint({
     if (is.null(d())){
       "Click on a state to view event data"
     }
     else{
-      str(d())
+      #str(d())
+      d()$curveNumber
     }
   })
+
+  d <- reactive(event_data("plotly_click"))
+  curveN <- reactive(d()$curveNumber)
+  cnP <- reactive(cnToPlot[which(cnToPlot$curveNumber==curveN()),])
+  cnPKI <- reactive(cnP()$ki)
+  cnH <- reactive(cnToID(attr(pS[cnP()$ki,cnP()$kj]$data, "cID")))
+  cnHex <- reactive(cbind(cnH()[,c(1,2)], curveNumber = cnToPlot[intersect(which(cnToPlot$ki==cnP()$ki), which(cnToPlot$kj==cnP()$kj)),]$curveNumber))
+  #testVal <- reactive(cnToPlot[intersect(which(cnToPlot$ki==cnP()$ki), which(cnToPlot$kj==cnP()$kj)),]$curveNumber)
+  hexVal <- reactive(as.numeric(as.character(cnHex()[which(cnHex()$curveNumber==curveN()),]$hexID)))
+
+  output$test <- renderPrint({
+    print("curveN")
+    curveN()
+  })
+
+  output$test2 <- renderPrint({
+    print("cnP")
+    cnP()
+  })
+
+  output$test3 <- renderPrint({
+    print("cnPKI")
+    cnPKI()
+  })
+
+  output$test4 <- renderPrint({
+    print("cnHex")
+    cnHex()
+  })
+
+  output$test5 <- renderPrint({
+    print("hexVal")
+    hexVal()
+  })
+
 }
 
 shinyApp(ui, server)

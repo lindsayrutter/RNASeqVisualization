@@ -8,12 +8,14 @@ library(hexbin)
 
 ui <- fluidPage(
   plotlyOutput("plot"),
-  verbatimTextOutput("click"),
-  verbatimTextOutput("test"),
-  verbatimTextOutput("test2"),
-  verbatimTextOutput("test3"),
-  verbatimTextOutput("test4"),
-  verbatimTextOutput("test5")
+  #verbatimTextOutput("click"),
+  #verbatimTextOutput("test"),
+  #verbatimTextOutput("test2"),
+  #verbatimTextOutput("test3"),
+  #verbatimTextOutput("test4"),
+  #verbatimTextOutput("test5"),
+  #verbatimTextOutput("test6"),
+  verbatimTextOutput("test7")
 )
 
 server <- function(input, output, session) {
@@ -95,8 +97,8 @@ server <- function(input, output, session) {
   cnPKI <- reactive(cnP()$ki)
   cnH <- reactive(cnToID(attr(pS[cnP()$ki,cnP()$kj]$data, "cID")))
   cnHex <- reactive(cbind(cnH()[,c(1,2)], curveNumber = cnToPlot[intersect(which(cnToPlot$ki==cnP()$ki), which(cnToPlot$kj==cnP()$kj)),]$curveNumber))
-  #testVal <- reactive(cnToPlot[intersect(which(cnToPlot$ki==cnP()$ki), which(cnToPlot$kj==cnP()$kj)),]$curveNumber)
   hexVal <- reactive(as.numeric(as.character(cnHex()[which(cnHex()$curveNumber==curveN()),]$hexID)))
+  obsns <- reactive(which(attr(pS[cnP()$ki,cnP()$kj]$data, "cID")==hexVal()))
 
   output$test <- renderPrint({
     print("curveN")
@@ -121,6 +123,16 @@ server <- function(input, output, session) {
   output$test5 <- renderPrint({
     print("hexVal")
     hexVal()
+  })
+
+  output$test6 <- renderPrint({
+    print("obsns")
+    obsns()
+  })
+
+  output$test7 <- renderPrint({
+    print("Data")
+    bindata[obsns(),]
   })
 
 }

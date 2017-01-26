@@ -15,10 +15,11 @@ ui <- fluidPage(
   #verbatimTextOutput("test4"),
   #verbatimTextOutput("test5"),
   #verbatimTextOutput("test6"),
-  verbatimTextOutput("test7"),
-  verbatimTextOutput("test8"),
-  verbatimTextOutput("test9"),
-  verbatimTextOutput("test10")
+  #verbatimTextOutput("test7"),
+  #verbatimTextOutput("test8"),
+  #verbatimTextOutput("test9"),
+  #verbatimTextOutput("test10"),
+  plotlyOutput("plot3")
 )
 
 server <- function(input, output, session) {
@@ -59,9 +60,6 @@ server <- function(input, output, session) {
     }
   }
 
-  #attr(pS[2,1]$data, "cID")
-
-
   cnToPlot = data.frame()
   cN=1
   i=2
@@ -84,94 +82,39 @@ server <- function(input, output, session) {
     ggplotly(pS)
   })
 
-  output$click <- renderPrint({
-    if (is.null(d())){
-      "Click on a state to view event data"
-    }
-    else{
-      #str(d())
-      d()$curveNumber
-    }
-  })
-
-  d <- reactive(event_data("plotly_click"))
-  curveN <- reactive(d()$curveNumber)
-  cnP <- reactive(cnToPlot[which(cnToPlot$curveNumber==curveN()),])
-  cnH <- reactive(cnToID(attr(pS[cnP()$ki,cnP()$kj]$data, "cID")))
-  cnHex <- reactive(cbind(cnH()[,c(1,2)], curveNumber = cnToPlot[intersect(which(cnToPlot$ki==cnP()$ki), which(cnToPlot$kj==cnP()$kj)),]$curveNumber))
-  hexVal <- reactive(as.numeric(as.character(cnHex()[which(cnHex()$curveNumber==curveN()),]$hexID)))
-  obsns <- reactive(which(attr(pS[cnP()$ki,cnP()$kj]$data, "cID")==hexVal()))
-  dat <- reactive(bindata[obsns(),])
-
-  output$test <- renderPrint({
-    print("curveN")
-    curveN()
-  })
-
-  output$test2 <- renderPrint({
-    print("cnP")
-    cnP()
-  })
-
-  output$test3 <- renderPrint({
-    print("cnPKI")
-    cnPKI()
-  })
-
-  output$test4 <- renderPrint({
-    print("cnHex")
-    cnHex()
-  })
-
-  output$test5 <- renderPrint({
-    print("hexVal")
-    hexVal()
-  })
-
-  output$test6 <- renderPrint({
-    print("obsns")
-    obsns()
-  })
-
-  output$test7 <- renderPrint({
-    print("dat")
-    dat()
-  })
 
 
 
-  # Convert DF from scatterplot to PCP
-  datt <- reactive(data.frame(t(dat())))
 
-  output$test8 <- renderPrint({
-    print("datt")
-    str(datt())
-  })
+  output$plot3 <- renderPlotly({
+    d <- event_data("plotly_click") #,source="subset"
+    if (is.null(d)) "Click and drag events (i.e., select/lasso) appear here (double-click to clear)" else d
 
-  nameChange <- reactive(as.matrix(datt()[1, ]))
+    curveN <- d$curveNumber
+    cnP <- cnToPlot[which(cnToPlot$curveNumber==curveN),]
+    cnH <- cnToID(attr(pS[cnP$ki,cnP$kj]$data, "cID"))
+    cnHex <- cbind(cnH[,c(1,2)], curveNumber = cnToPlot[intersect(which(cnToPlot$ki==cnP$ki), which(cnToPlot$kj==cnP$kj)),]$curveNumber)
+    hexVal <- as.numeric(as.character(cnHex[which(cnHex$curveNumber==curveN),]$hexID))
+    obsns <- which(attr(pS[cnP$ki,cnP$kj]$data, "cID")==hexVal)
+    temp <- bindata[obsns,]
 
-  output$test9 <- renderPrint({
-    print("nameChange")
-    str(nameChange())
-  })
+    dattb <- data.frame(t(temp))
+    data.frame(t(temp[,-c(ncol(temp), ncol(temp)-1)]))
+    names(dattb) <- as.matrix(dattb[1, ])
+    dattb <- dattb[-1, ]
+    dattb[] <- lapply(dattb, function(x) type.convert(as.character(x)))
+    setDT(dattb, keep.rownames = TRUE)[]
+    dat_long <- melt(dattb, id.vars ="rn" )
+    dat_long
 
-  reactive(names(datt()) <- nameChange)
-
-  output$test10 <- renderPrint({
-    print("datt")
-    str(datt())
-  })
-
-
-
-  #datt <- datt[-1, ]
-  #datt[] <- lapply(datt, function(x) type.convert(as.character(x)))
-  #setDT(datt, keep.rownames = TRUE)[]
-  #dat_long <- melt(datt, id.vars ="rn" )
-
-  output$plot2 <- renderPlotly({
     plot_ly(dat_long, x= ~rn, y= ~value, type = 'scatter', mode = 'lines+markers', color = ~variable)  %>% layout(dragmode="box", showlegend = FALSE)
   })
+
+
+
+# #  output$plot2 <- renderPlotly({
+#     plot_ly(dat_long, x= ~rn, y= ~value, type = 'scatter', mode = 'lines+markers', color = ~variable)  %>% layout(dragmode="box", showlegend = FALSE)
+#   })
 
 }
 

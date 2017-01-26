@@ -9,8 +9,8 @@ library(hexbin)
 
 ui <- fluidPage(
   plotlyOutput("plot"),
-  verbatimTextOutput("click")
-
+  verbatimTextOutput("click"),
+  verbatimTextOutput("test")
 )
 
 server <- function(input, output, session) {
@@ -42,6 +42,11 @@ server <- function(input, output, session) {
   d <- reactive(event_data("plotly_click"))
   clickID <- reactive(as.numeric(as.character(cnID[which(cnID$curveNumber==d()$curveNumber),]$hexID)))
   clickHex <- reactive(bindata[which(h@cID==clickID()),])
+
+  output$test <- renderPrint({
+    print("clickHex")
+    str(clickHex())
+  })
 
   output$plot <- renderPlotly({
     if (!is.null(d())){

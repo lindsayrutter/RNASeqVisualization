@@ -134,15 +134,35 @@ server <- function(input, output, session) {
   })
 
   ppS <- pS
-  for (i in 1:length(ppS$plots)){
-    if (length(ppS$plots[i][[1]]$mapping)==2){
-      print(i)
-    }
 
-  }
+  # my_fn <- function(data, mapping, ...){
+  #   x1 = data[,c(as.character(mapping$x))]
+  #   y1 = data[,c(as.character(mapping$y))]
+  #   h <- hexbin(x=x1, y=y1, xbins=5, shape=1, IDs=TRUE, xbnds=maxRange, ybnds=maxRange)
+  #   hexdf <- data.frame (hcell2xy (h),  hexID = h@cell, counts = h@count)
+  #   attr(hexdf, "cID") <- h@cID
+  #   x1 <- dat$A
+  #   y1 <- dat$B
+  #   p <- ggplot(hexdf, aes(x=x, y=y, fill = counts, hexID=hexID)) + geom_hex(stat="identity")
+  #   p
+  # }
+  #
+  # p <- ggpairs(bindata[,2:6], lower = list(continuous = my_fn))
+  #
 
 
 
+
+
+
+
+  # Approach to adding points to individual subplots directly is not working
+  # for (i in 1:length(ppS$plots)){
+  #   if (length(ppS$plots[i][[1]]$mapping)==2){
+  #     print(i)
+  #   }
+  #
+  # }
   # i=2
   # n=ncol(bindata)-1
   # while (i<=n){
@@ -161,10 +181,6 @@ server <- function(input, output, session) {
   #   i=i+1
   # }
 
-
-  inner <- getPlot(ppS,2,2)
-  inner <- inner + theme(legend.position="right")
-  gg0 <- putPlot(gg0,inner,2,2)
 
   output$plot2 <- renderPlotly({
     if (!is.null(d())){

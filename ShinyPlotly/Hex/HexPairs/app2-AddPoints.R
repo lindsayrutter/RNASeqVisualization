@@ -133,12 +133,38 @@ server <- function(input, output, session) {
     dat()
   })
 
-  for (i in 1:length(pS$plots)){
-    if (length(pS$plots[i][[1]]$mapping)==2){
+  ppS <- pS
+  for (i in 1:length(ppS$plots)){
+    if (length(ppS$plots[i][[1]]$mapping)==2){
       print(i)
     }
 
   }
+
+
+
+  # i=2
+  # n=ncol(bindata)-1
+  # while (i<=n){
+  #   ki=i
+  #   kj=i-1
+  #   while (ki<=n){
+  #     cat(sprintf("\"%f\" \"%f\"\n", ki, kj))
+  #     curPlot <- getPlot(ppS,ki,kj)
+  #     curPlot <- curPlot + geom_point(data = dat, aes(x=colnames(dat)[kj+1], y=colnames(dat)[ki+1]))
+  #     curPlot + geom_point(data = dat, aes(x=A, y=B)) + coord_equal()
+  #     curPlot + geom_point() + geom_point(dat, aes(A, B)) + coord_equal()
+  #     curPlot + geom_point() + geom_point(dat[,c(kj+1,ki+1)]) + coord_equal()
+  #     gg0 <- putPlot(gg0,curPlot,2,2)
+  #     ki=ki+1
+  #   }
+  #   i=i+1
+  # }
+
+
+  inner <- getPlot(ppS,2,2)
+  inner <- inner + theme(legend.position="right")
+  gg0 <- putPlot(gg0,inner,2,2)
 
   output$plot2 <- renderPlotly({
     if (!is.null(d())){

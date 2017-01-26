@@ -32,7 +32,7 @@ server <- function(input, output, session) {
     cnID$curveNumber <- seq(1, nrow(cnID))
     return(cnID)
   }
-
+  oneRow=FALSE
   set.seed(1)
   bindata <- data.frame(ID = paste0("ID",1:100), A=rnorm(100), B=rnorm(100), C=rnorm(100), D=rnorm(100), E=rnorm(100))
   bindata$ID <- as.character(bindata$ID)
@@ -98,13 +98,25 @@ server <- function(input, output, session) {
     obsns <- which(attr(pS[cnP$ki,cnP$kj]$data, "cID")==hexVal)
     temp <- bindata[obsns,]
 
+    if(nrow(temp)==1){
+      oneRow = TRUE
+      temp <- rbind(temp,temp)
+      temp$ID[2]="justTest"
+    }
+
     dattb <- data.frame(t(temp))
-    data.frame(t(temp[,-c(ncol(temp), ncol(temp)-1)]))
+    #data.frame(t(temp[,-c(ncol(temp), ncol(temp)-1)]))
     names(dattb) <- as.matrix(dattb[1, ])
     dattb <- dattb[-1, ]
     dattb[] <- lapply(dattb, function(x) type.convert(as.character(x)))
     setDT(dattb, keep.rownames = TRUE)[]
     dat_long <- melt(dattb, id.vars ="rn" )
+
+    if (oneRow){
+      dat_long <- dat_long[1:(nrow(dat_long)/2),]
+      oneRow=FALSE
+    }
+
     dat_long
 
     plot_ly(dat_long, x= ~rn, y= ~value, type = 'scatter', mode = 'lines+markers', color = ~variable)  %>% layout(dragmode="box", showlegend = FALSE)

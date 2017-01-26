@@ -1,4 +1,4 @@
-# Saving individual h@cID
+# ScatMat with hexagons, and obtain correct data frame if click on a given hexagon. Now try to add points to that given hexagon
 
 library(shiny)
 library(plotly)

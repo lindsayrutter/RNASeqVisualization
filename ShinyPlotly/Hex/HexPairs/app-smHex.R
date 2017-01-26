@@ -1,3 +1,5 @@
+# This app shows scatMat with hexagons (and x=y line) obtaining curveNumber
+
 library(shiny)
 library(plotly)
 library(data.table)

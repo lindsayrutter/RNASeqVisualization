@@ -75,7 +75,7 @@ server <- function(input, output, session) {
 
   # Right now, hoverInfo works okay, but if click on the transparent dot, still get information about it in event_data()
 
-  d <- reactive(event_data("plotly_selected"))
+  d <- reactive(event_data("plotly_click"))
 
   output$click <- renderPrint({
     if (is.null(d())){

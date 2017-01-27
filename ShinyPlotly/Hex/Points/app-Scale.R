@@ -27,7 +27,7 @@ server <- function(input, output, session) {
   my_fn <- function(data, mapping, ...){
     x <- data[,c(as.character(mapping$x))]
     y <- data[,c(as.character(mapping$y))]
-    keep <- sign(resid(lm(y-x-ciVal ~ 0)))==1 | sign(resid(lm(y-x+ciVal ~ 0)))==-1
+    keep <- abs(x - y) >= ciVal
     df <- data.frame(x = x[keep], y = y[keep])
 
     # Create one alpha transparent point in a plot if it otherwise has no dataframe. This is needed to prevent the plots from squishing together.

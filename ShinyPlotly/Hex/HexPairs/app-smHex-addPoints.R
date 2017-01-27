@@ -8,15 +8,8 @@ library(hexbin)
 
 ui <- fluidPage(
   plotlyOutput("plot"),
-  #verbatimTextOutput("click"),
-  #verbatimTextOutput("test"),
-  #verbatimTextOutput("test2"),
-  #verbatimTextOutput("test3"),
-  #verbatimTextOutput("test4"),
-  #verbatimTextOutput("test5"),
-  #verbatimTextOutput("test6"),
-  verbatimTextOutput("test7")
-
+  verbatimTextOutput("click"),
+  verbatimTextOutput("test")
 )
 
 server <- function(input, output, session) {
@@ -99,61 +92,11 @@ server <- function(input, output, session) {
   dat <- reactive(bindata[obsns(),])
 
   output$test <- renderPrint({
-    print("curveN")
-    curveN()
-  })
-
-  output$test2 <- renderPrint({
-    print("cnP")
-    cnP()
-  })
-
-  output$test3 <- renderPrint({
-    print("cnPKI")
-    cnPKI()
-  })
-
-  output$test4 <- renderPrint({
-    print("cnHex")
-    cnHex()
-  })
-
-  output$test5 <- renderPrint({
-    print("hexVal")
-    hexVal()
-  })
-
-  output$test6 <- renderPrint({
-    print("obsns")
-    obsns()
-  })
-
-  output$test7 <- renderPrint({
     print("dat")
     dat()
   })
 
   ppS <- pS
-
-  # my_fn <- function(data, mapping, ...){
-  #   x1 = data[,c(as.character(mapping$x))]
-  #   y1 = data[,c(as.character(mapping$y))]
-  #   h <- hexbin(x=x1, y=y1, xbins=5, shape=1, IDs=TRUE, xbnds=maxRange, ybnds=maxRange)
-  #   hexdf <- data.frame (hcell2xy (h),  hexID = h@cell, counts = h@count)
-  #   attr(hexdf, "cID") <- h@cID
-  #   x1 <- dat$A
-  #   y1 <- dat$B
-  #   p <- ggplot(hexdf, aes(x=x, y=y, fill = counts, hexID=hexID)) + geom_hex(stat="identity")
-  #   p
-  # }
-  #
-  # p <- ggpairs(bindata[,2:6], lower = list(continuous = my_fn))
-  #
-
-
-
-
-
 
 
   # Approach to adding points to individual subplots directly is not working
@@ -163,23 +106,23 @@ server <- function(input, output, session) {
   #   }
   #
   # }
-  # i=2
-  # n=ncol(bindata)-1
-  # while (i<=n){
-  #   ki=i
-  #   kj=i-1
-  #   while (ki<=n){
-  #     cat(sprintf("\"%f\" \"%f\"\n", ki, kj))
-  #     curPlot <- getPlot(ppS,ki,kj)
-  #     curPlot <- curPlot + geom_point(data = dat, aes(x=colnames(dat)[kj+1], y=colnames(dat)[ki+1]))
-  #     curPlot + geom_point(data = dat, aes(x=A, y=B)) + coord_equal()
-  #     curPlot + geom_point() + geom_point(dat, aes(A, B)) + coord_equal()
-  #     curPlot + geom_point() + geom_point(dat[,c(kj+1,ki+1)]) + coord_equal()
-  #     gg0 <- putPlot(gg0,curPlot,2,2)
-  #     ki=ki+1
-  #   }
-  #   i=i+1
-  # }
+  i=2
+  n=ncol(bindata)-1
+  while (i<=n){
+    ki=i
+    kj=i-1
+    while (ki<=n){
+      cat(sprintf("\"%f\" \"%f\"\n", ki, kj))
+      curPlot <- getPlot(ppS,ki,kj)
+      curPlot <- curPlot + geom_point(data = dat, aes(x=colnames(dat)[kj+1], y=colnames(dat)[ki+1]))
+      curPlot + geom_point(data = dat, aes(x=A, y=B)) + coord_equal()
+      curPlot + geom_point() + geom_point(dat, aes(A, B)) + coord_equal()
+      curPlot + geom_point() + geom_point(dat[,c(kj+1,ki+1)]) + coord_equal()
+      gg0 <- putPlot(gg0,curPlot,2,2)
+      ki=ki+1
+    }
+    i=i+1
+  }
 
 
   output$plot2 <- renderPlotly({

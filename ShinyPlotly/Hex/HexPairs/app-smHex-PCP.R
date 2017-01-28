@@ -24,7 +24,7 @@ server <- function(input, output, session) {
   }
   oneRow=FALSE
   set.seed(1)
-  bindata <- data.frame(ID = paste0("ID",1:1000), A=rnorm(1000), B=rnorm(1000), C=rnorm(1000), D=rnorm(1000), E=rnorm(1000))
+  bindata <- data.frame(ID = paste0("ID",1:100), A=rnorm(100), B=rnorm(100), C=rnorm(100), D=rnorm(100), E=rnorm(100))
   bindata$ID <- as.character(bindata$ID)
 
   maxVal = max(abs(bindata[,2:6]))

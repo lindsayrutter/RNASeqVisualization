@@ -12,9 +12,21 @@ y = data[,c("E")]
 h <- hexbin(x=x, y=y, xbins=5, shape=1, IDs=TRUE, xbnds=maxRange, ybnds=maxRange)
 hexdf <- data.frame (hcell2xy (h),  hexID = h@cell, counts = h@count)
 
-# Both objects below indicate there are 17 hexagons
-# hexdf
-# table(h@cID)
+p <- ggplot(hexdf, aes(x=x, y=y, fill = counts, hexID=hexID)) + geom_hex(stat="identity") + coord_cartesian(xlim = c(maxRange[1], maxRange[2]), ylim = c(maxRange[1], maxRange[2]))
 
-# However, plotting only shows 16 hexagons
-ggplot(hexdf, aes(x=x, y=y, fill = counts, hexID=hexID)) + geom_hex(stat="identity") + scale_x_continuous(limits = maxRange) + scale_y_continuous(limits = maxRange)
+dat <- data[c(1:5),]
+
+p + geom_point(data = dat, aes(x=A, y=B))
+p + geom_point() + geom_point(dat, aes(A, B))
+
+#############################################################################
+# Solution 1
+p + geom_point(data = dat, aes(x=A, y=B), inherit.aes = FALSE)
+
+# Solution 2
+p <- ggplot() +
+  geom_hex(data = hexdf, aes(x=x, y=y, fill = counts), stat="identity") +
+  coord_cartesian(xlim = c(maxRange[1], maxRange[2]), ylim = c(maxRange[1], maxRange[2]))
+
+p + geom_point(data = dat, aes(x = A, y = B))
+

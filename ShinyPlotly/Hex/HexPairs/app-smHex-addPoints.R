@@ -9,7 +9,8 @@ library(hexbin)
 ui <- fluidPage(
   plotlyOutput("plot"),
   verbatimTextOutput("click"),
-  verbatimTextOutput("test")
+  verbatimTextOutput("test"),
+  plotlyOutput("plot2")
 )
 
 server <- function(input, output, session) {
@@ -45,8 +46,7 @@ server <- function(input, output, session) {
   for(i in 2:p$nrow) {
     for(j in 1:(i-1)) {
       pS[i,j] <- p[i,j] +
-        scale_x_continuous(limits = maxRange) +
-        scale_y_continuous(limits = maxRange)
+        coord_cartesian(xlim = c(maxRange[1], maxRange[2]), ylim = c(maxRange[1], maxRange[2]))
     }
   }
 
@@ -96,45 +96,54 @@ server <- function(input, output, session) {
     dat()
   })
 
-  ppS <- pS
-
-
   # Approach to adding points to individual subplots directly is not working
-  # for (i in 1:length(ppS$plots)){
-  #   if (length(ppS$plots[i][[1]]$mapping)==2){
-  #     print(i)
-  #   }
-  #
-  # }
-  i=2
-  n=ncol(bindata)-1
-  while (i<=n){
-    ki=i
-    kj=i-1
-    while (ki<=n){
-      cat(sprintf("\"%f\" \"%f\"\n", ki, kj))
-      curPlot <- getPlot(ppS,ki,kj)
-      curPlot <- curPlot + geom_point(data = dat, aes(x=colnames(dat)[kj+1], y=colnames(dat)[ki+1]))
-      curPlot + geom_point(data = dat, aes(x=A, y=B)) + coord_equal()
-      curPlot + geom_point() + geom_point(dat, aes(A, B)) + coord_equal()
-      curPlot + geom_point() + geom_point(dat[,c(kj+1,ki+1)]) + coord_equal()
-      gg0 <- putPlot(gg0,curPlot,2,2)
-      ki=ki+1
+
+  hexPlots = c()
+  for (i in 1:length(pS$plots)){
+    if (!is.null(pS$plots[i][[1]]$labels$hexID)){
+      hexPlots = c(hexPlots, i)
     }
-    i=i+1
+  }
+
+  p <- ggpairs(bindata[,2:6], lower = list(continuous = my_fn))
+  pS <- p
+  for(i in 2:p$nrow) {
+    for(j in 1:(i-1)) {
+      pS[i,j] <- p[i,j] +
+        coord_cartesian(xlim = c(maxRange[1], maxRange[2]), ylim = c(maxRange[1], maxRange[2]))
+    }
   }
 
 
-  output$plot2 <- renderPlotly({
-    if (!is.null(d())){
-      pp <- pS + geom_point(data = dat, aes(x=x, y=y)) + coord_equal()
-      p2 <- ggplotly(pp)
-      for (i in 1:nrow(hexdf)){
-        p2$x$data[[i]]$text <- gsub("<.*$", "", p2$x$data[[i]]$text)
-      }
-    }
-    p2
-  })
+   pi=1
+   i=2
+   n=ncol(bindata)-1
+   while (i<=n){
+     ki=i
+     kj=i-1
+     while (ki<=n){
+       pS$plots[hexPlots[pi]][[1]] <- pS$plots[hexPlots[pi]][[1]] + geom_point(data = dat, aes_string(x=colnames(dat[kj+1]), y=colnames(dat[ki+1])), inherit.aes = FALSE)
+       ki=ki+1
+       pi=pi+1
+     }
+     i=i+1
+   }
+
+   #pS$plots[][[1]] <- pS$plots[6][[1]] + geom_point(data = dat, aes(x="A", y="B"), inherit.aes = FALSE)
+
+
+  #
+  # output$plot2 <- renderPlotly({
+  #   if (!is.null(d())){
+  #     # pp <- pS + geom_point(data = dat, aes(x=x, y=y)) + coord_equal()
+  #     pp <- pS + geom_point(data = dat(), aes(x=A, y=B), inherit.aes = FALSE)
+  #     p2 <- ggplotly(pp)
+  #     for (i in 1:nrow(hexdf)){
+  #       p2$x$data[[i]]$text <- gsub("<.*$", "", p2$x$data[[i]]$text)
+  #     }
+  #   }
+  #   p2
+  # })
 
 
 }

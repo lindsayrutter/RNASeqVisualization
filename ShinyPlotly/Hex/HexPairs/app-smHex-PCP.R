@@ -9,16 +9,6 @@ library(hexbin)
 ui <- fluidPage(
   plotlyOutput("plot"),
   #verbatimTextOutput("click"),
-  #verbatimTextOutput("test"),
-  #verbatimTextOutput("test2"),
-  #verbatimTextOutput("test3"),
-  #verbatimTextOutput("test4"),
-  #verbatimTextOutput("test5"),
-  #verbatimTextOutput("test6"),
-  #verbatimTextOutput("test7"),
-  #verbatimTextOutput("test8"),
-  #verbatimTextOutput("test9"),
-  #verbatimTextOutput("test10"),
   plotlyOutput("plot3")
 )
 
@@ -55,8 +45,7 @@ server <- function(input, output, session) {
   for(i in 2:p$nrow) {
     for(j in 1:(i-1)) {
       pS[i,j] <- p[i,j] +
-        scale_x_continuous(limits = maxRange) +
-        scale_y_continuous(limits = maxRange)
+        coord_cartesian(xlim = c(maxRange[1], maxRange[2]), ylim = c(maxRange[1], maxRange[2]))
     }
   }
 
@@ -98,35 +87,32 @@ server <- function(input, output, session) {
     obsns <- which(attr(pS[cnP$ki,cnP$kj]$data, "cID")==hexVal)
     temp <- bindata[obsns,]
 
-    if(nrow(temp)==1){
-      oneRow = TRUE
-      temp <- rbind(temp,temp)
-      temp$ID[2]="justTest"
+    if (nrow(temp) >0){
+
+      if(nrow(temp)==1){
+        oneRow = TRUE
+        temp <- rbind(temp,temp)
+        temp$ID[2]="justTest"
+      }
+
+      dattb <- data.frame(t(temp))
+      names(dattb) <- as.matrix(dattb[1, ])
+      dattb <- dattb[-1, ]
+      dattb[] <- lapply(dattb, function(x) type.convert(as.character(x)))
+      setDT(dattb, keep.rownames = TRUE)[]
+      dat_long <- melt(dattb, id.vars ="rn" )
+
+      if (oneRow){
+        dat_long <- dat_long[1:(nrow(dat_long)/2),]
+        oneRow=FALSE
+      }
+
+      dat_long
+
+      plot_ly(dat_long, x= ~rn, y= ~value, type = 'scatter', mode = 'lines+markers', color = ~variable)  %>% layout(dragmode="box", showlegend = FALSE)
     }
-
-    dattb <- data.frame(t(temp))
-    #data.frame(t(temp[,-c(ncol(temp), ncol(temp)-1)]))
-    names(dattb) <- as.matrix(dattb[1, ])
-    dattb <- dattb[-1, ]
-    dattb[] <- lapply(dattb, function(x) type.convert(as.character(x)))
-    setDT(dattb, keep.rownames = TRUE)[]
-    dat_long <- melt(dattb, id.vars ="rn" )
-
-    if (oneRow){
-      dat_long <- dat_long[1:(nrow(dat_long)/2),]
-      oneRow=FALSE
-    }
-
-    dat_long
-
-    plot_ly(dat_long, x= ~rn, y= ~value, type = 'scatter', mode = 'lines+markers', color = ~variable)  %>% layout(dragmode="box", showlegend = FALSE)
   })
 
-
-
-# #  output$plot2 <- renderPlotly({
-#     plot_ly(dat_long, x= ~rn, y= ~value, type = 'scatter', mode = 'lines+markers', color = ~variable)  %>% layout(dragmode="box", showlegend = FALSE)
-#   })
 
 }
 

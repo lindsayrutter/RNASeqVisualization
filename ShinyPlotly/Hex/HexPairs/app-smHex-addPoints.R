@@ -96,15 +96,6 @@ server <- function(input, output, session) {
     dat()
   })
 
-  # Approach to adding points to individual subplots directly is not working
-
-  hexPlots = c()
-  for (i in 1:length(pS$plots)){
-    if (!is.null(pS$plots[i][[1]]$labels$hexID)){
-      hexPlots = c(hexPlots, i)
-    }
-  }
-
   p <- ggpairs(bindata[,2:6], lower = list(continuous = my_fn))
   pS <- p
   for(i in 2:p$nrow) {
@@ -114,22 +105,18 @@ server <- function(input, output, session) {
     }
   }
 
-
-   pi=1
    i=2
    n=ncol(bindata)-1
    while (i<=n){
      ki=i
      kj=i-1
      while (ki<=n){
-       pS$plots[hexPlots[pi]][[1]] <- pS$plots[hexPlots[pi]][[1]] + geom_point(data = dat, aes_string(x=colnames(dat[kj+1]), y=colnames(dat[ki+1])), inherit.aes = FALSE)
+       pi = (ki-1)*5+kj
+       pS$plots[pi][[1]] <- pS$plots[pi][[1]] + geom_point(data = dat, aes_string(x=colnames(dat[kj+1]), y=colnames(dat[ki+1])), inherit.aes = FALSE, colour = "white", size = 0.5)
        ki=ki+1
-       pi=pi+1
      }
      i=i+1
    }
-
-   #pS$plots[][[1]] <- pS$plots[6][[1]] + geom_point(data = dat, aes(x="A", y="B"), inherit.aes = FALSE)
 
 
   #

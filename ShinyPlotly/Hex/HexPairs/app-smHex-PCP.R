@@ -71,14 +71,8 @@ server <- function(input, output, session) {
     ggplotly(pS)
   })
 
-
-
-
-
   output$plot3 <- renderPlotly({
-    d <- event_data("plotly_click") #,source="subset"
-    if (is.null(d)) "Click and drag events (i.e., select/lasso) appear here (double-click to clear)" else d
-
+    d <- event_data("plotly_click")
     curveN <- d$curveNumber
     cnP <- cnToPlot[which(cnToPlot$curveNumber==curveN),]
     cnH <- cnToID(attr(pS[cnP$ki,cnP$kj]$data, "cID"))

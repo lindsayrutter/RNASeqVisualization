@@ -8,8 +8,6 @@ library(hexbin)
 
 ui <- fluidPage(
   plotlyOutput("plot"),
-  verbatimTextOutput("click"),
-  verbatimTextOutput("test"),
   plotlyOutput("plot2")
 )
 
@@ -58,7 +56,6 @@ server <- function(input, output, session) {
     ki=i
     kj=i-1
     while (ki<=n){
-      #print(attr(pS[ki,kj]$data, "cID"))
       myLength <- length(table(attr(pS[ki,kj]$data, "cID")))
       cnToPlot = rbind(cnToPlot, cbind(ki = rep(ki, myLength), kj = rep(kj, myLength), curveNumber = cN:(cN+myLength-1)))
       ki=ki+1
@@ -72,67 +69,36 @@ server <- function(input, output, session) {
     ggplotly(pS)
   })
 
-  output$click <- renderPrint({
-    if (is.null(d())){
-      "Click on a state to view event data"
+  output$plot2 <- renderPlotly({
+    d <- event_data("plotly_click")
+    curveN <- d$curveNumber
+    cnP <- cnToPlot[which(cnToPlot$curveNumber==curveN),]
+    cnH <- cnToID(attr(pS[cnP$ki,cnP$kj]$data, "cID"))
+    cnHex <- cbind(cnH[,c(1,2)], curveNumber = cnToPlot[intersect(which(cnToPlot$ki==cnP$ki), which(cnToPlot$kj==cnP$kj)),]$curveNumber)
+    hexVal <- as.numeric(as.character(cnHex[which(cnHex$curveNumber==curveN),]$hexID))
+    obsns <- which(attr(pS[cnP$ki,cnP$kj]$data, "cID")==hexVal)
+    dat <- bindata[obsns,]
+
+    i=2
+    n=ncol(bindata)-1
+    while (i<=n){
+      ki=i
+      kj=i-1
+      while (ki<=n){
+        pi = (ki-1)*5+kj
+        pS$plots[pi][[1]] <- pS$plots[pi][[1]] + geom_point(data = dat, aes_string(x=colnames(dat[kj+1]), y=colnames(dat[ki+1])), inherit.aes = FALSE, colour = "white", size = 0.5)
+        ki=ki+1
+      }
+      i=i+1
     }
-    else{
-      #str(d())
-      d()$curveNumber
-    }
+    #pS
+
+    ggplotly(pS)
   })
-
-  d <- reactive(event_data("plotly_click"))
-  curveN <- reactive(d()$curveNumber)
-  cnP <- reactive(cnToPlot[which(cnToPlot$curveNumber==curveN()),])
-  cnH <- reactive(cnToID(attr(pS[cnP()$ki,cnP()$kj]$data, "cID")))
-  cnHex <- reactive(cbind(cnH()[,c(1,2)], curveNumber = cnToPlot[intersect(which(cnToPlot$ki==cnP()$ki), which(cnToPlot$kj==cnP()$kj)),]$curveNumber))
-  hexVal <- reactive(as.numeric(as.character(cnHex()[which(cnHex()$curveNumber==curveN()),]$hexID)))
-  obsns <- reactive(which(attr(pS[cnP()$ki,cnP()$kj]$data, "cID")==hexVal()))
-  dat <- reactive(bindata[obsns(),])
-
-  output$test <- renderPrint({
-    print("dat")
-    dat()
-  })
-
-  p <- ggpairs(bindata[,2:6], lower = list(continuous = my_fn))
-  pS <- p
-  for(i in 2:p$nrow) {
-    for(j in 1:(i-1)) {
-      pS[i,j] <- p[i,j] +
-        coord_cartesian(xlim = c(maxRange[1], maxRange[2]), ylim = c(maxRange[1], maxRange[2]))
-    }
-  }
-
-   i=2
-   n=ncol(bindata)-1
-   while (i<=n){
-     ki=i
-     kj=i-1
-     while (ki<=n){
-       pi = (ki-1)*5+kj
-       pS$plots[pi][[1]] <- pS$plots[pi][[1]] + geom_point(data = dat, aes_string(x=colnames(dat[kj+1]), y=colnames(dat[ki+1])), inherit.aes = FALSE, colour = "white", size = 0.5)
-       ki=ki+1
-     }
-     i=i+1
-   }
-
-
-  #
-  # output$plot2 <- renderPlotly({
-  #   if (!is.null(d())){
-  #     # pp <- pS + geom_point(data = dat, aes(x=x, y=y)) + coord_equal()
-  #     pp <- pS + geom_point(data = dat(), aes(x=A, y=B), inherit.aes = FALSE)
-  #     p2 <- ggplotly(pp)
-  #     for (i in 1:nrow(hexdf)){
-  #       p2$x$data[[i]]$text <- gsub("<.*$", "", p2$x$data[[i]]$text)
-  #     }
-  #   }
-  #   p2
-  # })
-
-
 }
 
 shinyApp(ui, server)
+
+
+
+

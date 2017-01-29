@@ -101,8 +101,6 @@ server <- function(input, output, session) {
         oneRow=FALSE
       }
 
-      dat_long
-
       plot_ly(dat_long, x= ~rn, y= ~value, type = 'scatter', mode = 'lines+markers', color = ~variable)  %>% layout(dragmode="box", showlegend = FALSE)
     }
   })

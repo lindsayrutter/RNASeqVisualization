@@ -6,12 +6,12 @@ library(data.table)
 library(GGally)
 library(hexbin)
 
-ui <- fluidPage(
-  plotlyOutput("plot"),
-  plotlyOutput("plot2")
-)
+ui <- shinyUI(fluidPage(
+  plotlyOutput("plot")
+  #plotlyOutput("plot2")
+))
 
-server <- function(input, output, session) {
+server <- shinyServer(function(input, output, session) {
 
   # Curve number to ID
   cnToID <- function(h){
@@ -65,39 +65,46 @@ server <- function(input, output, session) {
     i=i+1
   }
 
-  output$plot <- renderPlotly({
-    ggplotly(pS)
+  # Save plot in reactive
+  plotDat <- reactiveValues(main=pS)
+
+  # This is run anytime a reactive value inside it is updated
+  observe({
+    output$plot <- renderPlotly({ ggplotly(plotDat$main) })
   })
 
-  output$plot2 <- renderPlotly({
-    d <- event_data("plotly_click")
-    curveN <- d$curveNumber
-    cnP <- cnToPlot[which(cnToPlot$curveNumber==curveN),]
-    cnH <- cnToID(attr(pS[cnP$ki,cnP$kj]$data, "cID"))
-    cnHex <- cbind(cnH[,c(1,2)], curveNumber = cnToPlot[intersect(which(cnToPlot$ki==cnP$ki), which(cnToPlot$kj==cnP$kj)),]$curveNumber)
-    hexVal <- as.numeric(as.character(cnHex[which(cnHex$curveNumber==curveN),]$hexID))
-    obsns <- which(attr(pS[cnP$ki,cnP$kj]$data, "cID")==hexVal)
-    dat <- bindata[obsns,]
 
-    i=2
-    n=ncol(bindata)-1
-    while (i<=n){
-      ki=i
-      kj=i-1
-      while (ki<=n){
-        pi = (ki-1)*5+kj
-        pS$plots[pi][[1]] <- pS$plots[pi][[1]] + geom_point(data = dat, aes_string(x=colnames(dat[kj+1]), y=colnames(dat[ki+1])), inherit.aes = FALSE, colour = "white", size = 0.5)
-        ki=ki+1
+
+   d <- reactive(event_data("plotly_click"))
+
+   # This is only run when d() is changed
+  observeEvent(d(),{
+      # Reset plot to no points
+      plotDat$main <- pS
+
+      curveN <- reactive(d()$curveNumber)
+      cnP <- reactive(cnToPlot[which(cnToPlot$curveNumber==curveN()),])
+      cnH <- reactive(cnToID(attr(pS[cnP()$ki,cnP()$kj]$data, "cID")))
+      cnHex <- reactive(cbind(cnH()[,c(1,2)], curveNumber = cnToPlot[intersect(which(cnToPlot$ki==cnP()$ki), which(cnToPlot$kj==cnP()$kj)),]$curveNumber))
+      hexVal <- reactive(as.numeric(as.character(cnHex()[which(cnHex()$curveNumber==curveN()),]$hexID)))
+      obsns <- reactive(which(attr(pS[cnP()$ki,cnP()$kj]$data, "cID")==hexVal()))
+      dat <- reactive(bindata[obsns(),])
+
+      i=2
+      n=ncol(bindata)-1
+      while (i<=n){
+        ki=i
+        kj=i-1
+        while (ki<=n){
+          pi = (ki-1)*5+kj
+          plotDat$main$plots[pi][[1]] <- plotDat$main$plots[pi][[1]] + geom_point(data = dat(), aes_string(x = colnames(dat()[kj+1]), y = colnames(dat()[ki+1])), inherit.aes = FALSE, colour = "white", size = 0.5)
+          ki=ki+1
+        }
+        i=i+1
       }
-      i=i+1
-    }
-
-    ggplotly(pS)
   })
-}
 
-shinyApp(ui, server)
+})
 
-
-
+shinyApp(ui = ui, server = server)
 

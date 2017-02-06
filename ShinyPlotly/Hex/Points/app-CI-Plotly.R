@@ -43,7 +43,7 @@ server <- function(input, output, session) {
     }
     else{
       p <- ggplot(data = df, aes(x=x,y=y)) +
-            geom_point(size=0.5) +
+            geom_point(colour = "grey", size=0.5) +
             geom_ribbon(data=data2, aes(x=x, ymin = y-ciVal, ymax = y+ciVal), fill = "lightgrey") +
             geom_abline(intercept = 0, color = "white", size = 0.25) +
             scale_x_continuous(limits = c(myMin, myMax)) +

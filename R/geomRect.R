@@ -26,5 +26,15 @@ sig.tab <- mutate(sig.tab, xmin = pmin(C_S1_R1, C_S1_R2, C_S1_R3), xmax = pmax(C
 
 ggplot(sig.tab, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax)) + geom_rect(fill = NA, color = 'black') #+ geom_rect(aes(sig.tab[200,]), fill = NA, color = 'purple')
 
-p <- ggplot(sig.tab, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, text = genes)) + geom_rect(fill = NA, color = 'black')
+p <- ggplot(sig.tab, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, text = genes)) + geom_rect(fill = NA, color = 'purple')
 ggplotly(p, tooltip = "text") %>% layout(dragmode = "select")
+
+# For GSOC
+########################################################################################
+
+p + xlab("Group 1") + ylab("Group 2") + geom_abline(yintercept=0) +ylim(c(0,16)) +xlim(c(0,16))
+
+
+ggplot(sig.tab, aes(x=C_S1_R1, xend=C_S1_R2, y=C_S2_R1, yend=C_S2_R2)) + geom_segment(color='purple') + xlab("Group 1 - Replicates 1 and 2") + ylab("Group 2 - Replicates 1 and 2") + geom_abline(yintercept=0) +ylim(c(0,16)) + xlim(c(0,16))
+
+

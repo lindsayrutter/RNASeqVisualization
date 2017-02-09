@@ -22,7 +22,7 @@ server <- shinyServer(function(input, output, session) {
   }
 
   set.seed(1)
-  bindata <- data.frame(ID = paste0("ID",1:100), A=rnorm(100), B=rnorm(100), C=rnorm(100), D=rnorm(100), E=rnorm(100))
+  bindata <- data.frame(ID = paste0("ID",1:50), A=rnorm(50), B=rnorm(50), C=rnorm(50), D=rnorm(50), E=rnorm(50))
   bindata$ID <- as.character(bindata$ID)
 
   maxVal = max(abs(bindata[,2:6]))
@@ -67,7 +67,7 @@ server <- shinyServer(function(input, output, session) {
   # Save plot in reactive
   plotDat <- reactiveValues(main=pS)
 
-  # This is run anytime a reactive value inside it is updated
+  # Creates plotly ggPS anytime static pS is changed
   observe({
 
     ggPS <- ggplotly(plotDat$main)
@@ -80,12 +80,6 @@ server <- shinyServer(function(input, output, session) {
           ggPS[["x"]][["data"]][[i]]$hoverinfo <- "none"
         }
     }
-        #beg = c(beg, substring(item,1,2))
-        #if (startsWith(item, "density") || startsWith(item, "Corr")){
-        #  ggPS[["x"]][["data"]][[i]]$hoverinfo <- "none"
-        #
-    #> which(beg %in% c("A:","B:","C:","D:"))
-    #[1]  14  27  40  58  76  90 104 124 143 164
 
     output$plot <- renderPlotly({ggPS %>% layout(hovermode = 'closest')})
   })

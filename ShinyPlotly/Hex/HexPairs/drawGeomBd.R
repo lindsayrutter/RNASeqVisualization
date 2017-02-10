@@ -22,6 +22,9 @@ server <- shinyServer(function(input, output, session) {
   # Creates interactive plotly pI anytime static pS is reset
   observe({
     pI <- ggplotly(plotDat$main)
+    if (length(pI[["x"]][["data"]])==2 && pI[["x"]][["data"]][[2]]$mode == "lines"){
+      pI[["x"]][["data"]][[2]]$hoverinfo <- "none"
+    }
     output$plot <- renderPlotly({pI %>% layout(hovermode = 'closest')})
   })
 

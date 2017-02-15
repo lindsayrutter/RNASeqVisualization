@@ -236,7 +236,7 @@ m <- lm(mpg ~ wt, data = mtcars)
 broom::augment(m) %>%
   plot_ly(x = ~wt, showlegend = FALSE) %>%
   add_markers(y = ~mpg, color = I("black")) %>%
-  add_ribbons(ymin = ~.fitted - 1.96 * .se.fit, 
+  add_ribbons(ymin = ~.fitted - 1.96 * .se.fit,
               ymax = ~.fitted + 1.96 * .se.fit, color = I("gray80")) %>%
   add_lines(y = ~.fitted, color = I("steelblue"))
 
@@ -252,7 +252,7 @@ map_data("world", "canada") %>%
 dat <- map_data("world", "canada") %>% group_by(group)
 
 # geo() is the only object type which supports different map projections
-map3 <- plot_geo(dat, x = ~long, y = ~lat) %>% 
+map3 <- plot_geo(dat, x = ~long, y = ~lat) %>%
   add_markers(size = I(1)) %>%
   add_segments(x = -100, xend = -50, y = 50, 75) %>%
   layout(geo = list(projection = list(type = "mercator")))
@@ -273,5 +273,14 @@ subplot(
 )
 
 ################## subplots ########################
+
+p1 <- plot_ly(economics, x = ~date, y = ~unemploy) %>%
+  add_lines(name = "unemploy")
+p2 <- plot_ly(economics, x = ~date, y = ~uempmed) %>%
+  add_lines(name = "uempmed")
+subplot(p1, p2)
+
+# Although subplot() accepts an arbitrary number of plot objects, passing a list of plots can save typing and redundant code when dealing with a large number of plots. Below shows one time series for each variable in the economics dataset
+
 
 

@@ -156,4 +156,122 @@ ggplotly(p, originalData = FALSE) %>%
     text = ~level, size = I(9), color = I("black"), hoverinfo = "none"
   )
 
+############## Chapter 2 Notes ##############
+
+# Three subplots of scatterplots
+subplot(
+  plot_ly(mpg, x = ~cty, y = ~hwy, name = "default"),
+  plot_ly(mpg, x = ~cty, y = ~hwy) %>%
+    add_markers(alpha = 0.2, name = "alpha"),
+  plot_ly(mpg, x = ~cty, y = ~hwy) %>%
+    add_markers(symbol = I(1), name = "hollow")
+)
+
+p <- plot_ly(mpg, x = ~cty, y = ~hwy, alpha = 0.5)
+subplot(
+  add_markers(p, color = ~cyl, showlegend = FALSE) %>%
+    colorbar(title = "Viridis"),
+  add_markers(p, color = ~factor(cyl))
+)
+
+
+################ Linking views without Shiny ################
+# As far as ggplotly() and plot_ly() are concerned, SharedData object(s) act just like a data frame, but with a special key attribute attached to graphical elements.
+
+library(crosstalk)
+sd <- SharedData$new(txhousing, ~year)
+
+# Brushing scatterplot matrix - takes 1.5 seconds or so
+d <- SharedData$new(iris)
+p <- GGally::ggpairs(d, aes(color = Species), columns = 1:4)
+layout(ggplotly(p), dragmode = "select")
+
+# Temporary versus persistant highlighting
+sd <- SharedData$new(txhousing, ~city)
+p <- ggplot(sd, aes(date, median)) + geom_line()
+gg <- ggplotly(p, tooltip = "city")
+highlight(gg, on = "plotly_hover", dynamic = TRUE)
+highlight(gg, on = "plotly_hover", dynamic = TRUE, persistent = TRUE)
+
+############# Nested selections in ggplotly() #################
+# Graphical element to be tied to multiple observations. For example, a line of fitted values from a linear model is inherently connected to the observations used to fit the model. In fact, any graphical summary (e.g. boxplot, histogram, density, etc.) can be linked back the original data used to derive them. Especially when comparing multiple summaries, it can be useful to highlight group(s) of summaries, as well as the raw data that created them. Figure 4.13 uses ggplotly()’s built-in support for linking graphical summaries with raw data to enable highlighting of linear models.16 Furthermore, notice how there are actually two levels of selection in Figure 4.13 – when hovering over a single point, just that point is selected, but when hovering over a fitted line, all the observations tied to that line are selected.
+# # if you don't want to highlight individual points, you could specify
+# `class` as the key variable here, instead of the default (rownames)
+m <- SharedData$new(mpg)
+p <- ggplot(m, aes(displ, hwy, colour = class)) +
+  geom_point() +
+  geom_smooth(se = FALSE, method = "lm")
+ggplotly(p) %>% highlight("plotly_hover")
+
+# Simple highlighting link between two subplots
+d <- SharedData$new(mtcars)
+subplot(
+     qplot(data = d, x = mpg, y = wt),
+     qplot(data = d, x = mpg, y = vs)
+  )
+
+# Brushing scatterplot matrices takes several seconds
+pm <- GGally::ggpairs(iris)
+ggplotly(pm)
+
+################### Link line plots ###################
+library(dplyr)
+top5 <- txhousing %>%
+  group_by(city) %>%
+  summarise(m = mean(sales, na.rm = TRUE)) %>%
+  arrange(desc(m)) %>%
+  top_n(5)
+
+p <- semi_join(txhousing, top5, by = "city") %>%
+  plot_ly(x = ~date, y = ~median)
+
+subplot(
+  add_lines(p, color = ~city),
+  add_lines(p, linetype = ~city),
+  shareX = TRUE, nrows = 2
+)
+
+# Fit ribbon
+m <- lm(mpg ~ wt, data = mtcars)
+broom::augment(m) %>%
+  plot_ly(x = ~wt, showlegend = FALSE) %>%
+  add_markers(y = ~mpg, color = I("black")) %>%
+  add_ribbons(ymin = ~.fitted - 1.96 * .se.fit, 
+              ymax = ~.fitted + 1.96 * .se.fit, color = I("gray80")) %>%
+  add_lines(y = ~.fitted, color = I("steelblue"))
+
+# Add polygons
+map_data("world", "canada") %>%
+  group_by(group) %>%
+  plot_ly(x = ~long, y = ~lat, alpha = 0.2) %>%
+  add_polygons(hoverinfo = "none", color = I("black")) %>%
+  add_markers(text = ~paste(name, "<br />", pop), hoverinfo = "text", color = I("red"), data = maps::canada.cities) %>%
+  layout(showlegend = FALSE)
+
+
+dat <- map_data("world", "canada") %>% group_by(group)
+
+# geo() is the only object type which supports different map projections
+map3 <- plot_geo(dat, x = ~long, y = ~lat) %>% 
+  add_markers(size = I(1)) %>%
+  add_segments(x = -100, xend = -50, y = 50, 75) %>%
+  layout(geo = list(projection = list(type = "mercator")))
+
+# histogram2d()
+p <- plot_ly(diamonds, x = ~log(carat), y = ~log(price))
+subplot(
+  add_histogram2d(p) %>%
+    colorbar(title = "default") %>%
+    layout(xaxis = list(title = "default")),
+  add_histogram2d(p, zsmooth = "best") %>%
+    colorbar(title = "zsmooth") %>%
+    layout(xaxis = list(title = "zsmooth")),
+  add_histogram2d(p, nbinsx = 60, nbinsy = 60) %>%
+    colorbar(title = "nbins") %>%
+    layout(xaxis = list(title = "nbins")),
+  shareY = TRUE, titleX = TRUE
+)
+
+################## subplots ########################
+
 

@@ -1,12 +1,18 @@
 library(plotly)
 library(htmlwidgets)
 
-trace_0 <- rnorm(100, mean = 5)
-trace_1 <- rnorm(100, mean = 0)
-trace_2 <- rnorm(100, mean = -5)
-x <- c(1:100)
+set.seed(1056)
 
-data <- data.frame(x, trace_0, trace_1, trace_2)
+nPatients <- 50
+nVisits <- 10
+
+df <- data.frame(
+  fev1_perc = rnorm(n = nPatients * nVisits, mean = 100, sd = 10),
+  uin = rep(seq(nPatients), each = nVisits),
+  visit = rep(seq(nVisits), nPatients)
+)
+c1 <- list(color = toRGB("steelblue", 0.5))
+c2 <- list(color = toRGB("orange", 0.5))
 
 df %>%
   plot_ly(

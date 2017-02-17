@@ -1,6 +1,6 @@
 # This script is same as app-SeedSet.R, only now min max are scaled for all subplots (not just bottom-left)
 
-library(shiny)
+#library(shiny)
 library(plotly)
 library(data.table)
 library(GGally)

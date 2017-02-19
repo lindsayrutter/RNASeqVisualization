@@ -19,28 +19,9 @@ library(gtools)
 library(bsplus)
 
 ui <- fluidPage(
-  fluidRow(
-    column(8, plotlyOutput("plot")),
-    verbatimTextOutput("click"),
-    column(4, plotlyOutput("plot2")),
-    bs_carousel(id = "tabPrev", use_indicators = TRUE) %>%
-      bs_append(
-        content = bs_carousel_image(src = "knitr/birdSnow.jpg"),
-        caption = bs_carousel_caption("Snow bird")
-      ) %>%
-      bs_append(
-        content = bs_carousel_image(src = plotlyOutput("plot2")),
-        caption = bs_carousel_caption("Green lake house")
-      ) %>%
-      bs_append(
-        content = bs_carousel_image(src = "knitr/igloo.jpg"),
-        caption = bs_carousel_caption("Glowing igloo")
-      ) %>%
-      bs_append(
-        content = bs_carousel_image(src = "knitr/purpleLake.jpg"),
-        caption = bs_carousel_caption("Purple lake")
-      )
-  )
+  plotlyOutput("plot"),
+  verbatimTextOutput("click"),
+  plotlyOutput("plot2")
 )
 
 

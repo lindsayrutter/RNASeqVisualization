@@ -54,16 +54,13 @@ server <- function(input, output, session) {
       "Click on a state to view event data"
     }
     else{
-      # str(d())
-      # d()$curveNumber
-      # dat[d()$curveNumber+1,]
-      # dat[d()$curveNumber+1,]$ID
       indDat <- as.data.frame(dat_long[variable %in% dat[d()$curveNumber+1,]$ID])
       str(indDat)
-      # levels(indDat$group)[1]
-      #levels(indDat$group)[2]
     }
   })
+
+  z = 1;
+  as.formula(paste0("plot", z))
 
   output$plot2 <- renderPlotly({
     ax <- list(title = "", showticklabels = TRUE)

@@ -65,58 +65,21 @@ for (i in 1:myLength){
     }
 }
 
-cnP <- cnToPlot[which(cnToPlot$curveNumber==curveNumber),]
-cnHex <- cnToID(attr(pS[cnP$ki,cnP$kj]$data, "cID"))
-hexVal <- as.numeric(as.character(cnHex[which(cnHex$curveNumber==curveNumber),]$hexID))
+cnP <- cnToPlot[which(cnToPlot$curveNumber==25),]
+cnH <- cnToID(attr(pS[cnP$ki,cnP$kj]$data, "cID"))
+cnHex <- cbind(cnH[,c(1,2)], curveNumber = cnToPlot[intersect(which(cnToPlot$ki==cnP$ki), which(cnToPlot$kj==cnP$kj)),]$curveNumber)
+hexVal <- as.numeric(as.character(cnHex[which(cnHex$curveNumber==25),]$hexID))
 obsns <- which(attr(pS[cnP$ki,cnP$kj]$data, "cID")==hexVal)
 dat <- bindata[obsns,]
 
-i=2
-n=ncol(bindata)-1
-while (i<=n){
-  ki=i
-  kj=i-1
-  while (ki<=n){
-    pi = (ki-1)*5+kj
-    plotDat$main$plots[pi][[1]] <- plotDat$main$plots[pi][[1]] + geom_point(data = dat(), aes_string(x = colnames(dat()[kj+1]), y = colnames(dat()[ki+1])), inherit.aes = FALSE, colour = "white", size = 0.5)
-    ki=ki+1
-  }
-  i=i+1
-}
-
-
-
-
-cnToPlot = data.frame()
-cN=1
-i=2
-n=ncol(bindata)-1
-while (i<=n){
-  ki=i
-  kj=i-1
-  while (ki<=n){
-    myLength <- length(table(attr(pS[ki,kj]$data, "cID")))
-    cnToPlot = rbind(cnToPlot, cbind(ki = rep(ki, myLength), kj = rep(kj, myLength), curveNumber = cN:(cN+myLength-1)))
-    ki=ki+1
-    cN=cN+myLength+1
-  }
-  cN=cN+i
-  i=i+1
-}
-
-
 ggPS %>% onRender("
-           function(el, x) {
-           console.log(el)
+           function(el, x, data) {
+          el = el;
           x=x;
-           el = el;
-console.log(x.data)
-console.log(x.data[12].yaxis)
-split1 = (x.data[12].text).split(' ')
-hexID = (x.data[12].text).split(' ')[2]
-counts = split1[1].split('<')[0]
-console.log(hexID)
-console.log(counts)
+          var data = data[0];
+          console.log(el)
+          console.log(x)
+          console.log(data)
 
            myGraph = document.getElementById(el.id);
            el.on('plotly_click', function(e) {
@@ -124,13 +87,16 @@ console.log(counts)
            console.log(e)
            console.log(e.points[0].curveNumber)
 
-          cN = 1;
-          i = 2;
-          n = myGraph.getElementsByClassName('subplot').length;
-
+          cN = e.points[0].curveNumber
           console.log(cN)
-          console.log(i)
-          console.log(n)
+          console.log(x.data[cN].yaxis)
+          split1 = (x.data[cN].text).split(' ')
+          hexID = (x.data[cN].text).split(' ')[2]
+          counts = split1[1].split('<')[0]
+          console.log(hexID)
+          console.log(counts)
+          //n = myGraph.getElementsByClassName('subplot').length;
+
 
 
            for(var i=0; i < e.points.length; i++){
@@ -149,5 +115,5 @@ console.log(counts)
            Plotly.relayout(el.id,{annotations: annotations})
            }
            })}
-           ")
+           ", data = pS[3,2]$data)
 

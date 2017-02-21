@@ -22,7 +22,7 @@ server <- shinyServer(function(input, output, session) {
   }
 
   set.seed(1)
-  bindata <- data.frame(ID = paste0("ID",1:50), A=rnorm(50), B=rnorm(50), C=rnorm(50), D=rnorm(50), E=rnorm(50))
+  bindata <- data.frame(ID = paste0("ID",1:100), A=rnorm(100), B=rnorm(100), C=rnorm(100), D=rnorm(100), E=rnorm(100))
   bindata$ID <- as.character(bindata$ID)
 
   maxVal = max(abs(bindata[,2:6]))

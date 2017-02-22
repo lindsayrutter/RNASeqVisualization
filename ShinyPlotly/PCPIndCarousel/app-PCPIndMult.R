@@ -36,7 +36,7 @@ server <- shinyServer(function(input, output) {
   dat_long$group <- factor(dat_long$group)
 
   output$plot <- renderPlotly({
-    plot_ly(dat_long, x= ~x, y= ~value, type = 'scatter', mode = 'lines+markers', color = ~variable)  %>% layout(dragmode="box", showlegend = FALSE)
+    plot_ly(dat_long, x= ~x, y= ~value, type = 'scatter', mode = 'lines+markers', color = ~variable) %>% layout(dragmode="box", showlegend = FALSE)
   })
 
   d <- reactive(event_data("plotly_selected"))
@@ -75,20 +75,28 @@ server <- shinyServer(function(input, output) {
   # are visible on the web page.
   observeEvent(d(),{
     lengthY <- reactive((length(d()$y)))
-    yVal <- reactive((d()$y))
-  for (i in 1:lengthY()) {
-    # Need local so that each item gets its own number. Without it, the value
-    # of i in the renderPlot() will be the same across all instances, because
-    # of when the expression is evaluated.
-    local({
-      my_i <- i
-      plotname <- paste("plot", my_i, sep="")
+    curveY <- reactive(d()$curveNumber)
+    for (i in 1:lengthY()) {
+      # Need local so that each item gets its own number. Without it, the value
+      # of i in the renderPlot() will be the same across all instances, because
+      # of when the expression is evaluated.
+      local({
+        my_i <- i
+        plotname <- paste("plot", my_i, sep="")
 
-      output[[plotname]] <- renderPlotly({
-        plot_ly(x = c(4, 4), y = c(0, 10), mode = "lines") %>% add_trace(x = c(3, 5), y = c(yVal()[my_i], yVal()[my_i]))
+        ax <- list(title = "", showticklabels = TRUE)
+        ay <- list(title = "Read Count")
+        indDat <- as.data.frame(dat_long[variable %in% dat[curveY()+1,]$ID])
+        g1 <- levels(indDat$group)[1]
+        g2 <- levels(indDat$group)[2]
+        g1m <- mean(filter(indDat, group==g1)$value)
+        g2m <- mean(filter(indDat, group==g2)$value)
+
+        output[[plotname]] <- renderPlotly({
+          indDat %>% plot_ly(x = ~group, y = ~value, type = "scatter", marker = list(size = 10), color = ~group, colors = "Set2", hoverinfo = "text", text = paste0("Read count = ", format(round(indDat$value, 2), nsmall = 2))) %>% layout(xaxis = ax, yaxis = ay, legend = list(x = 0.35, y = -0.26)) %>% add_segments(x = g1, xend = g2, y = g1m, yend = g2m, showlegend = FALSE, line = list(color='#000000')) %>% add_trace(x = g1, y= g1m, showlegend = FALSE, hoverinfo = "text", text = paste0("Mean Read Count = ", round(g1m, digits = 2)), marker = list(color='#000000')) %>% add_trace(x = g2, y= g2m, showlegend = FALSE, hoverinfo = "text", text = paste0("Mean Read Count = ", round(g2m, digits = 2)), marker = list(color='#000000'))
+        })
       })
-    })
-  }
+    }
   })
 })
 

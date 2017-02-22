@@ -46,7 +46,7 @@ server <- shinyServer(function(input, output) {
       "Click on a state to view event data"
     }
     else{
-      str(d()$y)
+      str(d()$curveNumber)
     }
   })
 
@@ -54,7 +54,7 @@ server <- shinyServer(function(input, output) {
   # Insert the right number of plot output objects into the web page
   output$plots <- renderUI({
 
-    lengthY <- reactive((length(d()$y)))
+    lengthY <- reactive((length(unique(d()$curveNumber))))
     if (lengthY()<1){
       plot_output_list <- list()
     }
@@ -74,7 +74,7 @@ server <- shinyServer(function(input, output) {
   # Call renderPlot for each one. Plots are only actually generated when they
   # are visible on the web page.
   observeEvent(d(),{
-    lengthY <- reactive((length(d()$y)))
+    lengthY <- reactive(length(unique(d()$curveNumber)))
     for (i in 1:lengthY()) {
       # Need local so that each item gets its own number. Without it, the value
       # of i in the renderPlot() will be the same across all instances, because

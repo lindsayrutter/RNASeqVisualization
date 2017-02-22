@@ -75,13 +75,13 @@ server <- shinyServer(function(input, output) {
   # are visible on the web page.
   observeEvent(d(),{
     lengthY <- reactive((length(d()$y)))
-    curveY <- reactive(d()$curveNumber)
     for (i in 1:lengthY()) {
       # Need local so that each item gets its own number. Without it, the value
       # of i in the renderPlot() will be the same across all instances, because
       # of when the expression is evaluated.
       local({
         my_i <- i
+        curveY <- reactive(d()$curveNumber[my_i])
         plotname <- paste("plot", my_i, sep="")
 
         ax <- list(title = "", showticklabels = TRUE)

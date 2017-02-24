@@ -2,16 +2,30 @@ library(shiny)
 library(plotly)
 library(data.table)
 library(dplyr)
-library(tidyr)
 library(bsplus)
+
+# ui <- shinyUI(pageWithSidebar(
+#   headerPanel("Dynamic number of plots"),
+#
+#   sidebarPanel(
+#     plotlyOutput("plot")
+#   ),
+#
+#   mainPanel(
+#     # This is the dynamic UI for the plots
+#     bs_carousel(id = "tabPrev", use_indicators = TRUE) %>%
+#       bs_append(content = uiOutput("plots"))
+#     )
+#   )
+# )
 
 ui <- shinyUI(fluidPage(
   fluidRow(
     column(8,
-           plotlyOutput("plot")),
+           bs_carousel(id = "tabPrev", use_indicators = TRUE) %>%
+           bs_append(content = uiOutput("plots"))),
     column(4,
-           uiOutput("car_ui"),
-           uiOutput("plots")
+           plotlyOutput("plot")
     ))))
 
 server <- shinyServer(function(input, output) {
@@ -38,43 +52,24 @@ server <- shinyServer(function(input, output) {
   d <- reactive(event_data("plotly_selected"))
 
   observeEvent(d(),{
-
-    output$car_ui <- renderUI({
-
-      lengthY <- length(unique(d()$curveNumber))
-      if (lengthY<1){
-        plot_output_list <- list()
-      }
-      else{
-        plot_output_list <- lapply(1:lengthY, function(i) {
-          plotname <- paste("plot", i, sep="")
-          plotlyOutput(plotname, height = 280, width = 250)
-        })
-      }
-
-      car <- bs_carousel(id = "carousel", use_indicators = TRUE)
-      Reduce(bs_append, plot_output_list, init=car)
-    })
-
-
-    # Insert the right number of plot output objects into the web page
+  # Insert the right number of plot output objects into the web page
     output$plots <- renderUI({
 
-      lengthY <- reactive((length(unique(d()$curveNumber))))
-      if (lengthY()<1){
-        plot_output_list <- list()
-      }
-      else{
-        plot_output_list <- lapply(1:lengthY(), function(i) {
-          plotname <- paste("plot", i, sep="")
-          plotlyOutput(plotname, height = 280, width = 250)
-        })
-      }
+    lengthY <- reactive((length(unique(d()$curveNumber))))
+    if (lengthY()<1){
+      plot_output_list <- list()
+    }
+    else{
+      plot_output_list <- lapply(1:lengthY(), function(i) {
+        plotname <- paste("plot", i, sep="")
+        plotlyOutput(plotname, height = 280, width = 250)
+      })
+    }
 
-      # Convert the list to a tagList - this is necessary for the list of items
-      # to display properly.
-      do.call(tagList, plot_output_list)
-    })
+    # Convert the list to a tagList - this is necessary for the list of items
+    # to display properly.
+    do.call(tagList, plot_output_list)
+  })
   })
 
   # Call renderPlot for each one. Plots are only actually generated when they
@@ -99,7 +94,7 @@ server <- shinyServer(function(input, output) {
         g2m <- mean(filter(indDat, group==g2)$value)
 
         output[[plotname]] <- renderPlotly({
-          indDat %>% plot_ly(x = ~group, y = ~value, type = "scatter", marker = list(size = 10), color = ~group, colors = "Set2", hoverinfo = "text", text = paste0("Read count = ", format(round(indDat$value, 2), nsmall = 2))) %>% layout(showlegend = FALSE, xaxis = ax, yaxis = ay, legend = list(x = 0.35, y = -0.26)) %>% add_segments(x = g1, xend = g2, y = g1m, yend = g2m, showlegend = FALSE, line = list(color='#000000')) %>% add_trace(x = g1, y= g1m, showlegend = FALSE, hoverinfo = "text", text = paste0("Mean Read Count = ", round(g1m, digits = 2)), marker = list(color='#000000')) %>% add_trace(x = g2, y= g2m, showlegend = FALSE, hoverinfo = "text", text = paste0("Mean Read Count = ", round(g2m, digits = 2)), marker = list(color='#000000'))
+          indDat %>% plot_ly(x = ~group, y = ~value, type = "scatter", marker = list(size = 10), color = ~group, colors = "Set2", hoverinfo = "text", text = paste0("Read count = ", format(round(indDat$value, 2), nsmall = 2))) %>% layout(xaxis = ax, yaxis = ay, legend = list(x = 0.35, y = -0.26)) %>% add_segments(x = g1, xend = g2, y = g1m, yend = g2m, showlegend = FALSE, line = list(color='#000000')) %>% add_trace(x = g1, y= g1m, showlegend = FALSE, hoverinfo = "text", text = paste0("Mean Read Count = ", round(g1m, digits = 2)), marker = list(color='#000000')) %>% add_trace(x = g2, y= g2m, showlegend = FALSE, hoverinfo = "text", text = paste0("Mean Read Count = ", round(g2m, digits = 2)), marker = list(color='#000000'))
         })
       })
     }

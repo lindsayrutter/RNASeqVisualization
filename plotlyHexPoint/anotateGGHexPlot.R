@@ -88,11 +88,10 @@ ggPS %>% onRender("
            console.log(e.points[0].curveNumber)
 
           cN = e.points[0].curveNumber
-          console.log(cN)
-          console.log(x.data[cN].yaxis)
           split1 = (x.data[cN].text).split(' ')
           hexID = (x.data[cN].text).split(' ')[2]
           counts = split1[1].split('<')[0]
+          console.log(cN)
           console.log(hexID)
           console.log(counts)
           //n = myGraph.getElementsByClassName('subplot').length;

@@ -82,11 +82,18 @@ ggPS %>% onRender("
           console.log(x)
           console.log(data)
 
-          myGraph = document.getElementById(el.id);
+          console.log(document.getElementsByClassName('cartesianlayer')[0].childNodes.length);
+
           el.on('plotly_click', function(e) {
             console.log(e.points[0])
-            console.log(e.points[0].xaxis._id)
-            console.log(e.points[0].yaxis._id)
+            xVar = (e.points[0].xaxis._id).replace(/[^0-9]/g,'')
+            if (xVar.length == 0) xVar = 1
+            console.log(xVar)
+
+            yVar = (e.points[0].yaxis._id).replace(/[^0-9]/g,'')
+            if (yVar.length == 0) yVar = 1
+            console.log(yVar)
+
             cN = e.points[0].curveNumber
             split1 = (x.data[cN].text).split(' ')
             hexID = (x.data[cN].text).split(' ')[2]

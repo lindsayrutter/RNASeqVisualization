@@ -65,15 +65,16 @@ for (i in 1:myLength){
     }
 }
 
-cnP <- cnToPlot[which(cnToPlot$curveNumber==25),]
+cN <- 157
+cnP <- cnToPlot[which(cnToPlot$curveNumber==cN),]
 cnH <- cnToID(attr(pS[cnP$ki,cnP$kj]$data, "cID"))
 cnHex <- cbind(cnH[,c(1,2)], curveNumber = cnToPlot[intersect(which(cnToPlot$ki==cnP$ki), which(cnToPlot$kj==cnP$kj)),]$curveNumber)
-hexVal <- as.numeric(as.character(cnHex[which(cnHex$curveNumber==25),]$hexID))
+hexVal <- as.numeric(as.character(cnHex[which(cnHex$curveNumber==cN),]$hexID))
 obsns <- which(attr(pS[cnP$ki,cnP$kj]$data, "cID")==hexVal)
 dat <- bindata[obsns,]
 
 ggPS %>% onRender("
-           function(el, x, data) {
+          function(el, x, data) {
           el = el;
           x=x;
           var data = data[0];
@@ -81,38 +82,19 @@ ggPS %>% onRender("
           console.log(x)
           console.log(data)
 
-           myGraph = document.getElementById(el.id);
-           el.on('plotly_click', function(e) {
-           var pts = '';
-           console.log(e)
-           console.log(e.points[0].curveNumber)
-
-          cN = e.points[0].curveNumber
-          split1 = (x.data[cN].text).split(' ')
-          hexID = (x.data[cN].text).split(' ')[2]
-          counts = split1[1].split('<')[0]
-          console.log(cN)
-          console.log(hexID)
-          console.log(counts)
-          //n = myGraph.getElementsByClassName('subplot').length;
-
-
-
-           for(var i=0; i < e.points.length; i++){
-           var annotate_text = 'x = '+e.points[i].x +
-           'y = '+e.points[i].y.toPrecision(4);
-
-           var annotation = {
-           text: annotate_text,
-           x: e.points[i].x,
-           y: parseFloat(e.points[i].y.toPrecision(4))
-           }
-           console.log(annotation)
-           console.log(el.layout.annotations)
-           annotations = el.layout.annotations || [];
-           annotations.push(annotation);
-           Plotly.relayout(el.id,{annotations: annotations})
-           }
-           })}
+          myGraph = document.getElementById(el.id);
+          el.on('plotly_click', function(e) {
+            console.log(e.points[0])
+            console.log(e.points[0].xaxis._id)
+            console.log(e.points[0].yaxis._id)
+            cN = e.points[0].curveNumber
+            split1 = (x.data[cN].text).split(' ')
+            hexID = (x.data[cN].text).split(' ')[2]
+            counts = split1[1].split('<')[0]
+            console.log(cN)
+            console.log(hexID)
+            console.log(counts)
+          })}
            ", data = pS[3,2]$data)
+
 

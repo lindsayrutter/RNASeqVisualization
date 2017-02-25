@@ -20,7 +20,7 @@ function(el, x) {
         y: [5, 5, 5],
         mode: 'markers',
         marker: {
-          color: 'red',
+          color: 'green',
           size: 20
         }
       };

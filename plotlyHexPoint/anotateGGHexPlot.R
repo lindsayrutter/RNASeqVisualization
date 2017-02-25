@@ -82,7 +82,8 @@ ggPS %>% onRender("
           console.log(x)
           console.log(data)
 
-          console.log(document.getElementsByClassName('cartesianlayer')[0].childNodes.length);
+          myLength = Math.sqrt(document.getElementsByClassName('cartesianlayer')[0].childNodes.length);
+          console.log(myLength)
 
           el.on('plotly_click', function(e) {
             console.log(e.points[0])
@@ -93,6 +94,12 @@ ggPS %>% onRender("
             yVar = (e.points[0].yaxis._id).replace(/[^0-9]/g,'')
             if (yVar.length == 0) yVar = 1
             console.log(yVar)
+
+            myX = myLength + 1 - (yVar - myLength * (xVar - 1))
+            myY = xVar
+
+            console.log(myX)
+            console.log(myY)
 
             cN = e.points[0].curveNumber
             split1 = (x.data[cN].text).split(' ')

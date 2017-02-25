@@ -2,14 +2,7 @@ library(plotly)
 library(data.table)
 library(GGally)
 library(hexbin)
-
-cnToID <- function(h){
-  df <- data.frame(table(h)) #h@cID
-  colnames(df) <- c("hexID","count")
-  cnID <- df[order(df$count,as.character(df$hexID)),]
-  cnID$curveNumber <- seq(1, nrow(cnID))
-  return(cnID)
-}
+library(htmlwidgets)
 
 set.seed(1)
 bindata <- data.frame(ID = paste0("ID",1:100), A=rnorm(100), B=rnorm(100), C=rnorm(100), D=rnorm(100), E=rnorm(100))
@@ -37,23 +30,6 @@ for(i in 2:p$nrow) {
   }
 }
 
-cnToPlot = data.frame()
-cN=1
-i=2
-n=ncol(bindata)-1
-while (i<=n){
-  ki=i
-  kj=i-1
-  while (ki<=n){
-    myLength <- length(table(attr(pS[ki,kj]$data, "cID")))
-    cnToPlot = rbind(cnToPlot, cbind(ki = rep(ki, myLength), kj = rep(kj, myLength), curveNumber = cN:(cN+myLength-1)))
-    ki=ki+1
-    cN=cN+myLength+1
-  }
-  cN=cN+i
-  i=i+1
-}
-
 ggPS <- ggplotly(pS)
 
 myLength <- length(ggPS[["x"]][["data"]])
@@ -64,14 +40,6 @@ for (i in 1:myLength){
       ggPS[["x"]][["data"]][[i]]$hoverinfo <- "none"
     }
 }
-
-cN <- 157
-cnP <- cnToPlot[which(cnToPlot$curveNumber==cN),]
-cnH <- cnToID(attr(pS[cnP$ki,cnP$kj]$data, "cID"))
-cnHex <- cbind(cnH[,c(1,2)], curveNumber = cnToPlot[intersect(which(cnToPlot$ki==cnP$ki), which(cnToPlot$kj==cnP$kj)),]$curveNumber)
-hexVal <- as.numeric(as.character(cnHex[which(cnHex$curveNumber==cN),]$hexID))
-obsns <- which(attr(pS[cnP$ki,cnP$kj]$data, "cID")==hexVal)
-dat <- bindata[obsns,]
 
 ggPS %>% onRender("
           function(el, x, data) {
@@ -89,26 +57,26 @@ ggPS %>% onRender("
             console.log(e.points[0])
             xVar = (e.points[0].xaxis._id).replace(/[^0-9]/g,'')
             if (xVar.length == 0) xVar = 1
-            console.log(xVar)
-
             yVar = (e.points[0].yaxis._id).replace(/[^0-9]/g,'')
             if (yVar.length == 0) yVar = 1
-            console.log(yVar)
-
             myX = myLength + 1 - (yVar - myLength * (xVar - 1))
             myY = xVar
-
-            console.log(myX)
-            console.log(myY)
 
             cN = e.points[0].curveNumber
             split1 = (x.data[cN].text).split(' ')
             hexID = (x.data[cN].text).split(' ')[2]
             counts = split1[1].split('<')[0]
-            console.log(cN)
+
+            console.log(myX)
+            console.log(myY)
             console.log(hexID)
             console.log(counts)
           })}
-           ", data = pS[3,2]$data)
+           ", data = pS[5,2]$data)
 
 
+myX <- 5
+myY <- 2
+hexID <- 39
+obsns <- which(attr(pS[myX,myY]$data, "cID")==hexID)
+dat <- bindata[obsns,]

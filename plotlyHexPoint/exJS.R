@@ -115,14 +115,15 @@ ggplotly(p) %>%
   onRender('
            function(el, x) {
             var graphDiv = document.getElementById(el.id);
+            console.log(graphDiv)
+            console.log(x)
             // reduce the opacity of every trace except for the hover one
             el.on("plotly_click", function(e) {
-              Plotly.restyle(graphDiv, "opacity", 1)
-              var traces = [];
-              for (var i = 0; i < x.data.length; i++) {
-                if (i !== e.points[0].curveNumber) traces.push(i);
-              }
-              Plotly.restyle(graphDiv, "opacity", 0.2, traces);
+              console.log(e.points[0].data.marker.color)
+              //Plotly.restyle(graphDiv, "opacity", 1)
+              e.points[0].data.marker.color = "rgba(0, 1, 0, 1)"
+
+              Plotly.restyle(graphDiv, e);
            })
           }
           ')

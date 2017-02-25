@@ -5,7 +5,7 @@ library(hexbin)
 library(htmlwidgets)
 
 set.seed(1)
-bindata <- data.frame(ID = paste0("ID",1:100), A=rnorm(100), B=rnorm(100), C=rnorm(100), D=rnorm(100), E=rnorm(100))
+bindata <- data.frame(ID = paste0("ID",1:50000), A=rnorm(50000), B=rnorm(50000), C=rnorm(50000), D=rnorm(50000), E=rnorm(50000))
 bindata$ID <- as.character(bindata$ID)
 
 maxVal = max(abs(bindata[,2:6]))
@@ -41,14 +41,18 @@ for (i in 1:myLength){
     }
 }
 
+for(i in 2:(p$nrow)) {
+  for(j in 1:(p$nrow-1)) {
+    bindata[[paste(i,j,sep="-")]] <- attr(pS[i,j]$data, "cID")
+  }
+}
+
 ggPS %>% onRender("
           function(el, x, data) {
           el = el;
           x=x;
-          var data = data[0];
           console.log(el)
           console.log(x)
-          console.log(data)
 
           myLength = Math.sqrt(document.getElementsByClassName('cartesianlayer')[0].childNodes.length);
           console.log(myLength)
@@ -71,8 +75,16 @@ ggPS %>% onRender("
             console.log(myY)
             console.log(hexID)
             console.log(counts)
+
+            var selected_rows = [];
+
+            data.forEach(function(row){
+              if(row[myX+'-'+myY]==hexID) selected_rows.push(row);
+            });
+            console.log(selected_rows);
+
           })}
-           ", data = pS[5,2]$data)
+           ", data = bindata)
 
 
 myX <- 5

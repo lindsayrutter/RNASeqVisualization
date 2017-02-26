@@ -19,24 +19,20 @@ ggPS <- ggplotly(pS)
 
 ggPS %>% onRender("
 function(el, x) {
-  console.log(el)
-  var myGraph = document.getElementsByClassName('subplot xy2');
-  console.log(el.'plot-container plotly')
-  el.on('plotly_click', function(e)
-    {
+                console.log(el)
+                el.on('plotly_click', function(e)
+                {
 
-      var trace1 = {
-        x: [200, 300, 400],
-        y: [300, 350, 400],
-        mode: 'markers',
-        marker: {
-          color: 'green',
-          size: 20
-        }
-      };
-
-    Plotly.addTraces(el[0][0][0][3][1][6][4], trace1);
-    //Plotly.addTraces(myGraph, trace1);
-  }
-)}
-")
+                var trace1 = {
+                x: [e.points[0].x],
+                y: [e.points[0].y],
+                mode: 'markers',
+                marker: {
+                color: 'green',
+                size: 20
+                }
+                };
+                Plotly.addTraces(el.id, trace1);
+                }
+                )}
+                ")

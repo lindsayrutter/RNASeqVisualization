@@ -111,22 +111,27 @@ p <- ggplot(data = df, aes(x=x,y=y)) +
   scale_y_continuous(limits = c(myMin, myMax)) +
   scale_x_continuous(expand = c(0, 0)) + scale_y_continuous(expand = c(0, 0))
 
-ggplotly(p) %>%
-  onRender('
-           function(el, x) {
-            var graphDiv = document.getElementById(el.id);
-            console.log(graphDiv)
-            console.log(x)
-            // reduce the opacity of every trace except for the hover one
-            el.on("plotly_click", function(e) {
-              console.log(e.points[0].data.marker.color)
-              //Plotly.restyle(graphDiv, "opacity", 1)
-              e.points[0].data.marker.color = "rgba(0, 1, 0, 1)"
+ggPS <- ggplotly(p)
 
-              Plotly.restyle(graphDiv, e);
-           })
-          }
-          ')
+ggPS %>% onRender("
+           function(el, x) {
+            console.log(el)
+            el.on('plotly_click', function(e){
+              var trace1 = {
+              x: [e.points[0].x],
+              y: [e.points[0].y],
+              mode: 'markers',
+              marker: {
+                color: 'red',
+                size: 10
+              }
+            };
+            Plotly.addTraces(el.id, trace1);
+            })
+           }")
+
+
+
 
 ################ Ex: Goes to URL of scatterplot points ################
 library(plotly)

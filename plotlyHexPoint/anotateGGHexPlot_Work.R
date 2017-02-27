@@ -49,95 +49,29 @@ for(i in 2:(p$nrow)) {
 }
 
 ggPS %>% onRender("
-          function(el, x, data) {
-          el = el;
-          x=x;
-          console.log(el)
-          console.log(x)
-          titleName = document.getElementsByClassName('g-xtitle')
-          console.log(titleName[0].textContent)
+              function(el, x, data) {
 
-          myLength = Math.sqrt(document.getElementsByClassName('cartesianlayer')[0].childNodes.length);
-          console.log(myLength)
+                  myLength = Math.sqrt(document.getElementsByClassName('cartesianlayer')[0].childNodes.length);
 
-          el.on('plotly_click', function(e) {
+                  el.on('plotly_click', function(e) {
+                  xVar = (e.points[0].xaxis._id).replace(/[^0-9]/g,'')
+                  if (xVar.length == 0) xVar = 1
+                  yVar = (e.points[0].yaxis._id).replace(/[^0-9]/g,'')
+                  if (yVar.length == 0) yVar = 1
+                  myX = myLength + 1 - (yVar - myLength * (xVar - 1))
+                  myY = xVar
 
-            Plotly.deleteTraces(el.id, 0);
+                  cN = e.points[0].curveNumber
+                  split1 = (x.data[cN].text).split(' ')
+                  hexID = (x.data[cN].text).split(' ')[2]
+                  counts = split1[1].split('<')[0]
 
-            //console.log(e.points[0])
-            xVar = (e.points[0].xaxis._id).replace(/[^0-9]/g,'')
-            if (xVar.length == 0) xVar = 1
-            yVar = (e.points[0].yaxis._id).replace(/[^0-9]/g,'')
-            if (yVar.length == 0) yVar = 1
-            myX = myLength + 1 - (yVar - myLength * (xVar - 1))
-            myY = xVar
+                  var selected_rows = [];
 
-            cN = e.points[0].curveNumber
-            split1 = (x.data[cN].text).split(' ')
-            hexID = (x.data[cN].text).split(' ')[2]
-            counts = split1[1].split('<')[0]
+                  data.forEach(function(row){
+                  if(row[myX+'-'+myY]==hexID) selected_rows.push(row);
+                  });
+                  console.log(selected_rows);
 
-            //selected_rowsA = [];
-            //selected_rowsB = [];
-            //selected_rowsC = [];
-            //selected_rowsD = [];
-            //selected_rowsE = [];
-            selected_rows = [];
-            //axisNames = data.colNames
-            //console.log(axisNames)
-            //ax0 = axisNames.slice(0, 5)
-            //console.log(ax0)
-
-            //data.bindata.forEach(function(row){
-            //if(row[myX+'-'+myY]==hexID) selected_rows.push([row.A, row.B]);
-            //if(row[myX+'-'+myY]==hexID) selected_rows.push([row['A', 'B', 'C']]);
-            //if(row[myX+'-'+myY]==hexID) selected_rows.push([row[[axisNames.slice(0, 5)]]]);
-            //if(row[myX+'-'+myY]==hexID) selected_rows.push([row[ax0]]);
-            //if(row[myX+'-'+myY]==hexID){
-              //selected_rowsA.push(row[axisNames[0]]);
-              //selected_rowsB.push(row[axisNames[1]]);
-              //selected_rowsC.push(row[axisNames[2]]);
-              //selected_rowsD.push(row[axisNames[3]]);
-              //selected_rowsE.push(row[axisNames[4]]);
-              //selected_rows.push(row)
-            //}
-            //});
-
-            //  console.log(selected_rows);
-            //console.log(selected_rowsA);
-            //console.log(selected_rowsB);
-            //console.log(selected_rowsC);
-            //console.log(selected_rowsD);
-            //console.log(selected_rowsE);
-
-            //var trace1 = {
-            //    x: selected_rowsA,
-            //    y: selected_rowsE,
-            //    mode: 'markers',
-            //    marker: {
-            //      color: 'orange',
-            //     size: 5
-            //    }
-            //};
-
-            // var trace2 = {
-            //     x: selected_rowsB,
-            //     y: selected_rowsC,
-            //     mode: 'markers',
-            //     marker: {
-            //       color: 'green',
-            //       size: 5
-            //     }
-            // };
-
-              var selected_rows = [];
-
-              data.bindata.forEach(function(row){
-                if(row[myX+'-'+myY]==hexID) selected_rows.push(row);
-              });
-              console.log(selected_rows);
-
-            //Plotly.addTraces(el.id, trace1);
-            //Plotly.addTraces(el.id, trace2);
-          })}
-           ", data = list(bindata=bindata, colNames = colNames))
+                  })}
+                  ", data = bindata)

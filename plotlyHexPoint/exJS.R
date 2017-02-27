@@ -130,6 +130,47 @@ ggPS %>% onRender("
             })
            }")
 
+################# Now add a red trace point #################
+
+ggPS %>% onRender("
+           function(el, x) {
+                  console.log(el)
+                  el.on('plotly_click', function(e){
+                  var trace1 = {
+                  x: [e.points[0].x],
+                  y: [e.points[0].y],
+                  mode: 'markers',
+                  marker: {
+                  color: 'red',
+                  size: 10
+                  }
+                  };
+                  Plotly.addTraces(el.id, trace1);
+                  })
+                  }")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -49,65 +49,30 @@ for(i in 2:(p$nrow)) {
 }
 
 ggPS %>% onRender("
-          function(el, x, data) {
-          el = el;
-          x=x;
-          console.log(el)
-          console.log(x)
-          titleName = document.getElementsByClassName('g-xtitle')
-          console.log(titleName[0].textContent)
+              function(el, x, data) {
 
-          myLength = Math.sqrt(document.getElementsByClassName('cartesianlayer')[0].childNodes.length);
-          console.log(myLength)
+                  myLength = Math.sqrt(document.getElementsByClassName('cartesianlayer')[0].childNodes.length);
 
-          el.on('plotly_click', function(e) {
-            //console.log(e.points[0])
-            xVar = (e.points[0].xaxis._id).replace(/[^0-9]/g,'')
-            if (xVar.length == 0) xVar = 1
-            yVar = (e.points[0].yaxis._id).replace(/[^0-9]/g,'')
-            if (yVar.length == 0) yVar = 1
-            myX = myLength + 1 - (yVar - myLength * (xVar - 1))
-            myY = xVar
 
-            cN = e.points[0].curveNumber
-            split1 = (x.data[cN].text).split(' ')
-            hexID = (x.data[cN].text).split(' ')[2]
-            counts = split1[1].split('<')[0]
+                  el.on('plotly_click', function(e) {
+                  xVar = (e.points[0].xaxis._id).replace(/[^0-9]/g,'')
+                  if (xVar.length == 0) xVar = 1
+                  yVar = (e.points[0].yaxis._id).replace(/[^0-9]/g,'')
+                  if (yVar.length == 0) yVar = 1
+                  myX = myLength + 1 - (yVar - myLength * (xVar - 1))
+                  myY = xVar
 
-            selected_rowsA = [];
-            selected_rowsE = [];
-            //selected_rows = [];
-            axisNames = data.colNames
-            //console.log(axisNames)
-            //ax0 = axisNames.slice(0, 5)
-            //console.log(ax0)
+                  cN = e.points[0].curveNumber
+                  split1 = (x.data[cN].text).split(' ')
+                  hexID = (x.data[cN].text).split(' ')[2]
+                  counts = split1[1].split('<')[0]
 
-            data.bindata.forEach(function(row){
-            //if(row[myX+'-'+myY]==hexID) selected_rows.push([row.A, row.B]);
-            //if(row[myX+'-'+myY]==hexID) selected_rows.push([row['A', 'B', 'C']]);
-            //if(row[myX+'-'+myY]==hexID) selected_rows.push([row[[axisNames.slice(0, 5)]]]);
-            //if(row[myX+'-'+myY]==hexID) selected_rows.push([row[ax0]]);
-            if(row[myX+'-'+myY]==hexID){
-              selected_rowsA.push(row.A);
-              selected_rowsE.push(row.E);
-              //selected_rows.push(row)
-            }
-            });
-            console.log(selected_rowsA);
-            console.log(selected_rowsE);
-            //console.log(selected_rows);
-            //console.log(selected_rows.A);
+                  var selected_rows = [];
 
-            var trace1 = {
-                x: selected_rowsA,
-                y: selected_rowsE,
-                mode: 'markers',
-                marker: {
-                  color: 'orange',
-                  size: 5
-                }
-            };
+                  data.forEach(function(row){
+                  if(row[myX+'-'+myY]==hexID) selected_rows.push(row);
+                  });
+                  console.log(selected_rows);
 
-            Plotly.addTraces(el.id, trace1);
-          })}
-           ", data = list(bindata=bindata, colNames = colNames))
+                  })}
+                  ", data = bindata)

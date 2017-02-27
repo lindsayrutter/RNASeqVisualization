@@ -21,38 +21,49 @@ for(x in 2:p$nrow) {
 
 p3 <- ggplotly(p2)
 
-p3 %>% onRender("
-function(el, x, data) {
-                console.log(el)
-                // Number of rows is myLength=3
-                myLength = Math.sqrt(document.getElementsByClassName('cartesianlayer')[0].childNodes.length);
+p3 %>% onRender("function(el, x, data) {
 
-                // AxisNames stores the names of the 3 rows ('disp','hp','qsec')
-                AxisNames = [];
-                for (i = 1; i < (myLength+1); i++) {
-                  AxisNames.push(document.getElementsByClassName('infolayer')[0].childNodes[i].textContent);
-                }
-                console.log(AxisNames)
+    console.log(el)
+    // Number of rows is myLength=3
+    myLength = Math.sqrt(document.getElementsByClassName('cartesianlayer')[0].childNodes.length);
+
+    // AxisNames stores the names of the 3 rows ('disp','hp','qsec')
+    AxisNames = [];
+    for (i = 1; i < (myLength+1); i++) {
+      AxisNames.push(document.getElementsByClassName('infolayer')[0].childNodes[i].textContent);
+    }
+    console.log(AxisNames)
 
 
-                el.on('plotly_click', function(e) {
-                  data1 = data[Math.floor(Math.random() * 32) + 1];
-                  data2 = data[Math.floor(Math.random() * 32) + 1];
+    el.on('plotly_click', function(e) {
+      data1 = data[Math.floor(Math.random() * 32) + 1];
+      data2 = data[Math.floor(Math.random() * 32) + 1];
 
-                  for (i = 1; i < (myLength+1); i++) {
+      var myData = [data1, data2];
+      console.log(myData)
 
-                  }
+      var allData = [];
 
-                  var trace1 = {
-                  x: [e.points[0].x],
-                  y: [e.points[0].y],
-                  mode: 'markers',
-                  marker: {
-                  color: 'green',
-                  size: 20
-                  }
-                  };
-                  Plotly.addTraces(el.id, trace1);
-                  }
-                  )}
-                  ", data = dat)
+      for (i = 0; i < myData.length; i++){
+        for (j = 0 ; j < myLength; j++){
+          allData.push(myData[i][AxisNames[j]])
+        }
+      }
+      console.log(myData[0][AxisNames[0]])
+      console.log(allData)
+
+      //result = data1.axisData( AxisNames );
+      //console.log(result)
+
+      var trace1 = {
+      x: [e.points[0].x],
+      y: [e.points[0].y],
+      mode: 'markers',
+      marker: {
+      color: 'green',
+      size: 20
+      }
+      };
+      Plotly.addTraces(el.id, trace1);
+      }
+      )}", data = dat)

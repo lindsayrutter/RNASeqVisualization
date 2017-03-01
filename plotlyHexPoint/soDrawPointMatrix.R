@@ -23,7 +23,6 @@ p3 <- ggplotly(p2)
 
 p3 %>% onRender("function(el, x, data) {
 
-    console.log(el)
     // Number of rows is myLength=3
     myLength = Math.sqrt(document.getElementsByClassName('cartesianlayer')[0].childNodes.length);
 
@@ -32,38 +31,33 @@ p3 %>% onRender("function(el, x, data) {
     for (i = 1; i < (myLength+1); i++) {
       AxisNames.push(document.getElementsByClassName('infolayer')[0].childNodes[i].textContent);
     }
-    console.log(AxisNames)
-
 
     el.on('plotly_click', function(e) {
+      // Grab two random rows of the 32 rows from mtcars dataset and store in myData. In my real code (not this MWE), myData represents an array of 1 or more objects, where each object contains a value for each column in the dataset - here there are three columns - disp, hp, and qsec.
       data1 = data[Math.floor(Math.random() * 32) + 1];
       data2 = data[Math.floor(Math.random() * 32) + 1];
-
       var myData = [data1, data2];
-      console.log(myData)
 
+      //May not be necessary, but this creates one array allData that contains all column values for all randomly selected rows. Since this example has 3 columns (disp, hp, and qsec) and two randomly selected rows, allData has a length of 6.
       var allData = [];
-
       for (i = 0; i < myData.length; i++){
         for (j = 0 ; j < myLength; j++){
           allData.push(myData[i][AxisNames[j]])
         }
       }
-      console.log(myData[0][AxisNames[0]])
       console.log(allData)
 
-      //result = data1.axisData( AxisNames );
-      //console.log(result)
-
+      //This correctly plots the disp on the x-axis and qsec on the y-axis of both randomly selected data frame rows and plots it into the correct scatterplot (bottom left one that has x-axis of disp and y-axis of qsec). This needs to be automated, so that the corresponding x and y values for the 2 randomly selected data frame rows are also plotted on all other scatterplot matrices.
       var trace1 = {
-      x: [e.points[0].x],
-      y: [e.points[0].y],
+      x: [allData[0], allData[3]],
+      y: [allData[2], allData[5]],
       mode: 'markers',
       marker: {
       color: 'green',
       size: 20
       }
       };
+
       Plotly.addTraces(el.id, trace1);
       }
       )}", data = dat)

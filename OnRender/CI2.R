@@ -1,31 +1,50 @@
 library(plotly)
 library(broom)
+library(htmlwidgets)
 
 dat <- mtcars
 dat$mpg <- dat$mpg * 10
+
+ciVal = 100
+#keep <- abs(dat$x - dat$y) >= ciVal
+#df <- dat.frame(dat[keep,])
 
 p <- ggplot(data = dat, aes(x=disp,y=mpg)) + geom_point(size=0.5)
 
 ggplotly(p) %>%
   onRender("
            function(el, x, data) {
-            var graphDiv = document.getElementById(el.id);
             // reduce the opacity of every trace except for the hover one
             el.on('plotly_click', function(e) {
 
+              // Plotly.deleteTraces(el.id, trace1);
+              //console.log(data.ciVal)
+
+              // var selected_rows = [];
+
+              //data.dat.forEach(function(row){
+              //  if(row['disp']-row['mpg'] > 100) selected_rows.push(row);
+              //});
+
+              console.log(selected_rows);
+
+              //Plotly.deleteTraces(el.id, trace1);
               var trace1 = {
                  x: [100, 400],
                  y: [100, 400],
                  mode: 'lines',
-                 marker: {
+                 line: {
                    color: 'gray',
-                   size: 200
-                 }};
+                   width: 100
+                 },
+                 opacity: 0.5
+              }
 
+              //Plotly.deleteTraces(el.id, trace1);
               Plotly.addTraces(el.id, trace1);
            })
           }
-          ", data=dat)
+          ", data = list(dat=dat, ciVal=ciVal))
 
 # var traces = [];
 # for (var i = 0; i < x.data.length; i++) {

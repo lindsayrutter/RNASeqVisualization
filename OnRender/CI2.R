@@ -17,6 +17,8 @@ ggplotly(p) %>%
             // reduce the opacity of every trace except for the hover one
             el.on('plotly_click', function(e) {
 
+              console.log(x)
+
               // Plotly.deleteTraces(el.id, trace1);
               //console.log(data.ciVal)
 
@@ -26,7 +28,7 @@ ggplotly(p) %>%
               //  if(row['disp']-row['mpg'] > 100) selected_rows.push(row);
               //});
 
-              console.log(selected_rows);
+              //console.log(selected_rows);
 
               //Plotly.deleteTraces(el.id, trace1);
               var trace1 = {

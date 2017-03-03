@@ -6,6 +6,7 @@ set.seed(1)
 dat <- mtcars[,c(1,3,4,7)]
 dat[,1] = dat[,1]*10
 dat[,4] = rnorm(32,250,70)
+dat$qsec2 = dat$qsec+10
 
 p <- ggpairs(dat)
 
@@ -25,91 +26,45 @@ p3 <- ggplotly(p2)
 
 p3 %>% onRender("function(el, x, data) {
 
-                myLength = Math.sqrt(document.getElementsByClassName('cartesianlayer')[0].childNodes.length);
+                len = Math.sqrt(document.getElementsByClassName('cartesianlayer')[0].childNodes.length);
 
                 // AxisNames stores the names of the 3 rows ('disp','hp','qsec')
                 AxisNames = [];
-                for (i = 1; i < (myLength+1); i++) {
+                for (i = 1; i < (len+1); i++) {
                 AxisNames.push(document.getElementsByClassName('infolayer')[0].childNodes[i].textContent);
                 }
 
                 el.on('plotly_click', function(e) {
-                data1 = data[Math.floor(Math.random() * 32) + 1];
-                data2 = data[Math.floor(Math.random() * 32) + 1];
-                var myData = [data1, data2];
+                  data1 = data[Math.floor(Math.random() * 32) + 1];
+                  data2 = data[Math.floor(Math.random() * 32) + 1];
+                  var myData = [data1, data2];
 
-                //console.log(myData)
-                //console.log(myData[0])
-                //console.log(myData[1])
-
-                //console.log(AxisNames[0])
-                //console.log(myData[0][AxisNames[0]])
-
-                //console.log(AxisNames[1])
-                //console.log(myData[0][AxisNames[1]])
-
-                //console.log(AxisNames[2])
-                //console.log(myData[0][AxisNames[2]])
-
-                Traces = [];
-                k=0;
-                for (i = 1; i < 3; i++) {
-                  var trace1 = {
-                  x: [myData[0][AxisNames[k]], myData[1][AxisNames[k+1]]],
-                  y: [myData[0][AxisNames[k]], myData[1][AxisNames[k+1]]],
-                  mode: 'markers',
-                  marker: {
-                    color: 'green',
-                    size: 20
-                  },
-                  xaxis: 'x',
-                  yaxis: 'y'
-                };
-                Traces.push(trace1);
-                k++
-                }
-
-                console.log(Traces)
-
-                var trace1 = {
-                  x: [myData[0][AxisNames[0]], myData[1][AxisNames[0]]],
-                  y: [myData[0][AxisNames[2]], myData[1][AxisNames[2]]],
-                  mode: 'markers',
-                  marker: {
-                    color: 'green',
-                    size: 20
-                  },
-                  xaxis: 'x',
-                  yaxis: 'y'
-                };
-
-                //console.log(trace1)
-
-                var trace2 = {
-                  x: [myData[0][AxisNames[0]], myData[1][AxisNames[0]]],
-                  y: [myData[0][AxisNames[1]], myData[1][AxisNames[1]]],
-                  mode: 'markers',
-                  marker: {
-                    color: 'green',
-                    size: 20
-                  },
-                  xaxis: 'x',
-                  //yaxis: 'y2'
-                  yaxis: 'y' + i
-                };
-
-                var trace3 = {
-                  x: [myData[0][AxisNames[1]], myData[1][AxisNames[1]]],
-                  y: [myData[0][AxisNames[2]], myData[1][AxisNames[2]]],
-                  mode: 'markers',
-                  marker: {
-                    color: 'green',
-                    size: 20
-                  },
-                  xaxis: 'x2',
-                  yaxis: 'y4'
-                };
-
-                Plotly.addTraces(el.id, Traces);
+                  var Traces = [];
+                  var i=0;
+                  var k=1;
+                  while ((i*len+k)<=Math.pow((len-1),2)) {
+                    while ((i+k)<len){
+                      var trace = {
+                        x: [myData[0][AxisNames[i]], myData[1][AxisNames[i]]],
+                        y: [myData[0][AxisNames[(len-k)]], myData[1][AxisNames[(len-k)]]],
+                        mode: 'markers',
+                        marker: {
+                          color: 'green',
+                          size: 10
+                        },
+                        xaxis: 'x' + (i+1),
+                        yaxis: 'y' + (i*len+k)
+                      };
+                      console.log('added Trace');
+                      Traces.push(trace);
+                      console.log(Traces);
+                      k++;
+                    }
+                    i++;
+                    k=1;
+                  }
+                  console.log('Print final traces');
+                  console.log(Traces);
+                  Plotly.addTraces(el.id, Traces);
                 }
                 )}", data = dat)

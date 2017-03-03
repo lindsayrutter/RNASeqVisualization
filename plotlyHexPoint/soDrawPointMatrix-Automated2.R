@@ -3,10 +3,7 @@ library(htmlwidgets)
 library(GGally)
 
 set.seed(1)
-dat <- mtcars[,c(1,3,4,7)]
-dat[,1] = dat[,1]*10
-dat[,4] = rnorm(32,250,70)
-dat$qsec2 = dat$qsec+10
+dat <- data.frame(A = rnorm(1000,500,100), B = rnorm(1000,500,100), B = rnorm(1000,500,100), C = rnorm(1000,500,100), D = rnorm(1000,500,100), E = rnorm(1000,500,100))
 
 p <- ggpairs(dat)
 
@@ -38,33 +35,39 @@ p3 %>% onRender("function(el, x, data) {
                   data1 = data[Math.floor(Math.random() * 32) + 1];
                   data2 = data[Math.floor(Math.random() * 32) + 1];
                   var myData = [data1, data2];
+                  console.log(myData);
 
                   var Traces = [];
                   var i=0;
                   var k=1;
                   while ((i*len+k)<=Math.pow((len-1),2)) {
+                        var xArr = [];
+                        for (a=0; a<myData.length; a++){
+                          xArr.push(myData[a][AxisNames[i]])
+                        }
                     while ((i+k)<len){
+                        var yArr = [];
+                        for (a=0; a<myData.length; a++){
+                          yArr.push(myData[a][AxisNames[(len-k)]])
+                        }
+
                       var trace = {
-                        x: [myData[0][AxisNames[i]], myData[1][AxisNames[i]]],
-                        y: [myData[0][AxisNames[(len-k)]], myData[1][AxisNames[(len-k)]]],
+                        x: xArr,
+                        y: yArr,
                         mode: 'markers',
                         marker: {
-                          color: 'green',
+                          color: 'orange',
                           size: 10
                         },
                         xaxis: 'x' + (i+1),
                         yaxis: 'y' + (i*len+k)
                       };
-                      console.log('added Trace');
                       Traces.push(trace);
-                      console.log(Traces);
                       k++;
                     }
                     i++;
                     k=1;
                   }
-                  console.log('Print final traces');
-                  console.log(Traces);
                   Plotly.addTraces(el.id, Traces);
                 }
                 )}", data = dat)

@@ -2,8 +2,10 @@ library(plotly)
 library(htmlwidgets)
 library(GGally)
 
-dat <- mtcars[,c(3,4,7)]
-dat[,3] = dat[,3]*8
+set.seed(1)
+dat <- mtcars[,c(1,3,4,7)]
+dat[,1] = dat[,1]*10
+dat[,4] = rnorm(32,250,70)
 
 p <- ggpairs(dat)
 
@@ -40,14 +42,34 @@ p3 %>% onRender("function(el, x, data) {
                 //console.log(myData[0])
                 //console.log(myData[1])
 
-                console.log(AxisNames[0])
+                //console.log(AxisNames[0])
                 //console.log(myData[0][AxisNames[0]])
 
-                console.log(AxisNames[1])
+                //console.log(AxisNames[1])
                 //console.log(myData[0][AxisNames[1]])
 
-                console.log(AxisNames[2])
+                //console.log(AxisNames[2])
                 //console.log(myData[0][AxisNames[2]])
+
+                Traces = [];
+                k=0;
+                for (i = 1; i < 3; i++) {
+                  var trace1 = {
+                  x: [myData[0][AxisNames[k]], myData[1][AxisNames[k+1]]],
+                  y: [myData[0][AxisNames[k]], myData[1][AxisNames[k+1]]],
+                  mode: 'markers',
+                  marker: {
+                    color: 'green',
+                    size: 20
+                  },
+                  xaxis: 'x',
+                  yaxis: 'y'
+                };
+                Traces.push(trace1);
+                k++
+                }
+
+                console.log(Traces)
 
                 var trace1 = {
                   x: [myData[0][AxisNames[0]], myData[1][AxisNames[0]]],
@@ -61,6 +83,8 @@ p3 %>% onRender("function(el, x, data) {
                   yaxis: 'y'
                 };
 
+                //console.log(trace1)
+
                 var trace2 = {
                   x: [myData[0][AxisNames[0]], myData[1][AxisNames[0]]],
                   y: [myData[0][AxisNames[1]], myData[1][AxisNames[1]]],
@@ -70,7 +94,8 @@ p3 %>% onRender("function(el, x, data) {
                     size: 20
                   },
                   xaxis: 'x',
-                  yaxis: 'y2'
+                  //yaxis: 'y2'
+                  yaxis: 'y' + i
                 };
 
                 var trace3 = {
@@ -85,6 +110,6 @@ p3 %>% onRender("function(el, x, data) {
                   yaxis: 'y4'
                 };
 
-                Plotly.addTraces(el.id, [trace1,trace2,trace3]);
+                Plotly.addTraces(el.id, Traces);
                 }
                 )}", data = dat)

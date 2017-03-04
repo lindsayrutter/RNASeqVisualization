@@ -2,8 +2,8 @@ library(plotly)
 library(htmlwidgets)
 library(GGally)
 
-set.seed(1)
-dat <- data.frame(A = rnorm(1000,500,100), B = rnorm(1000,500,100), B = rnorm(1000,500,100), C = rnorm(1000,500,100), D = rnorm(1000,500,100), E = rnorm(1000,500,100))
+dat <- mtcars[,c(3,4,7)]
+dat[,3] = dat[,3]*8
 
 p <- ggpairs(dat)
 
@@ -56,8 +56,8 @@ p3 %>% onRender("function(el, x, data) {
                         y: yArr,
                         mode: 'markers',
                         marker: {
-                          color: 'orange',
-                          size: 10
+                          color: 'green',
+                          size: 20
                         },
                         xaxis: 'x' + (i+1),
                         yaxis: 'y' + (i*len+k)

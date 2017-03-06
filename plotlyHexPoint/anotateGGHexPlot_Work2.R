@@ -105,7 +105,8 @@ ggPS %>% onRender("
                   size: 7
                   },
                   xaxis: 'x' + (i+1),
-                  yaxis: 'y' + (i*len+k)
+                  yaxis: 'y' + (i*len+k),
+                  hoverinfo: 'none'
                   };
                   Traces.push(trace);
                   k++;
@@ -113,6 +114,6 @@ ggPS %>% onRender("
                   i++;
                   k=1;
                   }
-                  Plotly.addTraces(el.id, Traces, inherit=TRUE);
+                  Plotly.addTraces(el.id, Traces);
                   })}
                   ", data = bindata)

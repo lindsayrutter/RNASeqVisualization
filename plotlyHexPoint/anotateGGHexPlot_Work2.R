@@ -62,17 +62,10 @@ ggPS %>% onRender("
                   AxisNames.push(document.getElementsByClassName('infolayer')[0].childNodes[i].textContent);
                   }
                   noPoint = x.data.length;
-                  console.log(noPoint)
-                  console.log(range(noPoint, (noPoint+(len*(len-1)/2-1)), 1))
 
                   el.on('plotly_click', function(e) {
 
                   if (x.data.length > noPoint){
-                    console.log('bigger ' + x.data.length);
-                    //x.data = x.data.slice(0, noPoint);
-                    console.log('new size ' + x.data.length);
-                    console.log(el)
-                    //Plotly.deleteTraces(el.id, [179, 180, 181, 182, 183, 184, 185, 186, 187, 188]);
                     Plotly.deleteTraces(el.id, range(noPoint, (noPoint+(len*(len-1)/2-1)), 1));
                   }
 
@@ -120,8 +113,6 @@ ggPS %>% onRender("
                   i++;
                   k=1;
                   }
-                  Plotly.addTraces(el.id, Traces);
-
-                  console.log(x.data.length)
+                  Plotly.addTraces(el.id, Traces, inherit=TRUE);
                   })}
                   ", data = bindata)

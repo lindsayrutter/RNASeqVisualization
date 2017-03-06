@@ -1,107 +1,84 @@
 library(plotly)
-library(broom)
 library(htmlwidgets)
 
 dat <- mtcars
 dat$mpg <- dat$mpg * 10
+#dat = data.frame(mpg = rnorm(20,0,5), disp=rnorm(20,0,5))
+#dat = data.frame(mpg = rnorm(20,30,5), disp=rnorm(20,30,5))
+minVal = min(dat)
+maxVal = max(dat)
+cv = 20
 
-ciVal = 100
-#keep <- abs(dat$x - dat$y) >= ciVal
-#df <- dat.frame(dat[keep,])
-
-p <- ggplot(data = dat, aes(x=disp,y=mpg)) + geom_point(size=0.5)
+p <- ggplot(data = dat, aes(x=disp,y=mpg)) + geom_point(size=0.5) + coord_cartesian(xlim = c(minVal, maxVal), ylim = c(minVal, maxVal))
 
 ggplotly(p) %>%
   onRender("
            function(el, x, data) {
-            // reduce the opacity of every trace except for the hover one
-            el.on('plotly_click', function(e) {
 
-              console.log(x)
+             AxisNames = [];
+             //for (i = 1; i < (len+1); i++) {
+             for (i = 1; i < 3; i++) {
+                AxisNames.push(document.getElementsByClassName('infolayer')[0].childNodes[i].textContent);
+             }
+             console.log(AxisNames);
 
-              // Plotly.deleteTraces(el.id, trace1);
-              //console.log(data.ciVal)
+           el.on('plotly_click', function(e) {
 
-              // var selected_rows = [];
+           var selRows = [];
+           data.dat.forEach(function(row){
+           console.log(Math.abs(row['disp']-row['mpg']) )
+           if(Math.abs(row['disp']-row['mpg']) > Math.sqrt(2)*data.cv) selRows.push(row);
+           });
+           console.log(selRows);
+           
+           var xArr = [];
+           for (a=0; a<selRows.length; a++){
+             xArr.push(selRows[a][AxisNames[0]])
+           }
+           var yArr = [];
+           for (a=0; a<selRows.length; a++){
+             yArr.push(selRows[a][AxisNames[1]])
+           }
+           
+           var tracePoints = {
+             x: xArr,
+             y: yArr,
+             mode: 'markers',
+             marker: {
+              color: 'orange',
+              size: 10
+             }
+           }
 
-              //data.dat.forEach(function(row){
-              //  if(row['disp']-row['mpg'] > 100) selected_rows.push(row);
-              //});
+           var Traces = [];
+           Traces.push(tracePoints);
 
-              //console.log(selected_rows);
+           var traceHiLine = {
+             x: [data.minVal, data.maxVal - Math.sqrt(2)*data.cv],
+             y: [data.minVal + Math.sqrt(2)*data.cv, data.maxVal],
+             mode: 'lines',
+             line: {
+               color: 'blue',
+               width: 2
+             },
+             opacity: 0.5
+           }
 
-              //Plotly.deleteTraces(el.id, trace1);
-              var trace1 = {
-                 x: [100, 400],
-                 y: [100, 400],
-                 mode: 'lines',
-                 line: {
-                   color: 'gray',
-                   width: 100
-                 },
-                 opacity: 0.5
-              }
+           var traceLoLine = {
+             x: [data.minVal + Math.sqrt(2)*data.cv, data.maxVal],
+             y: [data.minVal, data.maxVal - Math.sqrt(2)*data.cv],
+             mode: 'lines',
+             fill: 'tonexty',
+             line: {
+               color: 'red',
+               width: 2
+             },
+             opacity: 0.5
+           }
 
-              //Plotly.deleteTraces(el.id, trace1);
-              Plotly.addTraces(el.id, trace1);
+           Plotly.addTraces(el.id, traceHiLine);
+           Plotly.addTraces(el.id, traceLoLine);
+           Plotly.addTraces(el.id, Traces);
            })
-          }
-          ", data = list(dat=dat, ciVal=ciVal))
-
-# var traces = [];
-# for (var i = 0; i < x.data.length; i++) {
-#   if (i !== e.points[0].curveNumber) traces.push(i);
-# }
-
-p <- plot_ly(dat, x = ~disp, color = I("black")) %>%
-  add_markers(y = ~mpg, text = rownames(dat), showlegend = FALSE) %>%
-  add_lines(x=y) %>%
-  add_ribbons(data = augment(m),
-              ymin = ~.fitted - 1.96 * .se.fit,
-              ymax = ~.fitted + 1.96 * .se.fit,
-              line = list(color = 'rgba(7, 164, 181, 0.05)'),
-              fillcolor = 'rgba(7, 164, 181, 0.2)',
-              name = "Standard Error")
-
-
-########### Ex: Change scatterplot opacity w/ CI ###########
-# Supposed to keep clicked point black and turn rest of points gray, but it keeps all points black and turns CI gray
-set.seed(1)
-data <- data.frame(ID = paste0("ID",1:20), x = runif(20), y = runif(20))
-data$ID <- as.character(data$ID)
-
-ciVal = 0.5
-myMax = max(data[,2:3])
-myMin = min(data[,2:3])
-myMid = (myMax-myMin)/2
-data2 <- data.frame(x = c(myMin, myMax), y = c(myMin, myMax))
-
-keep <- abs(data$x - data$y) >= ciVal
-df <- data.frame(data[keep,])
-
-p <- ggplot(data = df, aes(x=x,y=y)) +
-  geom_point(size=0.5) +
-  geom_ribbon(data=data2, aes(x=x, ymin = y-ciVal, ymax = y+ciVal), fill = "lightgrey") +
-  geom_abline(intercept = 0, color = "white", size = 0.25) +
-  scale_x_continuous(limits = c(myMin, myMax)) +
-  scale_y_continuous(limits = c(myMin, myMax)) +
-  scale_x_continuous(expand = c(0, 0)) + scale_y_continuous(expand = c(0, 0))
-
-ggPS <- ggplotly(p)
-
-ggPS %>% onRender("
-                  function(el, x) {
-                  console.log(el)
-                  el.on('plotly_click', function(e){
-                  var trace1 = {
-                  x: [e.points[0].x],
-                  y: [e.points[0].y],
-                  mode: 'markers',
-                  marker: {
-                  color: 'red',
-                  size: 10
-                  }
-                  };
-                  Plotly.addTraces(el.id, trace1);
-                  })
-                  }")
+           }
+           ", data = list(dat=dat, cv=cv, minVal=minVal, maxVal=maxVal))

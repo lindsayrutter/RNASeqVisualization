@@ -1,13 +1,16 @@
 library(plotly)
 library(htmlwidgets)
 
-dat <- mtcars
-dat$mpg <- dat$mpg * 10
+#dat <- mtcars
+#dat$mpg <- dat$mpg * 10
 #dat = data.frame(mpg = rnorm(20,0,5), disp=rnorm(20,0,5))
-#dat = data.frame(mpg = rnorm(20,30,5), disp=rnorm(20,30,5))
+dat = data.frame(mpg = rnorm(20,30,5), disp=rnorm(20,30,5))
 minVal = min(dat)
 maxVal = max(dat)
-cv = 20
+# Designate end points of lines to be drawn
+minLine = minVal - 5*(maxVal-minVal)
+maxLine = maxVal + 5*(maxVal-minVal)
+cv = 4
 
 p <- ggplot(data = dat, aes(x=disp,y=mpg)) + geom_point(size=0.5) + coord_cartesian(xlim = c(minVal, maxVal), ylim = c(minVal, maxVal))
 
@@ -24,13 +27,16 @@ ggplotly(p) %>%
 
            el.on('plotly_click', function(e) {
 
+           myMin = -1000000000;
+           myMax = 1000000000;
+
            var selRows = [];
            data.dat.forEach(function(row){
            console.log(Math.abs(row['disp']-row['mpg']) )
            if(Math.abs(row['disp']-row['mpg']) > Math.sqrt(2)*data.cv) selRows.push(row);
            });
            console.log(selRows);
-           
+
            var xArr = [];
            for (a=0; a<selRows.length; a++){
              xArr.push(selRows[a][AxisNames[0]])
@@ -39,7 +45,7 @@ ggplotly(p) %>%
            for (a=0; a<selRows.length; a++){
              yArr.push(selRows[a][AxisNames[1]])
            }
-           
+
            var tracePoints = {
              x: xArr,
              y: yArr,
@@ -54,8 +60,8 @@ ggplotly(p) %>%
            Traces.push(tracePoints);
 
            var traceHiLine = {
-             x: [data.minVal, data.maxVal - Math.sqrt(2)*data.cv],
-             y: [data.minVal + Math.sqrt(2)*data.cv, data.maxVal],
+             x: [data.minLine, data.maxLine - Math.sqrt(2)*data.cv],
+             y: [data.minLine + Math.sqrt(2)*data.cv, data.maxLine],
              mode: 'lines',
              line: {
                color: 'blue',
@@ -65,8 +71,8 @@ ggplotly(p) %>%
            }
 
            var traceLoLine = {
-             x: [data.minVal + Math.sqrt(2)*data.cv, data.maxVal],
-             y: [data.minVal, data.maxVal - Math.sqrt(2)*data.cv],
+             x: [data.minLine + Math.sqrt(2)*data.cv, data.maxLine],
+             y: [data.minLine, data.maxLine - Math.sqrt(2)*data.cv],
              mode: 'lines',
              fill: 'tonexty',
              line: {
@@ -81,4 +87,4 @@ ggplotly(p) %>%
            Plotly.addTraces(el.id, Traces);
            })
            }
-           ", data = list(dat=dat, cv=cv, minVal=minVal, maxVal=maxVal))
+           ", data = list(dat=dat, cv=cv, minLine=minLine, maxLine=maxLine))

@@ -42,6 +42,7 @@ ggplotly(p) %>%
            var tracePoints = {
              x: xArr,
              y: yArr,
+             hoverinfo: 'none',
              mode: 'markers',
              marker: {
               color: 'black',
@@ -78,6 +79,33 @@ ggplotly(p) %>%
 
            el.on('plotly_selected', function(e) {
              console.log(e)
+             numSel = e.points.length
+             console.log(numSel)
+
+             var selX = [];
+             for (a=0; a<numSel; a++){
+               selX.push(e.points[a].x)
+             }
+             var selY = [];
+             for (a=0; a<numSel; a++){
+               selY.push(e.points[a].y)
+             }
+
+             console.log(selX);
+             console.log(selY);
+
+             var selPoints = {
+               x: selX,
+               y: selY,
+               hoverinfo: 'none',
+               mode: 'markers',
+               marker: {
+                color: 'red',
+                size: 4
+               }
+             }
+
+           Plotly.addTraces(el.id, selPoints);
            })
 
            }

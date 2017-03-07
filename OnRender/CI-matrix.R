@@ -45,89 +45,78 @@ for (i in 1:myLength){
 ggplotly(ggPS) %>%
   onRender("
            function(el, x, data) {
-
            function range(start, stop, step){
-             var a=[start], b=start;
-             while(b<stop){b+=step;a.push(b)}
-             return a;
+           var a=[start], b=start;
+           while(b<stop){b+=step;a.push(b)}
+           return a;
            };
-
            len = Math.sqrt(document.getElementsByClassName('cartesianlayer')[0].childNodes.length);
            AxisNames = [];
            for (i = 1; i < (len+1); i++) {
            AxisNames.push(document.getElementsByClassName('infolayer')[0].childNodes[i].textContent);
            }
            noPoint = x.data.length;
-
-
            var Traces = [];
            var i=0;
            var k=1;
            while ((i*len+k)<=Math.pow((len-1),2)) {
            while ((i+k)<len){
-
-             var selRows = [];
-             data.dat.forEach(function(row){
-             if(Math.abs(row[AxisNames[i]]-row[AxisNames[(len-k)]]) > Math.sqrt(2)*data.cv) selRows.push(row);});
-
-             var xArr = [];
-             for (a=0; a<selRows.length; a++){
-             xArr.push(selRows[a][AxisNames[i]])
-             }
-
-             var yArr = [];
-             for (a=0; a<selRows.length; a++){
-                yArr.push(selRows[a][AxisNames[(len-k)]])
-             }
-
-             var tracePoints = {
-               x: xArr,
-               y: yArr,
-               hoverinfo: 'none',
-               mode: 'markers',
-               marker: {
-                 color: 'black',
-                 size: 4
-               },
-               xaxis: 'x' + (i+1),
-               yaxis: 'y' + (i*len+k)
-             };
-
-             var traceHiLine = {
-               x: [data.minLine, data.maxLine - Math.sqrt(2)*data.cv],
-               y: [data.minLine + Math.sqrt(2)*data.cv, data.maxLine],
-               mode: 'lines',
-               line: {
-                 color: 'gray',
-                 width: 1
-               },
-               opacity: 0.25,
-               xaxis: 'x' + (i+1),
-               yaxis: 'y' + (i*len+k)
-             }
-
-             var traceLoLine = {
-               x: [data.minLine + Math.sqrt(2)*data.cv, data.maxLine],
-               y: [data.minLine, data.maxLine - Math.sqrt(2)*data.cv],
-               mode: 'lines',
-               fill: 'tonexty',
-               line: {
-                 color: 'gray',
-                 width: 1
-               },
-               opacity: 0.25,
-               xaxis: 'x' + (i+1),
-               yaxis: 'y' + (i*len+k)
-             }
-
-             Traces.push(tracePoints);
-             Traces.push(traceHiLine);
-             Traces.push(traceLoLine);
-             k++;
-}
-             i++;
-             k=1;
-             }
-             Plotly.addTraces(el.id, Traces);
+           var selRows = [];
+           data.dat.forEach(function(row){
+           if(Math.abs(row[AxisNames[i]]-row[AxisNames[(len-k)]]) > Math.sqrt(2)*data.cv) selRows.push(row);});
+           var xArr = [];
+           for (a=0; a<selRows.length; a++){
+           xArr.push(selRows[a][AxisNames[i]])
+           }
+           var yArr = [];
+           for (a=0; a<selRows.length; a++){
+           yArr.push(selRows[a][AxisNames[(len-k)]])
+           }
+           var tracePoints = {
+           x: xArr,
+           y: yArr,
+           hoverinfo: 'none',
+           mode: 'markers',
+           marker: {
+           color: 'black',
+           size: 4
+           },
+           xaxis: 'x' + (i+1),
+           yaxis: 'y' + (i*len+k)
+           };
+           var traceHiLine = {
+           x: [data.minLine, data.maxLine - Math.sqrt(2)*data.cv],
+           y: [data.minLine + Math.sqrt(2)*data.cv, data.maxLine],
+           mode: 'lines',
+           line: {
+           color: 'gray',
+           width: 1
+           },
+           opacity: 0.25,
+           xaxis: 'x' + (i+1),
+           yaxis: 'y' + (i*len+k)
+           }
+           var traceLoLine = {
+           x: [data.minLine + Math.sqrt(2)*data.cv, data.maxLine],
+           y: [data.minLine, data.maxLine - Math.sqrt(2)*data.cv],
+           mode: 'lines',
+           fill: 'tonexty',
+           line: {
+           color: 'gray',
+           width: 1
+           },
+           opacity: 0.25,
+           xaxis: 'x' + (i+1),
+           yaxis: 'y' + (i*len+k)
+           }
+           Traces.push(tracePoints);
+           Traces.push(traceHiLine);
+           Traces.push(traceLoLine);
+           k++;
+           }
+           i++;
+           k=1;
+           }
+           Plotly.addTraces(el.id, Traces);
            }
            ", data = list(dat=dat, cv=cv, minLine=minLine, maxLine=maxLine))

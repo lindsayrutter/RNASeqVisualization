@@ -2,6 +2,7 @@ library(plotly)
 library(htmlwidgets)
 
 ui <- shinyUI(fluidPage(
+  sliderInput("treshold", "Threshold:", min = 1, max = 400, value=50),
   plotlyOutput("myPlot")
 ))
 
@@ -12,7 +13,7 @@ server <- shinyServer(function(input, output) {
   minVal = min(dat)
   maxVal = max(dat)
 
-  p <- ggplot(data = dat, aes(x=disp,y=mpg)) + coord_cartesian(xlim = c(minVal, maxVal), ylim = c(minVal, maxVal))
+  p <- ggplot(data = dat, aes(x=disp,y=mpg)) + geom_point() + coord_cartesian(xlim = c(minVal, maxVal), ylim = c(minVal, maxVal))
 
   output$myPlot <- renderPlotly(ggplotly(p) %>%
     onRender("
@@ -21,7 +22,8 @@ server <- shinyServer(function(input, output) {
              var selRows = [];
              console.log(data.dat)
              data.dat.forEach(function(row){
-             if(Math.abs(row['disp']-row['mpg']) > 10) selRows.push(row);
+              if(Math.abs(row['disp']-row['mpg']) > data.val) selRows.push(row);
+             //if(Math.abs(row['disp']-row['mpg']) > input$threshold) selRows.push(row);
              });
              console.log(selRows);
 
@@ -47,6 +49,6 @@ server <- shinyServer(function(input, output) {
 
              Plotly.addTraces(el.id, tracePoints);
              }
-             ", data = list(dat=dat, cv=cv)))})
+             ", data = list(dat=dat, val=input$treshold)))})
 
 shinyApp(ui, server)

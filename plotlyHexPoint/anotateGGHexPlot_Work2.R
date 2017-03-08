@@ -35,10 +35,16 @@ ggPS <- ggplotly(pS)
 myLength <- length(ggPS[["x"]][["data"]])
 for (i in 1:myLength){
   item =ggPS[["x"]][["data"]][[i]]$text[1]
-  if (!is.null(item))
+  if (!is.null(item)){
     if (!startsWith(item, "co")){
       ggPS[["x"]][["data"]][[i]]$hoverinfo <- "none"
-    }
+    }}
+  hexHover = ggPS[["x"]][["data"]][[i]]$text
+  if (!is.null(hexHover) && grepl("hexID", hexHover)){
+    ggPS[["x"]][["data"]][[i]]$text <- strsplit(hexHover, "<")[[1]][1]
+    ggPS[["x"]][["data"]][[i]]$t2 <- hexHover
+    ggPS[["x"]][["data"]][[i]]$hoverinfo <- "text"
+  }
 }
 
 for(i in 2:(p$nrow)) {
@@ -76,8 +82,9 @@ ggPS %>% onRender("
                   myX = len + 1 - (yVar - len * (xVar - 1))
                   myY = xVar
                   cN = e.points[0].curveNumber
+                  console.log(x.data[cN])
                   split1 = (x.data[cN].text).split(' ')
-                  hexID = (x.data[cN].text).split(' ')[2]
+                  hexID = (x.data[cN].t2).split(' ')[2]
                   counts = split1[1].split('<')[0]
                   var selRows = [];
                   data.forEach(function(row){
@@ -117,3 +124,4 @@ ggPS %>% onRender("
                   Plotly.addTraces(el.id, Traces);
                   })}
                   ", data = bindata)
+

@@ -9,7 +9,7 @@ ui <- shinyUI(fluidPage(
 
 server <- shinyServer(function(input, output) {
   set.seed(1)
-  dat <- data.frame(ID = paste0("ID",1:10), A=rnorm(10), B=rnorm(10), C=rnorm(10), D=rnorm(10))
+  dat <- data.frame(ID = paste0("ID",1:10), A=rnorm(10), B=rnorm(10), C=rnorm(10), D=rnorm(10), E=rnorm(10))
   dat$ID <- as.character(dat$ID)
 
   minVal = min(dat[,-1])
@@ -62,6 +62,7 @@ server <- shinyServer(function(input, output) {
              AxisNames.push(document.getElementsByClassName('infolayer')[0].childNodes[i].textContent);
              }
              noPoint = x.data.length;
+             var SubPoints = [];
              var Traces = [];
              var i=0;
              var k=1;
@@ -69,7 +70,11 @@ server <- shinyServer(function(input, output) {
              while ((i+k)<len){
              var selRows = [];
              data.dat.forEach(function(row){
-             if(Math.abs(row[AxisNames[i]]-row[AxisNames[(len-k)]]) > Math.sqrt(2)*data.val) selRows.push(row);});
+             if(Math.abs(row[AxisNames[i]]-row[AxisNames[(len-k)]]) > Math.sqrt(2)*data.val){
+               selRows.push(row);
+               //SubPoints.push()
+             }})
+             //console.log(selRows);
              var xArr = [];
              for (a=0; a<selRows.length; a++){
              xArr.push(selRows[a][AxisNames[i]])
@@ -78,6 +83,12 @@ server <- shinyServer(function(input, output) {
              for (a=0; a<selRows.length; a++){
              yArr.push(selRows[a][AxisNames[(len-k)]])
              }
+             var keepIndex = [];
+             for (a=0; a<selRows.length; a++){
+             console.log(selRows[a]['ID'])
+             //keepIndex.push(selRows[a].'ID')
+             }
+             //console.log();
              var tracePoints = {
              x: xArr,
              y: yArr,
@@ -128,10 +139,14 @@ server <- shinyServer(function(input, output) {
 
 
 
+
+
+
            el.on('plotly_selected', function(e) {
-             console.log(e)
-             //numSel = e.points.length
+             //console.log(e)
+             numSel = e.points.length
              //console.log(numSel)
+             //console.log(e.points[0].pointNumber)
 
              //var selX = [];
              //for (a=0; a<numSel; a++){

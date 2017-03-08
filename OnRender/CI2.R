@@ -110,3 +110,4 @@ ggplotly(p) %>%
 
            }
            ", data = list(dat=dat, cv=cv, minLine=minLine, maxLine=maxLine))
+

@@ -5,7 +5,7 @@ library(hexbin)
 library(htmlwidgets)
 
 set.seed(1)
-bindata <- data.frame(ID = paste0("ID",1:100), A=rnorm(100), B=rnorm(100), C=rnorm(100), D=rnorm(100))
+bindata <- data.frame(ID = paste0("ID",1:500000), A=rnorm(500000), B=rnorm(500000), C=rnorm(500000), D=rnorm(500000))
 bindata$ID <- as.character(bindata$ID)
 
 maxVal = max(abs(bindata[,-1]))
@@ -82,7 +82,6 @@ ggPS %>% onRender("
                   myX = len + 1 - (yVar - len * (xVar - 1))
                   myY = xVar
                   cN = e.points[0].curveNumber
-                  console.log(x.data[cN])
                   split1 = (x.data[cN].text).split(' ')
                   hexID = (x.data[cN].t2).split(' ')[2]
                   counts = split1[1].split('<')[0]

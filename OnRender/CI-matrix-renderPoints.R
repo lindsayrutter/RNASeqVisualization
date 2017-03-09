@@ -132,41 +132,68 @@ server <- shinyServer(function(input, output) {
              k=1;
              }
              Plotly.addTraces(el.id, Traces);
-             console.log(SubPoints)
 
 
+
+            var idRows = []
+            for (a=0; a<data.dat.length; a++){
+             idRows.push(data.dat[a]['ID'])
+            }
 
 
            el.on('plotly_selected', function(e) {
-             //console.log(e)
              numSel = e.points.length
-             //console.log(numSel)
-             //console.log(e.points[0].pointNumber)
+             cN = e.points[0].curveNumber;
 
-             //var selX = [];
-             //for (a=0; a<numSel; a++){
-             //selX.push(e.points[a].x)
-             //}
-             //var selY = [];
-             //for (a=0; a<numSel; a++){
-             //selY.push(e.points[a].y)
-             //}
+             var pointNumbers = [];
+             for (a=0; a<numSel; a++){
+              pointNumbers.push(e.points[a].pointNumber)
+             }
 
-             //console.log(selX);
-             //console.log(selY);
+             // Determine which subplot was selected
+             subPlot = (cN - Math.pow(len,2))/3+1
 
-             //var selPoints = {
-             //x: selX,
-             //y: selY,
-             //hoverinfo: 'none',
-             //mode: 'markers',
-             //marker: {
-             //color: 'red',
-             //size: 4
-             //}
-             //}
+            var selData = []
+            for (a=0; a<pointNumbers.length; a++){
+              selData.push(data.dat[idRows.indexOf(SubPoints[subPlot-1][pointNumbers[a]])])
+            }
+            console.log(selData)
 
-             //Plotly.addTraces(el.id, selPoints);
+
+
+
+             var Traces = [];
+             var i=0;
+             var k=1;
+             while ((i*len+k)<=Math.pow((len-1),2)) {
+             var xArr = [];
+             for (a=0; a<selData.length; a++){
+              xArr.push(selData[a][AxisNames[i]])
+             }
+             while ((i+k)<len){
+             var yArr = [];
+             for (a=0; a<selData.length; a++){
+             yArr.push(selData[a][AxisNames[(len-k)]])
+             }
+             var trace = {
+             x: xArr,
+             y: yArr,
+             mode: 'markers',
+             marker: {
+             color: 'red',
+             size: 4
+             },
+             xaxis: 'x' + (i+1),
+             yaxis: 'y' + (i*len+k),
+             hoverinfo: 'none'
+             };
+             Traces.push(trace);
+             k++;
+             }
+             i++;
+             k=1;
+             }
+             Plotly.addTraces(el.id, Traces);
              })
 
 

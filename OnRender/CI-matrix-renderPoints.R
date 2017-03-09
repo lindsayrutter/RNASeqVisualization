@@ -9,7 +9,7 @@ ui <- shinyUI(fluidPage(
 
 server <- shinyServer(function(input, output) {
   set.seed(1)
-  dat <- data.frame(ID = paste0("ID",1:10), A=rnorm(10), B=rnorm(10), C=rnorm(10), D=rnorm(10), E=rnorm(10))
+  dat <- data.frame(ID = paste0("ID",sample(c(1:20),20)), A=rnorm(20), B=rnorm(20), C=rnorm(20), D=rnorm(20), E=rnorm(20))
   dat$ID <- as.character(dat$ID)
 
   minVal = min(dat[,-1])
@@ -72,9 +72,7 @@ server <- shinyServer(function(input, output) {
              data.dat.forEach(function(row){
              if(Math.abs(row[AxisNames[i]]-row[AxisNames[(len-k)]]) > Math.sqrt(2)*data.val){
                selRows.push(row);
-               //SubPoints.push()
              }})
-             //console.log(selRows);
              var xArr = [];
              for (a=0; a<selRows.length; a++){
              xArr.push(selRows[a][AxisNames[i]])
@@ -85,10 +83,9 @@ server <- shinyServer(function(input, output) {
              }
              var keepIndex = [];
              for (a=0; a<selRows.length; a++){
-             console.log(selRows[a]['ID'])
-             //keepIndex.push(selRows[a].'ID')
+             keepIndex.push(selRows[a]['ID'])
              }
-             //console.log();
+             SubPoints.push(keepIndex);
              var tracePoints = {
              x: xArr,
              y: yArr,
@@ -135,9 +132,7 @@ server <- shinyServer(function(input, output) {
              k=1;
              }
              Plotly.addTraces(el.id, Traces);
-
-
-
+             console.log(SubPoints)
 
 
 

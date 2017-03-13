@@ -35,6 +35,18 @@ ci.lines<-function(model, conf= .95, interval = "confidence"){
 
   predictions <- predict(model, level = conf, interval = interval)
 
+  # Calculate predictions without R
+  lwr = c()
+  upr = c()
+  for (i in 1:n){
+    sei = summary(model)[[6]] * sqrt(1/n+(x[i]-xm)^2/ssx)
+    predY = coef(model)[1]+coef(model)[2]*x[i]
+    lwr[i] = predY - sei *s.t
+    upr[i] = predY + sei *s.t
+  }
+
+
+
   insideCI <- predictions[,'lwr'] < y & y < predictions[,'upr']
 
   x_name <- rownames(attr(model[[11]],"factors"))[2]

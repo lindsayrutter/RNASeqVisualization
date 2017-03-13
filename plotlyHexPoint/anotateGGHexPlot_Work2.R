@@ -5,7 +5,7 @@ library(hexbin)
 library(htmlwidgets)
 
 set.seed(1)
-bindata <- data.frame(ID = paste0("ID",1:500000), A=rnorm(500000), B=rnorm(500000), C=rnorm(500000), D=rnorm(500000))
+bindata <- data.frame(ID = paste0("ID",1:10000), A=rnorm(10000), B=rnorm(10000), C=rnorm(10000), D=rnorm(10000))
 bindata$ID <- as.character(bindata$ID)
 
 maxVal = max(abs(bindata[,-1]))
@@ -87,38 +87,38 @@ ggPS %>% onRender("
                   counts = split1[1].split('<')[0]
                   var selRows = [];
                   data.forEach(function(row){
-                  if(row[myX+'-'+myY]==hexID) selRows.push(row);
+                    if(row[myX+'-'+myY]==hexID) selRows.push(row);
                   });
                   var Traces = [];
                   var i=0;
                   var k=1;
                   while ((i*len+k)<=Math.pow((len-1),2)) {
-                  var xArr = [];
-                  for (a=0; a<selRows.length; a++){
-                  xArr.push(selRows[a][AxisNames[i]])
-                  }
-                  while ((i+k)<len){
-                  var yArr = [];
-                  for (a=0; a<selRows.length; a++){
-                  yArr.push(selRows[a][AxisNames[(len-k)]])
-                  }
-                  var trace = {
-                  x: xArr,
-                  y: yArr,
-                  mode: 'markers',
-                  marker: {
-                  color: 'orange',
-                  size: 7
-                  },
-                  xaxis: 'x' + (i+1),
-                  yaxis: 'y' + (i*len+k),
-                  hoverinfo: 'none'
-                  };
-                  Traces.push(trace);
-                  k++;
-                  }
-                  i++;
-                  k=1;
+                    var xArr = [];
+                    for (a=0; a<selRows.length; a++){
+                      xArr.push(selRows[a][AxisNames[i]])
+                    }
+                    while ((i+k)<len){
+                    var yArr = [];
+                    for (a=0; a<selRows.length; a++){
+                      yArr.push(selRows[a][AxisNames[(len-k)]])
+                    }
+                    var trace = {
+                      x: xArr,
+                      y: yArr,
+                      mode: 'markers',
+                      marker: {
+                        color: 'orange',
+                        size: 7
+                      },
+                      xaxis: 'x' + (i+1),
+                      yaxis: 'y' + (i*len+k),
+                      hoverinfo: 'none'
+                    };
+                    Traces.push(trace);
+                    k++;
+                    }
+                    i++;
+                    k=1;
                   }
                   Plotly.addTraces(el.id, Traces);
                   })}

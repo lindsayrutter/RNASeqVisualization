@@ -1,12 +1,12 @@
-diseasesev<-c(1.9,3.1,3.3,4.8,5.3,6.1,6.4,7.6,9.8,12.4)
+y<-c(1.9,3.1,3.3,4.8,5.3,6.1,6.4,7.6,9.8,12.4)
 # Predictor variable, (Centigrade)
-temperature<-c(2,1,5,5,20,20,23,10,30,25)
+x<-c(2,1,5,5,20,20,23,10,30,25)
 
 ## For convenience, the data may be formatted into a dataframe
-severity <- as.data.frame(cbind(diseasesev,temperature))
+dat <- as.data.frame(cbind(y,x))
 
 ## Fit a linear model for the data and summarize the output from function lm()
-severity.lm <- lm(diseasesev~temperature,data=severity)
+dat.lm <- lm(y~x,data=dat)
 
 # Function to plot the linear regression and overlay the confidence intervals
 ci.lines<-function(model, conf= .95, interval = "confidence"){
@@ -45,18 +45,10 @@ ci.lines<-function(model, conf= .95, interval = "confidence"){
     upr[i] = predY + sei *s.t
   }
 
-
-
   insideCI <- predictions[,'lwr'] < y & y < predictions[,'upr']
 
-  x_name <- rownames(attr(model[[11]],"factors"))[2]
-  y_name <- rownames(attr(model[[11]],"factors"))[1]
-
   plot(x[insideCI],y[insideCI],
-       pch=16,pty="s",xlim=c(limits1,limits2),ylim=c(limits1,limits2),
-       xlab=x_name,
-       ylab=y_name,
-       main=paste("Graph of ", y_name, " vs ", x_name,sep=""))
+       pch=16,pty="s",xlim=c(limits1,limits2),ylim=c(limits1,limits2))
 
   abline(model)
 

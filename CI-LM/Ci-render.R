@@ -14,7 +14,11 @@ y<-c(1.9,3.1,3.3,4.8,5.3,6.1,6.4,7.6,9.8,12.4)
 # For convenience, the data may be formatted into a dataframe
 dat <- as.data.frame(cbind(x,y))
 # Fit a linear model for the data and summarize the output from function lm()
-datLm <- lm(x~y,data=dat)
+datLm <- lm(y~x,data=dat)
+
+b0 <- coef(datLm)[1]
+b1 <- coef(datLm)[2]
+sse <- summary(datLm)[[6]]
 
 minVal = min(c(x,y))
 maxVal = max(c(x,y))
@@ -41,12 +45,55 @@ output$myPlot <- renderPlotly(ggPS %>%
                  for (a=0; a<n; a++){
                    ssx+=Math.pow((data.dat[a].x - xm),2)
                  }
-                 console.log(xm)
-                 console.log(ssx)
 
+                 // JS needs to calculate this later
+                 var st = 2.306004
+
+                 var minX = Math.min.apply(null,x)
+                 var maxX = Math.max.apply(null,x)
+                 var inc = (maxX-minX)/100
+                 var xv = [];
+                 var yv = [];
+                 var se = [];
+                 var ci = [];
+                 var uyv = [];
+                 var lyv = [];
+                 var a = minX
+                 while (a < maxX){
+                   xv.push(a);
+                   yva = data.b0+data.b1*a;
+                   sea = data.sse * Math.sqrt(1/n+Math.pow((a-xm),2)/ssx);
+                   yv.push(yva);
+                   se.push(sea);
+                   ci.push(st*sea);
+                   uyv.push(yva+st*sea);
+                   lyv.push(yva-st*sea);
+                   a += inc;
+                 }
+
+                 var lwr = [];
+                 var upr = [];
+                 var ypred = [];
+                 var ssea = [];
+                 var outCI = [];
+                 for (a=0; a<n; a++){
+                   xa = data.dat[a].x
+                   ssea.push(data.sse * Math.sqrt(1/n+Math.pow((xa-xm),2)/ssx))
+                   ypred.push(data.b0+data.b1*xa)
+                   lwr.push(ypred[a] - ssea[a]*st)
+                   upr.push(ypred[a] + ssea[a]*st)
+                   if (!(y[a]>lwr[a] & y[a]<upr[a])){
+                      outCI.push(xa)
+                   }
+                 }
+                 console.log(outCI);
 
 
              }
-             ", data = list(dat=dat, lm = datLm, ci = input$ci)))})
+             ", data = list(dat=dat, lm=datLm, b0=b0, b1=b1, sse=sse, ci=input$ci)))})
 
 shinyApp(ui, server)
+
+
+
+

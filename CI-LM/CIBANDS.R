@@ -16,7 +16,7 @@ ci.lines<-function(model, conf= .95, interval = "confidence"){
   n<-length(x)
   ssx<- sum((x - mean(x))^2)
   # T-distribution with vector of probabilities and df
-  s.t<- qt(1-(1-conf)/2,(n-2))
+  st<- qt(1-(1-conf)/2,(n-2))
   # x and y vectors to plot best fit line
   xv<-seq(min(x),max(x),(max(x) - min(x))/100)
   yv<- coef(model)[1]+coef(model)[2]*xv
@@ -27,7 +27,7 @@ ci.lines<-function(model, conf= .95, interval = "confidence"){
                prediction = summary(model)[[6]] * sqrt(1+1/n+(xv-xm)^2/ssx)
   )
 
-  ci<-s.t*se
+  ci<-st*se
   uyv<-yv+ci
   lyv<-yv-ci
   limits1 <- min(c(x,y))
@@ -38,11 +38,13 @@ ci.lines<-function(model, conf= .95, interval = "confidence"){
   # Calculate predictions without R
   lwr = c()
   upr = c()
+  predY = c()
+  sei = c()
   for (i in 1:n){
-    sei = summary(model)[[6]] * sqrt(1/n+(x[i]-xm)^2/ssx)
-    predY = coef(model)[1]+coef(model)[2]*x[i]
-    lwr[i] = predY - sei *s.t
-    upr[i] = predY + sei *s.t
+    sei[i] = summary(model)[[6]] * sqrt(1/n+(x[i]-xm)^2/ssx)
+    predY[i] = coef(model)[1]+coef(model)[2]*x[i]
+    lwr[i] = predY[i] - sei[i] *st
+    upr[i] = predY[i] + sei[i] *st
   }
 
   insideCI <- predictions[,'lwr'] < y & y < predictions[,'upr']

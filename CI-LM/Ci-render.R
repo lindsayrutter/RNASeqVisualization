@@ -68,7 +68,7 @@ output$myPlot <- renderPlotly(ggPS %>%
                    ci.push(st*sea);
                    uyv.push(yva+st*sea);
                    lyv.push(yva-st*sea);
-                   a += inc;
+                   a+=inc;
                  }
 
                  var lwr = [];
@@ -76,6 +76,8 @@ output$myPlot <- renderPlotly(ggPS %>%
                  var ypred = [];
                  var ssea = [];
                  var outCI = [];
+                 var xPoints = [];
+                 var yPoints = [];
                  for (a=0; a<n; a++){
                    xa = data.dat[a].x
                    ssea.push(data.sse * Math.sqrt(1/n+Math.pow((xa-xm),2)/ssx))
@@ -83,12 +85,27 @@ output$myPlot <- renderPlotly(ggPS %>%
                    lwr.push(ypred[a] - ssea[a]*st)
                    upr.push(ypred[a] + ssea[a]*st)
                    if (!(y[a]>lwr[a] & y[a]<upr[a])){
-                      outCI.push(xa)
+                      xPoints.push(xa)
+                      yPoints.push(data.dat[a].y)
                    }
                  }
-                 console.log(outCI);
+                 console.log(xPoints);
+                 console.log(yPoints);
 
+                var tracePoints = {
+                  x: xPoints,
+                  y: yPoints,
+                  mode: 'markers',
+                  marker: {
+                    color: 'orange',
+                    size: 7
+                  },
+                  //xaxis: 'x' + (i+1),
+                  //yaxis: 'y' + (i*len+k),
+                  hoverinfo: 'none'
+                };
 
+             Plotly.addTraces(el.id, tracePoints);
              }
              ", data = list(dat=dat, lm=datLm, b0=b0, b1=b1, sse=sse, ci=input$ci)))})
 

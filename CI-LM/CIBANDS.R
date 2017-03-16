@@ -61,5 +61,5 @@ ci.lines<-function(model, conf= .95, interval = "confidence"){
   lines(xv,lyv,lty=2,col=3)
 }
 
-ci.lines(severity.lm, conf= .95 , interval = "confidence")
+ci.lines(dat.lm, conf= .95 , interval = "confidence")
 ci.lines(severity.lm, conf= .85 , interval = "prediction")

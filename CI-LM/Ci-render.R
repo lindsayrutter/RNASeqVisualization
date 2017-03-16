@@ -100,12 +100,44 @@ output$myPlot <- renderPlotly(ggPS %>%
                     color: 'orange',
                     size: 7
                   },
-                  //xaxis: 'x' + (i+1),
-                  //yaxis: 'y' + (i*len+k),
+                  hoverinfo: 'none'
+                };
+                var hiLine = {
+                  x: xv,
+                  y: uyv,
+                  mode: 'lines',
+                  line: {
+                    color: 'gray',
+                    width: 1
+                  },
+                  opacity: 0.25
+                };
+                var lowLine = {
+                  x: xv,
+                  y: lyv,
+                  mode: 'lines',
+                  fill: 'tonexty',
+                  line: {
+                    color: 'gray',
+                    width: 1
+                  },
+                  opacity: 0.25
+                };
+                var fitLine = {
+                  x: [xv[0], xv[xv.length-1]],
+                  y: [data.b0+data.b1*xv[0], data.b0+data.b1*xv[xv.length-1]],
+                  mode: 'lines',
+                  line: {
+                    color: 'black',
+                    width: 1
+                  },
                   hoverinfo: 'none'
                 };
 
              Plotly.addTraces(el.id, tracePoints);
+             Plotly.addTraces(el.id, hiLine);
+             Plotly.addTraces(el.id, lowLine);
+             Plotly.addTraces(el.id, fitLine);
              }
              ", data = list(dat=dat, lm=datLm, b0=b0, b1=b1, sse=sse, ci=input$ci)))})
 

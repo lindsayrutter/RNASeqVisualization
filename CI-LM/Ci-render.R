@@ -9,8 +9,13 @@ ui <- shinyUI(fluidPage(
 
 server <- shinyServer(function(input, output) {
 
-x<-c(2,1,5,5,20,20,23,10,30,25)
-y<-c(1.9,3.1,3.3,4.8,5.3,6.1,6.4,7.6,9.8,12.4)
+set.seed(1)
+x<-rnorm(100,0,1)
+y<-rnorm(100,0,1)
+
+#load("../leavesDat.Rda")
+#x <- data$M.1
+#y <- data$M.2
 # For convenience, the data may be formatted into a dataframe
 dat <- as.data.frame(cbind(x,y))
 # Fit a linear model for the data and summarize the output from function lm()
@@ -45,9 +50,11 @@ output$myPlot <- renderPlotly(ggPS %>%
                  for (a=0; a<n; a++){
                    ssx+=Math.pow((data.dat[a].x - xm),2)
                  }
+                 console.log(ssx)
 
                  // JS needs to calculate this later
                  var st = 2.306004
+                 // console.log(t(1,1))
 
                  var minX = Math.min.apply(null,x)
                  var maxX = Math.max.apply(null,x)
@@ -89,16 +96,14 @@ output$myPlot <- renderPlotly(ggPS %>%
                       yPoints.push(data.dat[a].y)
                    }
                  }
-                 console.log(xPoints);
-                 console.log(yPoints);
 
                 var tracePoints = {
                   x: xPoints,
                   y: yPoints,
                   mode: 'markers',
                   marker: {
-                    color: 'orange',
-                    size: 7
+                    color: 'black',
+                    size: 4
                   },
                   hoverinfo: 'none'
                 };
@@ -123,23 +128,23 @@ output$myPlot <- renderPlotly(ggPS %>%
                   },
                   opacity: 0.25
                 };
-                var fitLine = {
-                  x: [xv[0], xv[xv.length-1]],
-                  y: [data.b0+data.b1*xv[0], data.b0+data.b1*xv[xv.length-1]],
-                  mode: 'lines',
-                  line: {
-                    color: 'black',
-                    width: 1
-                  },
-                  hoverinfo: 'none'
-                };
+                //var fitLine = {
+                //  x: [xv[0], xv[xv.length-1]],
+                //  y: [data.b0+data.b1*xv[0], data.b0+data.b1*xv[xv.length-1]],
+                //  mode: 'lines',
+                //  line: {
+                //    color: 'black',
+                //    width: 1
+                //  },
+                //  hoverinfo: 'none'
+                //};
 
              Plotly.addTraces(el.id, tracePoints);
              Plotly.addTraces(el.id, hiLine);
              Plotly.addTraces(el.id, lowLine);
-             Plotly.addTraces(el.id, fitLine);
+             //Plotly.addTraces(el.id, fitLine);
              }
-             ", data = list(dat=dat, lm=datLm, b0=b0, b1=b1, sse=sse, ci=input$ci)))})
+             ", data = list(dat=dat, b0=b0, b1=b1, sse=sse, ci=input$ci)))})
 
 shinyApp(ui, server)
 

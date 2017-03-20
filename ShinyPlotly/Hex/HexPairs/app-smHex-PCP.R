@@ -81,7 +81,7 @@ server <- function(input, output, session) {
     obsns <- which(attr(pS[cnP$ki,cnP$kj]$data, "cID")==hexVal)
     temp <- bindata[obsns,]
 
-    if (nrow(temp) >0){
+    if (nrow(temp)>0){
 
       if(nrow(temp)==1){
         oneRow = TRUE
@@ -104,8 +104,6 @@ server <- function(input, output, session) {
       plot_ly(dat_long, x= ~rn, y= ~value, type = 'scatter', mode = 'lines+markers', color = ~variable)  %>% layout(dragmode="box", showlegend = FALSE)
     }
   })
-
-
 }
 
 shinyApp(ui, server)

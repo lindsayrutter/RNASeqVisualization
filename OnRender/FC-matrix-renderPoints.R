@@ -3,13 +3,14 @@ library(GGally)
 library(htmlwidgets)
 
 ui <- shinyUI(fluidPage(
-  sliderInput("threshold", "Threshold:", min = 0, max = 4, value=1, step=0.1),
+  sliderInput("threshold", "Threshold:", min = 0, max = 30, value=15, step=1),
   plotlyOutput("myPlot")
 ))
 
 server <- shinyServer(function(input, output) {
   set.seed(1)
-  dat <- data.frame(ID = paste0("ID",sample(c(1:100),100)), A=rnorm(100), B=rnorm(100), C=rnorm(100), D=rnorm(100), E=rnorm(100))
+  # Acts strange when not all values are positive
+  dat <- data.frame(ID = paste0("ID",sample(c(1:100),100)), A=abs(rnorm(100)), B=abs(rnorm(100)), C=abs(rnorm(100)), D=abs(rnorm(100)), E=abs(rnorm(100)))
   dat$ID <- as.character(dat$ID)
 
   minVal = min(dat[,-1])
@@ -17,7 +18,6 @@ server <- shinyServer(function(input, output) {
   # Designate end points of lines to be drawn
   minLine = minVal - 5*(maxVal-minVal)
   maxLine = maxVal + 5*(maxVal-minVal)
-  cv = 1
 
   my_fn <- function(data, mapping, ...){
     x = data[,c(as.character(mapping$x))]
@@ -65,7 +65,10 @@ server <- shinyServer(function(input, output) {
                while ((i+k)<len){
                  var selRows = [];
                  data.dat.forEach(function(row){
-                 if(Math.abs(row[AxisNames[i]]-row[AxisNames[(len-k)]]) > Math.sqrt(2)*data.val){
+                 var fract = row[AxisNames[i]] / row[AxisNames[(len-k)]]
+                 console.log(fract)
+                 //if(Math.abs(row[AxisNames[i]]-row[AxisNames[(len-k)]]) > Math.sqrt(2)*data.val){
+                 if(fract > (data.val + 1) || fract < (1/(data.val+1))){
                    selRows.push(row);
                  }})
                  var xArr = [];

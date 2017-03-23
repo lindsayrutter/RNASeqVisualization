@@ -10,7 +10,7 @@ ui <- shinyUI(fluidPage(
 
 server <- shinyServer(function(input, output) {
 
-ci <- reactive(input$ci) 
+ci <- reactive(input$ci)
 
 #set.seed(2)
 #dat <- data.frame(ID = paste0("ID",1:100), A.1=rnorm(100), A.2=rnorm(100), A.3=rnorm(100), B.1=rnorm(100), B.2=rnorm(100))
@@ -100,6 +100,11 @@ output$myPlot <- renderPlotly(ggPS %>%
 
                  var minX = Math.min.apply(null,x)
                  var maxX = Math.max.apply(null,x)
+
+                 console.log(x)
+                 //console.log(minX)
+                 //console.log(maxX)
+
                  var inc = (maxX-minX)/100
                  var xv = [];
                  var yv = [];

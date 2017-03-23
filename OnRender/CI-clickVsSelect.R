@@ -9,7 +9,7 @@ ui <- shinyUI(fluidPage(
 
 server <- shinyServer(function(input, output) {
   set.seed(1)
-  dat <- data.frame(ID = paste0("ID",sample(c(1:100),100)), A=rnorm(100), B=rnorm(100), C=rnorm(100), D=rnorm(100), E=rnorm(100))
+  dat <- data.frame(ID = paste0("ID",sample(c(1:10),10)), A=rnorm(10), B=rnorm(10), C=rnorm(10), D=rnorm(10), E=rnorm(10))
   dat$ID <- as.character(dat$ID)
 
   minVal = min(dat[,-1])
@@ -28,14 +28,6 @@ server <- shinyServer(function(input, output) {
 
   p <- ggpairs(dat[,-1], lower = list(continuous = my_fn))
 
-  # pS <- p
-  # for(i in 2:p$nrow) {
-  #   for(j in 1:(i-1)) {
-  #     pS[i,j] <- p[i,j] +
-  #       coord_cartesian(xlim = c(minVal, maxVal), ylim = c(minVal, maxVal))
-  #   }
-  # }
-
   # ggPS <- ggplotly(pS)
   ggPS <- ggplotly(p)
 
@@ -52,12 +44,11 @@ server <- shinyServer(function(input, output) {
     onRender("
              function(el, x, data) {
 
-function range(start, stop, step){
-var a=[start], b=start;
-while(b<stop){b+=step;a.push(b)}
-return a;
-};
-
+                  function range(start, stop, step){
+                    var a=[start], b=start;
+                    while(b<stop){b+=step;a.push(b)}
+                    return a;
+                  };
 
              len = Math.sqrt(document.getElementsByClassName('cartesianlayer')[0].childNodes.length);
              AxisNames = [];
@@ -73,9 +64,7 @@ return a;
                while ((i+k)<len){
                  var selRows = [];
                  data.dat.forEach(function(row){
-                 if(Math.abs(row[AxisNames[i]]-row[AxisNames[(len-k)]]) > Math.sqrt(2)*data.val){
-                   selRows.push(row);
-                 }})
+                 selRows.push(row)})
                  var xArr = [];
                  for (a=0; a<selRows.length; a++){
                   xArr.push(selRows[a][AxisNames[i]])
@@ -89,9 +78,6 @@ return a;
                   keepIndex.push(selRows[a]['ID'])
                  }
                  SubPoints.push(keepIndex);
-
-console.log(SubPoints)
-
                  var tracePoints = {
                    x: xArr,
                    y: yArr,
@@ -104,34 +90,7 @@ console.log(SubPoints)
                    xaxis: 'x' + (i+1),
                    yaxis: 'y' + (i*len+k)
                  };
-                 var traceHiLine = {
-                   x: [data.minLine, data.maxLine - Math.sqrt(2)*data.val],
-                   y: [data.minLine + Math.sqrt(2)*data.val, data.maxLine],
-                   mode: 'lines',
-                   line: {
-                     color: 'gray',
-                     width: 1
-                   },
-                   opacity: 0.25,
-                   xaxis: 'x' + (i+1),
-                   yaxis: 'y' + (i*len+k)
-                 }
-                 var traceLoLine = {
-                   x: [data.minLine + Math.sqrt(2)*data.val, data.maxLine],
-                   y: [data.minLine, data.maxLine - Math.sqrt(2)*data.val],
-                   mode: 'lines',
-                   fill: 'tonexty',
-                   line: {
-                     color: 'gray',
-                     width: 1
-                   },
-                   opacity: 0.25,
-                   xaxis: 'x' + (i+1),
-                   yaxis: 'y' + (i*len+k)
-                 }
                  Traces.push(tracePoints);
-                 Traces.push(traceHiLine);
-                 Traces.push(traceLoLine);
                  k++;
                }
                i++;
@@ -144,18 +103,19 @@ console.log(SubPoints)
              idRows.push(data.dat[a]['ID'])
             }
 
-           noPoint = x.data.length;
+
+                  noPoint = x.data.length;
+
 
            el.on('plotly_selected', function(e) {
 
-//console.log('selected')
-
-if (x.data.length > noPoint){
+//if (x.data.length > noPoint){
   //Plotly.deleteTraces(el.id, range(noPoint, (noPoint+(len*(len-1)/2-1)), 1));
-  Plotly.deleteTraces(el.id, x.data.length-1);
-}
+  //Plotly.deleteTraces(el.id);
+//}
 
              numSel = e.points.length
+             console.log(numSel)
              cN = e.points[0].curveNumber;
 
              var pointNumbers = [];
@@ -164,17 +124,13 @@ if (x.data.length > noPoint){
              }
 
              // Determine which subplot was selected
-             subPlot = (cN - Math.pow(len,2))/3+1
-//console.log(subPlot)
+             subPlot = (cN - Math.pow(len,2))+1
+            console.log(subPlot)
 
-            //console.log(pointNumbers.length)
             var selData = []
-            for (a=0; a<pointNumbers.length; a++){
-              //console.log(data.dat[idRows.indexOf(SubPoints[subPlot-1])])
+            for (a=0; a<numSel; a++){
               selData.push(data.dat[idRows.indexOf(SubPoints[subPlot-1][pointNumbers[a]])])
             }
-            //console.log(selData)
-
 
              var Traces = [];
              var i=0;

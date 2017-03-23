@@ -3,7 +3,7 @@ library(GGally)
 library(htmlwidgets)
 
 ui <- shinyUI(fluidPage(
-  sliderInput("threshold", "Threshold:", min = 0, max = 30, value=15, step=1),
+  sliderInput("threshold", "Threshold:", min = 0, max = 30, value=15, step=0.1),
   plotlyOutput("myPlot")
 ))
 
@@ -16,8 +16,10 @@ server <- shinyServer(function(input, output) {
   minVal = min(dat[,-1])
   maxVal = max(dat[,-1])
   # Designate end points of lines to be drawn
-  minLine = minVal - 5*(maxVal-minVal)
-  maxLine = maxVal + 5*(maxVal-minVal)
+  minLine = minVal
+  maxLine = maxVal
+  #minLine = minVal - 5*(maxVal-minVal)
+  #maxLine = maxVal + 5*(maxVal-minVal)
 
   my_fn <- function(data, mapping, ...){
     x = data[,c(as.character(mapping$x))]
@@ -61,13 +63,35 @@ server <- shinyServer(function(input, output) {
              var Traces = [];
              var i=0;
              var k=1;
+
+
+             //console.log(x)
+             //var minX = Math.min.apply(null,x)
+             //console.log(minX)
+             //var maxX = Math.max.apply(null,x)
+             //console.log(maxX)
+             var inc = (data.maxLine-data.minLine)/100
+             var xv = [];
+             var uyv = [];
+             var lyv = [];
+             var a = data.minLine
+             while (a < data.maxLine){
+               var fract = a
+               xv.push(a);
+               uyv.push(a*(data.val+1));
+               lyv.push(a/(data.val+1));
+               a+=inc;
+             }
+
+             console.log(xv)
+             console.log(uyv)
+             console.log(lyv)
+
              while ((i*len+k)<=Math.pow((len-1),2)) {
                while ((i+k)<len){
                  var selRows = [];
                  data.dat.forEach(function(row){
                  var fract = row[AxisNames[i]] / row[AxisNames[(len-k)]]
-                 console.log(fract)
-                 //if(Math.abs(row[AxisNames[i]]-row[AxisNames[(len-k)]]) > Math.sqrt(2)*data.val){
                  if(fract > (data.val + 1) || fract < (1/(data.val+1))){
                    selRows.push(row);
                  }})
@@ -96,34 +120,39 @@ server <- shinyServer(function(input, output) {
                    xaxis: 'x' + (i+1),
                    yaxis: 'y' + (i*len+k)
                  };
-                 var traceHiLine = {
-                   x: [data.minLine, data.maxLine - Math.sqrt(2)*data.val],
-                   y: [data.minLine + Math.sqrt(2)*data.val, data.maxLine],
-                   mode: 'lines',
-                   line: {
-                     color: 'gray',
-                     width: 1
-                   },
-                   opacity: 0.25,
-                   xaxis: 'x' + (i+1),
-                   yaxis: 'y' + (i*len+k)
-                 }
-                 var traceLoLine = {
-                   x: [data.minLine + Math.sqrt(2)*data.val, data.maxLine],
-                   y: [data.minLine, data.maxLine - Math.sqrt(2)*data.val],
-                   mode: 'lines',
-                   fill: 'tonexty',
-                   line: {
-                     color: 'gray',
-                     width: 1
-                   },
-                   opacity: 0.25,
-                   xaxis: 'x' + (i+1),
-                   yaxis: 'y' + (i*len+k)
-                 }
+
+                var hiLine = {
+                  x: xv,
+                  y: uyv,
+                  mode: 'lines',
+                  line: {
+                    color: 'gray',
+                    width: 1
+                  },
+                  xaxis: 'x' + (i+1),
+                  yaxis: 'y' + (i*len+k),
+                  opacity: 0.25,
+                  hoverinfo: 'none'
+                };
+
+                var lowLine = {
+                  x: xv,
+                  y: lyv,
+                  mode: 'lines',
+                  fill: 'tonexty',
+                  line: {
+                    color: 'gray',
+                    width: 1
+                  },
+                  xaxis: 'x' + (i+1),
+                  yaxis: 'y' + (i*len+k),
+                  opacity: 0.25,
+                  hoverinfo: 'none'
+                };
+
                  Traces.push(tracePoints);
-                 Traces.push(traceHiLine);
-                 Traces.push(traceLoLine);
+                 Traces.push(hiLine);
+                 Traces.push(lowLine);
                  k++;
                }
                i++;
@@ -149,12 +178,11 @@ server <- shinyServer(function(input, output) {
              // Determine which subplot was selected
              subPlot = (cN - Math.pow(len,2))/3+1
 
-            console.log(pointNumbers.length)
             var selData = []
             for (a=0; a<pointNumbers.length; a++){
               selData.push(data.dat[idRows.indexOf(SubPoints[subPlot-1][pointNumbers[a]])])
             }
-            console.log(selData)
+
 
 
              var Traces = [];

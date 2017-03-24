@@ -4,7 +4,7 @@ library(shiny)
 library(GGally)
 
 ui <- shinyUI(fluidPage(
-  sliderInput("ci", "Confidence interval:", min = 0, max = 1, value=0.95, step=0.05),
+  sliderInput("ci", "Confidence interval:", min = 0, max = 1, value=0.95, step=0.01),
   plotlyOutput("myPlot")
 ))
 

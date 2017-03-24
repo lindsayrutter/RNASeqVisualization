@@ -4,7 +4,7 @@ library(shiny)
 library(GGally)
 
 ui <- shinyUI(fluidPage(
-  sliderInput("ci", "Confidence interval:", min = 0, max = 1, value=0.95, step=0.05),
+  sliderInput("ci", "Prediction interval:", min = 0, max = 1, value=0.95, step=0.01),
   plotlyOutput("myPlot")
 ))
 
@@ -15,15 +15,15 @@ ci <- reactive(input$ci)
 #set.seed(2)
 #dat <- data.frame(ID = paste0("ID",1:100), A.1=rnorm(100), A.2=rnorm(100), A.3=rnorm(100), B.1=rnorm(100), B.2=rnorm(100))
 
-load("../leavesDat.Rda")
-dat <- data.frame(ID = paste0("ID",1:nrow(data)), M.1=data[,2], M.2=data[,3], M.3=data[,4], P.1=data[,5], P.2=data[,6], P.3=data[,7])
-dat <- dat[1:100,]
+#load("../leavesDat.Rda")
+#dat <- data.frame(ID = paste0("ID",1:nrow(data)), M.1=data[,2], M.2=data[,3], M.3=data[,4], P.1=data[,5], P.2=data[,6], P.3=data[,7])
+#dat <- dat[1:100,]
 
-dat$ID <- as.character(dat$ID)
+#dat$ID <- as.character(dat$ID)
 nCol = ncol(dat)
 
-#st = qt(1-(1-0.999)/2,(nrow(dat)-2))
-#st = 150
+conf=seq(0,1,.01)
+st<- qt(1-(1-conf)/2,(nrow(dat)-2))
 
 b0 = c()
 b1 = c()
@@ -77,6 +77,13 @@ output$myPlot <- renderPlotly(ggPS %>%
                    AxisNames.push(document.getElementsByClassName('infolayer')[0].childNodes[i].textContent);
                  }
 
+stIndex = (1-0)/.01*data.ci
+console.log(stIndex)
+stIndex2 = Math.round(stIndex)
+console.log(stIndex2)
+st = data.st[stIndex2]
+console.log(st)
+
                var Traces = [];
                var i=0;
                var j=0;
@@ -103,7 +110,7 @@ output$myPlot <- renderPlotly(ggPS %>%
                  var minX = Math.min.apply(null,x)
                  var maxX = Math.max.apply(null,x)
 
-                 console.log(x)
+                 //console.log(x)
                  //console.log(minX)
                  //console.log(maxX)
 
@@ -118,12 +125,13 @@ output$myPlot <- renderPlotly(ggPS %>%
                  while (a < maxX){
                    xv.push(a);
                    yva = data.b0[j]+data.b1[j]*a;
-                   sea = data.sse[j] * Math.sqrt(1/n+Math.pow((a-xm),2)/ssx);
+                   // just changed this to have 1+1/n instead of just 1/n
+                   sea = data.sse[j] * Math.sqrt(1+1/n+Math.pow((a-xm),2)/ssx);
                    yv.push(yva);
                    se.push(sea);
-                   ci.push(data.st*sea);
-                   uyv.push(yva+data.st*sea);
-                   lyv.push(yva-data.st*sea);
+                   ci.push(st*sea);
+                   uyv.push(yva+st*sea);
+                   lyv.push(yva-st*sea);
                    a+=inc;
                  }
 
@@ -138,8 +146,8 @@ output$myPlot <- renderPlotly(ggPS %>%
                    xa = data.dat[a][AxisNames[i]]
                    ssea.push(data.sse[j] * Math.sqrt(1/n+Math.pow((xa-xm),2)/ssx))
                    ypred.push(data.b0[j]+data.b1[j]*xa)
-                   lwr.push(ypred[a] - ssea[a]*data.st)
-                   upr.push(ypred[a] + ssea[a]*data.st)
+                   lwr.push(ypred[a] - ssea[a]*st)
+                   upr.push(ypred[a] + ssea[a]*st)
                    if (!(y[a]>lwr[a] & y[a]<upr[a])){
                       xPoints.push(xa)
                       yPoints.push(data.dat[a][AxisNames[(len-k)]])
@@ -196,8 +204,8 @@ output$myPlot <- renderPlotly(ggPS %>%
                }
              Plotly.addTraces(el.id, Traces);
              }
-             ", data = list(dat=dat, b0=b0, b1=b1, sse=sse, st=ci())))})
-#st=st, ci=input$ci
+             ", data = list(dat=dat, b0=b0, b1=b1, sse=sse, st=st, ci=ci())))})
+#st=st, ci=input$ci, st=ci()
 
 shinyApp(ui, server)
 

@@ -9,7 +9,7 @@ ui <- shinyUI(fluidPage(
 
 server <- shinyServer(function(input, output) {
   set.seed(1)
-  dat <- data.frame(ID = paste0("ID",sample(c(1:100),100)), A=rnorm(100), B=rnorm(100), C=rnorm(100), D=rnorm(100), E=rnorm(100))
+  dat <- data.frame(ID = paste0("ID",sample(c(1:10),10)), A=rnorm(10), B=rnorm(10), C=rnorm(10), D=rnorm(10), E=rnorm(10))
   dat$ID <- as.character(dat$ID)
 
   minVal = min(dat[,-1])
@@ -90,8 +90,6 @@ return a;
                  }
                  SubPoints.push(keepIndex);
 
-console.log(SubPoints)
-
                  var tracePoints = {
                    x: xArr,
                    y: yArr,
@@ -144,6 +142,8 @@ console.log(SubPoints)
              idRows.push(data.dat[a]['ID'])
             }
 
+console.log(SubPoints[1])
+
            noPoint = x.data.length;
 
            el.on('plotly_selected', function(e) {
@@ -154,7 +154,7 @@ if (x.data.length > noPoint){
   //Plotly.deleteTraces(el.id, range(noPoint, (noPoint+(len*(len-1)/2-1)), 1));
   Plotly.deleteTraces(el.id, x.data.length-1);
 }
-
+console.log(e)
              numSel = e.points.length
              cN = e.points[0].curveNumber;
 
@@ -162,18 +162,20 @@ if (x.data.length > noPoint){
              for (a=0; a<numSel; a++){
               pointNumbers.push(e.points[a].pointNumber)
              }
+//console.log(numSel)
+//console.log(pointNumbers)
 
              // Determine which subplot was selected
              subPlot = (cN - Math.pow(len,2))/3+1
 //console.log(subPlot)
 
-            //console.log(pointNumbers.length)
+//console.log(pointNumbers.length)
             var selData = []
             for (a=0; a<pointNumbers.length; a++){
-              //console.log(data.dat[idRows.indexOf(SubPoints[subPlot-1])])
+//console.log(data.dat[idRows.indexOf(SubPoints[subPlot-1][pointNumbers[a]])])
               selData.push(data.dat[idRows.indexOf(SubPoints[subPlot-1][pointNumbers[a]])])
             }
-            //console.log(selData)
+//console.log(selData)
 
 
              var Traces = [];

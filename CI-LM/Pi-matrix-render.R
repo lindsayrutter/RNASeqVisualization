@@ -4,7 +4,7 @@ library(shiny)
 library(GGally)
 
 ui <- shinyUI(fluidPage(
-  sliderInput("ci", "Prediction interval:", min = 0, max = 1, value=0.95, step=0.01),
+  sliderInput("ci", "Prediction interval:", min = 0, max = 0.99, value=0.95, step=0.01),
   plotlyOutput("myPlot")
 ))
 
@@ -22,7 +22,7 @@ ci <- reactive(input$ci)
 #dat$ID <- as.character(dat$ID)
 nCol = ncol(dat)
 
-conf=seq(0,1,.01)
+conf=seq(0,0.99,.01)
 st<- qt(1-(1-conf)/2,(nrow(dat)-2))
 
 b0 = c()
@@ -77,11 +77,9 @@ output$myPlot <- renderPlotly(ggPS %>%
                    AxisNames.push(document.getElementsByClassName('infolayer')[0].childNodes[i].textContent);
                  }
 
-stIndex = (1-0)/.01*data.ci
+stIndex = Math.round((1-0)/.01*data.ci)
 console.log(stIndex)
-stIndex2 = Math.round(stIndex)
-console.log(stIndex2)
-st = data.st[stIndex2]
+st = data.st[stIndex]
 console.log(st)
 
                var Traces = [];
@@ -144,7 +142,8 @@ console.log(st)
                  var yPoints = [];
                  for (a=0; a<n; a++){
                    xa = data.dat[a][AxisNames[i]]
-                   ssea.push(data.sse[j] * Math.sqrt(1/n+Math.pow((xa-xm),2)/ssx))
+                   // just changed this to have 1+1/n instead of just 1/n
+                   ssea.push(data.sse[j] * Math.sqrt(1+1/n+Math.pow((xa-xm),2)/ssx))
                    ypred.push(data.b0[j]+data.b1[j]*xa)
                    lwr.push(ypred[a] - ssea[a]*st)
                    upr.push(ypred[a] + ssea[a]*st)
@@ -205,7 +204,6 @@ console.log(st)
              Plotly.addTraces(el.id, Traces);
              }
              ", data = list(dat=dat, b0=b0, b1=b1, sse=sse, st=st, ci=ci())))})
-#st=st, ci=input$ci, st=ci()
 
 shinyApp(ui, server)
 

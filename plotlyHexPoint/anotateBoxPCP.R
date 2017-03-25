@@ -65,20 +65,20 @@ function(el, x, data) {
     while(b<stop){b+=step;a.push(b)}
     return a;
   };
-  
+
   len = Math.sqrt(document.getElementsByClassName('cartesianlayer')[0].childNodes.length);
   AxisNames = [];
   for (i = 1; i < (len+1); i++) {
   AxisNames.push(document.getElementsByClassName('infolayer')[0].childNodes[i].textContent);
   }
   noPoint = x.data.length;
-  
+
   el.on('plotly_click', function(e) {
-  
+
   if (x.data.length > noPoint){
     Plotly.deleteTraces(el.id, range(noPoint, (noPoint+(len*(len-1)/2-1)), 1));
   }
-  
+
   xVar = (e.points[0].xaxis._id).replace(/[^0-9]/g,'')
   if (xVar.length == 0) xVar = 1
   yVar = (e.points[0].yaxis._id).replace(/[^0-9]/g,'')
@@ -131,35 +131,68 @@ function(el, x, data) {
 ####################################### Prepare PCP Boxplot
 ###########################################################
 
+
+set.seed(1)
+bindata <- data.frame(ID = paste0("ID",1:10000), A=rnorm(10000), B=rnorm(10000), C=rnorm(10000), D=rnorm(10000))
+bindata$ID <- as.character(bindata$ID)
+
 # If use selRows from the scatterplot matrix...
 selRows=c(1:5)
 
 temp <- bindata[selRows,]
 
 if (nrow(temp)>0){
-  
+
   if(nrow(temp)==1){
     oneRow = TRUE
     temp <- rbind(temp,temp)
     temp$ID[2]="justTest"
   }
-  
+
   dattb <- data.frame(t(temp))
   names(dattb) <- as.matrix(dattb[1, ])
   dattb <- dattb[-1, ]
   dattb[] <- lapply(dattb, function(x) type.convert(as.character(x)))
   setDT(dattb, keep.rownames = TRUE)[]
   dat_long <- melt(dattb, id.vars ="rn" )
-  
+
   if (oneRow){
     dat_long <- dat_long[1:(nrow(dat_long)/2),]
     oneRow=FALSE
   }
-  
+
   plot_ly(dat_long, x= ~rn, y= ~value, type = 'scatter', mode = 'lines+markers', color = ~variable)  %>% layout(dragmode="box", showlegend = FALSE)
 }
 
+ggplot(dat_long, aes(x = rn, y = value)) + geom_boxplot()
 
 
 
+#############################################################
+#############################################################
 
+
+library(tidyr);
+long_dat <- bindata %>% gather(key, val, -c(ID))
+
+#############################################################
+#############################################################
+# Can plot boxplot immediately even with 10,000 points
+set.seed(1)
+rn1 =sample(c("A","B","C","D"), 10000, replace=TRUE)
+value1 = rnorm(10000)
+df = data.frame(rn1=rn1, value1=value1)
+ggplot(df, aes(x = rn1, y = value1)) + geom_boxplot()
+
+#############################################################
+#############################################################
+#rm(list = ls())
+library(datasets)
+library(ggplot2)
+
+data(airquality)
+airquality$Month <- factor(airquality$Month,
+                           labels = c("May", "Jun", "Jul", "Aug", "Sep"))
+
+p10 <- ggplot(airquality, aes(x = Month, y = Ozone)) + geom_boxplot()
+p10

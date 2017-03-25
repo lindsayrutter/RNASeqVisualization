@@ -3,7 +3,7 @@ library(GGally)
 library(htmlwidgets)
 
 ui <- shinyUI(fluidPage(
-  sliderInput("threshold", "Threshold:", min = 0, max = 30, value=15, step=0.1),
+  sliderInput("threshold", "Fold Change:", min = 0, max = 30, value=15, step=0.1),
   plotlyOutput("myPlot")
 ))
 

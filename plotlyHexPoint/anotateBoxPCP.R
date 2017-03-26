@@ -160,6 +160,7 @@ console.log('test first')
 
   pcpDat <- reactive(bindata[which(bindata$ID %in% selID()), c(1:(p$nrow+1))])
   output$selectedValues <- renderPrint({str(pcpDat())})
+  colNms <- colnames(bindata[, c(2:(p$nrow+1))])
 
   boxDat <- bindata[, c(1:(p$nrow+1))] %>% gather(key, val, -c(ID))
   BP <- ggplot(boxDat, aes(x = key, y = val)) + geom_boxplot()
@@ -168,27 +169,43 @@ console.log('test first')
   output$boxPlot <- renderPlotly({
   ggBP %>% onRender("
   function(el, x, data) {
-var Traces = [];
-console.log('test second')
-//console.log(data.pcpDat)
-//for (a=0; a<.length; a++){
-//var traceHiLine = {
-//  x: [1, 2, 3, 4],
-//  y: [0, 1, -1, 0],
-//  mode: 'lines',
-//  line: {
-//    color: 'gray',
-//    width: 1
-//  },
-//  //opacity: 0.25,
-//}
-//Traces.push(traceHiLine);
-//}
+console.log(data.colNms)
 
-}", data = list(pcpDat = pcpDat()))})
+
+var Traces = [];
+
+var DLength = data.pcpDat.length
+var vLength = data.nVar
+var cNames = data.colNms
+
+for (a=0; a<DLength; a++){
+xArr = [];
+yArr = [];
+for (b=0; b<vLength; b++){
+xArr.push(b+1)
+yArr.push(data.pcpDat[a][cNames[b]]);
+}
+console.log(xArr)
+console.log(yArr)
+
+var traceHiLine = {
+x: xArr,
+y: yArr,
+mode: 'lines',
+line: {
+color: 'orange',
+width: 1
+},
+opacity: 0.9,
+}
+Traces.push(traceHiLine);
+}
+Plotly.addTraces(el.id, Traces);
+
+}", data = list(pcpDat = pcpDat(), nVar = p$nrow, colNms = colNms))})
 })
 
-#data = pcpDat() // just gives selected indices (not A/B/C/D values)
+#data = list(pcpDat = pcpDat() // working
 
 #plot_ly(long_dat, x= ~key, y= ~val, type = 'scatter', mode = 'lines+markers', color = ~ID)  %>% layout(dragmode="box", showlegend = FALSE)
 

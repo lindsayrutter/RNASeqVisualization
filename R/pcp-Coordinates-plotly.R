@@ -1,30 +1,31 @@
 ui <- basicPage(
-  plotOutput("plot1", brush = "plot_brush"
-  ),
-  verbatimTextOutput("info")
+  plotlyOutput("plot1")#,
+  #verbatimTextOutput("info")
 )
 
 server <- function(input, output) {
 
-  #output$plot1 <- renderPlot({
-  #  plot(mtcars$wt, mtcars$mpg)
-  #})
-
   p <- qplot(mtcars$wt, mtcars$mpg)
   gp <- ggplotly(p)
 
+  output$plot1 <- renderPlotly({
   gp %>% onRender("
-                  function(el, x, data) {
+    function(el, x, data) {
 
-                  output$info <- renderText({
-                  xy_range_str <- function(e) {
-                  if(is.null(e)) return("NULL\n")
-                  paste0("xmin=", round(e$xmin, 1), " xmax=", round(e$xmax, 1),
-                  " ymin=", round(e$ymin, 1), " ymax=", round(e$ymax, 1))
-                  }
+el.on('plotly_selected', function(e) {
+  var xMin = e.range.x[0]
+  var xMax = e.range.x[1]
+  var yMin = e.range.y[0]
+  var yMax = e.range.y[1]
+  console.log(xMin)
+  console.log(xMax)
+  console.log(yMin)
+  console.log(yMax)
+})
+    }")})
+}
 
-                  paste0("brush: ", xy_range_str(input$plot_brush))
-                  })
-                  }
 
-                  shinyApp(ui, server)
+shinyApp(ui, server)
+
+# paste0('brush: ', xy_range_str(input$plot_brush))

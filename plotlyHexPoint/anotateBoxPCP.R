@@ -7,18 +7,16 @@ library(tidyr)
 library(shiny)
 
 ui <- shinyUI(fluidPage(
-  #sliderInput("ci", "Value:", min = 0, max = 34, value=34, step=1),
   plotlyOutput("scatMatPlot"),
-  textOutput("selectedValues"),
+  #textOutput("selectedValues"),
   plotlyOutput("boxPlot")
 ))
 
 
 server <- shinyServer(function(input, output) {
 
-  oneRow=FALSE
   set.seed(1)
-  bindata <- data.frame(ID = paste0("ID",1:100), A=rnorm(100), B=rnorm(100), C=rnorm(100), D=rnorm(100))
+  bindata <- data.frame(ID = paste0("ID",1:10000), A=rnorm(10000), B=rnorm(10000), C=rnorm(10000), D=rnorm(10000))
   bindata$ID <- as.character(bindata$ID)
 
   ################################ Prepare scatterplot matrix
@@ -73,8 +71,6 @@ server <- shinyServer(function(input, output) {
   ggPS %>% onRender("
   function(el, x, data) {
 
-console.log('test first')
-
     function range(start, stop, step){
       var a=[start], b=start;
       while(b<stop){b+=step;a.push(b)}
@@ -113,8 +109,7 @@ console.log('test first')
     for (a=0; a<selRows.length; a++){
       selID.push(selRows[a]['ID'])
     }
-    //console.log(selID)
-    // save selected row IDs for PCP
+    // Save selected row IDs for PCP
     Shiny.onInputChange('selID', selID);
 
     var Traces = [];
@@ -155,9 +150,6 @@ console.log('test first')
 })
   selID <- reactive(input$selID)
 
-  #output$selectedValues <- renderPrint({str(selID())})
-  #output$selectedValues <- renderPrint({sprintf("The selected rows are:%s", input$selID)})
-
   pcpDat <- reactive(bindata[which(bindata$ID %in% selID()), c(1:(p$nrow+1))])
   output$selectedValues <- renderPrint({str(pcpDat())})
   colNms <- colnames(bindata[, c(2:(p$nrow+1))])
@@ -169,98 +161,37 @@ console.log('test first')
   output$boxPlot <- renderPlotly({
   ggBP %>% onRender("
   function(el, x, data) {
-console.log(data.colNms)
 
+  var Traces = [];
 
-var Traces = [];
+  var DLength = data.pcpDat.length
+  var vLength = data.nVar
+  var cNames = data.colNms
 
-var DLength = data.pcpDat.length
-var vLength = data.nVar
-var cNames = data.colNms
+  for (a=0; a<DLength; a++){
+  xArr = [];
+  yArr = [];
+  for (b=0; b<vLength; b++){
+    xArr.push(b+1)
+    yArr.push(data.pcpDat[a][cNames[b]]);
+  }
 
-for (a=0; a<DLength; a++){
-xArr = [];
-yArr = [];
-for (b=0; b<vLength; b++){
-xArr.push(b+1)
-yArr.push(data.pcpDat[a][cNames[b]]);
-}
-console.log(xArr)
-console.log(yArr)
-
-var traceHiLine = {
-x: xArr,
-y: yArr,
-mode: 'lines',
-line: {
-color: 'orange',
-width: 1
-},
-opacity: 0.9,
-}
-Traces.push(traceHiLine);
-}
-Plotly.addTraces(el.id, Traces);
+  var traceHiLine = {
+    x: xArr,
+    y: yArr,
+    mode: 'lines',
+    line: {
+      color: 'orange',
+      width: 1
+    },
+    opacity: 0.9,
+  }
+  Traces.push(traceHiLine);
+  }
+  Plotly.addTraces(el.id, Traces);
 
 }", data = list(pcpDat = pcpDat(), nVar = p$nrow, colNms = colNms))})
 })
-
-#data = list(pcpDat = pcpDat() // working
-
-#plot_ly(long_dat, x= ~key, y= ~val, type = 'scatter', mode = 'lines+markers', color = ~ID)  %>% layout(dragmode="box", showlegend = FALSE)
-
-####################################### Prepare PCP Boxplot
-###########################################################
-
-
-# long_dat <- bindata %>% gather(key, val, -c(ID))
-# ggBP <- ggplot(long_dat, aes(x = key, y = val)) + geom_boxplot()
-#
-# ggBP %>% onRender("
-# function(el, x, data) {
-#
-#   }
-#   ", data = bindata)
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-# # If use selRows from the scatterplot matrix...
-# selRows=c(1:5)
-#
-# temp <- bindata[selRows,]
-#
-# if (nrow(temp)>0){
-#
-#   if(nrow(temp)==1){
-#     oneRow = TRUE
-#     temp <- rbind(temp,temp)
-#     temp$ID[2]="justTest"
-#   }
-#
-#   dattb <- data.frame(t(temp))
-#   names(dattb) <- as.matrix(dattb[1, ])
-#   dattb <- dattb[-1, ]
-#   dattb[] <- lapply(dattb, function(x) type.convert(as.character(x)))
-#   setDT(dattb, keep.rownames = TRUE)[]
-#   dat_long <- melt(dattb, id.vars ="rn" )
-#
-#   if (oneRow){
-#     dat_long <- dat_long[1:(nrow(dat_long)/2),]
-#     oneRow=FALSE
-#   }
-#
-#   plot_ly(dat_long, x= ~rn, y= ~value, type = 'scatter', mode = 'lines+markers', color = ~variable)  %>% layout(dragmode="box", showlegend = FALSE)
-# }
 
 shinyApp(ui, server)
 

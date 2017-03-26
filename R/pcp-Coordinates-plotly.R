@@ -7,9 +7,7 @@ ui <- basicPage(
 
 server <- function(input, output) {
   # For some reason, will only allow box select if use geom_blank() with qplot() instead of ggplot()
-  #p <- ggplot(mtcars, aes(x = wt, y = mpg)) + geom_blank()
-  #gp <- ggplotly(p)
-  p <- qplot(mtcars$wt, mtcars$mpg) + geom_blank()
+  p <- ggplot(mtcars, aes(x = wt, y = mpg)) + geom_point(alpha=0)
   gp <- ggplotly(p)
 
   set.seed(1)
@@ -19,7 +17,21 @@ server <- function(input, output) {
   output$plot1 <- renderPlotly({
   gp %>% onRender("
     function(el, x, data) {
- //here1
+    Traces=[]
+    for (a=0; a<10; a++){
+      var tracePCP = {
+        x: data.xArr,
+        y: data.yArr.slice(a*4, (a+1)*4),
+        mode: 'lines',
+        line: {
+          color: 'orange',
+          width: 1
+        },
+        opacity: 0.9,
+      }
+      Traces.push(tracePCP);
+    }
+    Plotly.addTraces(el.id, Traces);
 
   el.on('plotly_selected', function(e) {
     var xMin = e.range.x[0]
@@ -31,14 +43,10 @@ server <- function(input, output) {
     console.log(yMin)
     console.log(yMax)
 
-  // here2
-  //Traces.push(traceHiLine);
-  //Plotly.addTraces(el.id, Traces);
+
   })
     }", data = list(xArr=xArr, yArr=yArr))})
 }
 
-
 shinyApp(ui, server)
 
-# paste0('brush: ', xy_range_str(input$plot_brush))

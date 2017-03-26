@@ -9,7 +9,8 @@ library(shiny)
 ui <- shinyUI(fluidPage(
   #sliderInput("ci", "Value:", min = 0, max = 34, value=34, step=1),
   plotlyOutput("scatMatPlot"),
-  textOutput("selectedValues")
+  textOutput("selectedValues"),
+  plotlyOutput("boxPlot")
 ))
 
 
@@ -17,7 +18,7 @@ server <- shinyServer(function(input, output) {
 
   oneRow=FALSE
   set.seed(1)
-  bindata <- data.frame(ID = paste0("ID",1:10000), A=rnorm(10000), B=rnorm(10000), C=rnorm(10000), D=rnorm(10000))
+  bindata <- data.frame(ID = paste0("ID",1:100), A=rnorm(100), B=rnorm(100), C=rnorm(100), D=rnorm(100))
   bindata$ID <- as.character(bindata$ID)
 
   ################################ Prepare scatterplot matrix
@@ -150,12 +151,40 @@ server <- shinyServer(function(input, output) {
     ", data = bindata)
 
 })
-  selID = reactive(input$selID)
+  selID <- reactive(input$selID)
 
-  output$selectedValues <- renderPrint({str(selID())})
+  #output$selectedValues <- renderPrint({str(selID())})
   #output$selectedValues <- renderPrint({sprintf("The selected rows are:%s", input$selID)})
+
+  pcpDat <- reactive(bindata[which(bindata$ID %in% selID()), c(1:(p$nrow+1))])
+  output$selectedValues <- renderPrint({str(pcpDat())})
+
+  boxDat <- bindata[, c(1:(p$nrow+1))] %>% gather(key, val, -c(ID))
+  ggBP <- ggplot(boxDat, aes(x = key, y = val)) + geom_boxplot()
+  output$boxPlot <- renderPlotly({
+  ggBP %>% onRender("
+  function(el, x, data) {
+console.log(data)
+var Traces = [];
+for (a=0; a<.length; a++){
+var traceHiLine = {
+  x: [1, 2, 3, 4],
+  y: [0, 1, -1, 0],
+  mode: 'lines',
+  line: {
+    color: 'gray',
+    width: 1
+  },
+  //opacity: 0.25,
+}
+Traces.push(traceHiLine);
+}
+
+}", data = pcpDat())})
 }
 )
+
+#plot_ly(long_dat, x= ~key, y= ~val, type = 'scatter', mode = 'lines+markers', color = ~ID)  %>% layout(dragmode="box", showlegend = FALSE)
 
 ####################################### Prepare PCP Boxplot
 ###########################################################

@@ -73,6 +73,8 @@ server <- shinyServer(function(input, output) {
   ggPS %>% onRender("
   function(el, x, data) {
 
+console.log('test first')
+
     function range(start, stop, step){
       var a=[start], b=start;
       while(b<stop){b+=step;a.push(b)}
@@ -111,7 +113,7 @@ server <- shinyServer(function(input, output) {
     for (a=0; a<selRows.length; a++){
       selID.push(selRows[a]['ID'])
     }
-    console.log(selID)
+    //console.log(selID)
     // save selected row IDs for PCP
     Shiny.onInputChange('selID', selID);
 
@@ -160,29 +162,33 @@ server <- shinyServer(function(input, output) {
   output$selectedValues <- renderPrint({str(pcpDat())})
 
   boxDat <- bindata[, c(1:(p$nrow+1))] %>% gather(key, val, -c(ID))
-  ggBP <- ggplot(boxDat, aes(x = key, y = val)) + geom_boxplot()
+  BP <- ggplot(boxDat, aes(x = key, y = val)) + geom_boxplot()
+  ggBP <- ggplotly(BP)
+
   output$boxPlot <- renderPlotly({
   ggBP %>% onRender("
   function(el, x, data) {
-console.log(data)
 var Traces = [];
-for (a=0; a<.length; a++){
-var traceHiLine = {
-  x: [1, 2, 3, 4],
-  y: [0, 1, -1, 0],
-  mode: 'lines',
-  line: {
-    color: 'gray',
-    width: 1
-  },
-  //opacity: 0.25,
-}
-Traces.push(traceHiLine);
-}
+console.log('test second')
+//console.log(data.pcpDat)
+//for (a=0; a<.length; a++){
+//var traceHiLine = {
+//  x: [1, 2, 3, 4],
+//  y: [0, 1, -1, 0],
+//  mode: 'lines',
+//  line: {
+//    color: 'gray',
+//    width: 1
+//  },
+//  //opacity: 0.25,
+//}
+//Traces.push(traceHiLine);
+//}
 
-}", data = pcpDat())})
-}
-)
+}", data = list(pcpDat = pcpDat()))})
+})
+
+#data = pcpDat() // just gives selected indices (not A/B/C/D values)
 
 #plot_ly(long_dat, x= ~key, y= ~val, type = 'scatter', mode = 'lines+markers', color = ~ID)  %>% layout(dragmode="box", showlegend = FALSE)
 

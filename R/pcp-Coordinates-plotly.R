@@ -69,11 +69,27 @@ for (a=0; a<dLength; a++){
   var yMinDF2 = dat[cNames[xMaxF]] // yMin for case2
 
   //console.log(yMinDC1, yMinDF1, xMinC, xMinF, xMax) //case1
-  console.log(yMinDC2, yMinDF2, xMaxC, xMaxF, xMax) //case2
+  //console.log(yMinDC2, yMinDF2, xMaxC, xMaxF, xMax) //case2
   var case1 = (xMin-xMinF)*(yMinDC1-yMinDF1)/(xMinC-xMinF) + yMinDF1
   var case2 = (xMax-xMaxF)*(yMinDC2-yMinDF2)/(xMaxC-xMaxF) + yMinDF2
+
+  //console.log(yMin, case1, yMax)
+  if (yMin < case1 && case1 < yMax){
+    console.log('yes case1')
+  }
+  else if (yMin < case2 && case2 < yMax){
+    console.log('yes case2')
+  }
+  else if (Math.sign(yMin-case1)!=Math.sign(yMin-case2)){
+    console.log('yes case3')
+  }
+  //else if (Math.sign(yMax-case1)!=Math.sign(yMax-case2)){
+  //  console.log('yes case4')
+  //}
+
+
   //console.log(case1) // works perfectly
-  console.log(case2) // works perfectly
+  //console.log(case2) // works perfectly
 }
 
 }

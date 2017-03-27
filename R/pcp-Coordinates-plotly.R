@@ -14,7 +14,7 @@ server <- function(input, output) {
   gp <- ggplotly(p)
 
   set.seed(1)
-  pcpDat <- data.frame(ID = paste0("ID",1:10), A=rnorm(10), B=rnorm(10), C=rnorm(10), D=rnorm(10))
+  pcpDat <- data.frame(ID = paste0("ID",1:2), A=rnorm(2), B=rnorm(2), C=rnorm(2), D=rnorm(2))
   pcpDat$ID <- as.character(pcpDat$ID)
   colNms <- colnames(pcpDat[, c(2:(ncol(pcpDat)))])
   nVar <- length(colNms)
@@ -52,15 +52,30 @@ server <- function(input, output) {
   el.on('plotly_selected', function(e) {
     var xMin = e.range.x[0]
     var xMinF = Math.floor(xMin)
+    var xMinC = Math.ceil(xMin)
     var xMax = e.range.x[1]
+    var xMaxF = Math.floor(xMax)
     var xMaxC = Math.ceil(xMax)
     var yMin = e.range.y[0]
     var yMax = e.range.y[1]
 
 if (!((xMax<0) || (xMin>(vLength-1)))){
 for (a=0; a<dLength; a++){
-  console.log(data.pcpDat[a]['A'])
+  var dat = data.pcpDat[a]
+  var yMinDC1 = dat[cNames[xMinF+1]] // yMax for case1
+  var yMinDF1 = dat[cNames[xMinF]] // yMin for case1
+
+  var yMinDC2 = dat[cNames[xMaxF+1]] // yMax for case2
+  var yMinDF2 = dat[cNames[xMaxF]] // yMin for case2
+
+  //console.log(yMinDC1, yMinDF1, xMinC, xMinF, xMax) //case1
+  console.log(yMinDC2, yMinDF2, xMaxC, xMaxF, xMax) //case2
+  var case1 = (xMin-xMinF)*(yMinDC1-yMinDF1)/(xMinC-xMinF) + yMinDF1
+  var case2 = (xMax-xMaxF)*(yMinDC2-yMinDF2)/(xMaxC-xMaxF) + yMinDF2
+  //console.log(case1) // works perfectly
+  console.log(case2) // works perfectly
 }
+
 }
 
 

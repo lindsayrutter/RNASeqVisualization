@@ -81,12 +81,22 @@ for (a=0; a<dLength; a++){
     console.log('yes case2')
   }
   else if (Math.sign(yMin-case1)!=Math.sign(yMin-case2)){
-    console.log('yes case3')
+    //if (!isNaN(case1)&&!isNaN(case2)){
+      console.log('yes case3')
+    //}
   }
-  //else if (Math.sign(yMax-case1)!=Math.sign(yMax-case2)){
-  //  console.log('yes case4')
-  //}
-
+  else if (Math.sign(yMax-case1)!=Math.sign(yMax-case2)){
+    //if (!isNaN(case1)&&!isNaN(case2)){
+      console.log('yes case4')
+    //}
+  }
+  // Check triangle case
+  else if (yMinDF1 < yMin && yMinDC2 < yMin && yMinDC1 > yMin && yMinDC1 < yMax){
+    console.log('yes case5')
+  }
+  else if (yMinDF1 > yMax && yMinDC2 > yMax && yMinDC1 < yMax && yMinDC1 > yMin){
+    console.log('yes case6')
+  }
 
   //console.log(case1) // works perfectly
   //console.log(case2) // works perfectly

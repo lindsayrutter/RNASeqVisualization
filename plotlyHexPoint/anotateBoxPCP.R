@@ -151,6 +151,7 @@ server <- shinyServer(function(input, output) {
   selID <- reactive(input$selID)
 
   pcpDat <- reactive(bindata[which(bindata$ID %in% selID()), c(1:(p$nrow+1))])
+  #pcpDat<- bindata[which(bindata$ID %in% c("ID1","ID2","ID3")), c(1:(p$nrow+1))]
   output$selectedValues <- renderPrint({str(pcpDat())})
   colNms <- colnames(bindata[, c(2:(p$nrow+1))])
 
@@ -164,11 +165,11 @@ server <- shinyServer(function(input, output) {
 
   var Traces = [];
 
-  var DLength = data.pcpDat.length
+  var dLength = data.pcpDat.length
   var vLength = data.nVar
   var cNames = data.colNms
 
-  for (a=0; a<DLength; a++){
+  for (a=0; a<dLength; a++){
   xArr = [];
   yArr = [];
   for (b=0; b<vLength; b++){

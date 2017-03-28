@@ -27,7 +27,7 @@ server <- function(input, output) {
       var dLength = data.pcpDat.length //10
       var vLength = data.nVar //4
       var cNames = data.colNms //'A','B','C','D'
-  
+
       for (a=0; a<dLength; a++){
         xArr = [];
         yArr = [];
@@ -48,8 +48,10 @@ server <- function(input, output) {
         Traces.push(pcpLine);
       }
       Plotly.addTraces(el.id, Traces);
-  
+
     el.on('plotly_selected', function(e) {
+      var selectedPCP = []
+
       var xMin = e.range.x[0]
       var xMax = e.range.x[1]
       var xMinF = Math.floor(xMin)
@@ -58,7 +60,7 @@ server <- function(input, output) {
       var xMaxC = Math.ceil(xMax)
       var yMin = e.range.y[0]
       var yMax = e.range.y[1]
-  
+
       if (xMin<0){
         xMin = 0
         xMinF = 0
@@ -69,7 +71,7 @@ server <- function(input, output) {
         xMaxF = vLength -2
         xMaxC = vLength-1
       }
-  
+
   if (!((xMax<0) || (xMin>(vLength-1)))){
     for (a=0; a<dLength; a++){
       var dat = data.pcpDat[a]
@@ -78,27 +80,26 @@ server <- function(input, output) {
       var yAtXmaxF = dat[cNames[xMaxF+1]]
       var yAtXmaxC = dat[cNames[xMaxF]]
       leftInt = xMinF
-//console.log(leftInt)
-    
+
       while (leftInt < xMaxC){
         var rightInt = leftInt+1
         var yAtXmin = (xMin-xMinF)*(yAtXminC-yAtXminF)/(xMinC-xMinF) + yAtXminF
         var yAtXmax = (xMax-xMaxF)*(yAtXmaxF-yAtXmaxC)/(xMaxC-xMaxF) + yAtXmaxC
-    
+
         if (leftInt == xMinF && yMin < yAtXmin && yAtXmin < yMax){
             //console.log(['leftEdge',a])
-            console.log(a)
+            selectedPCP.push(a)
             leftInt = xMaxC-1
         }
         else if (xMinF == xMaxF){
           if (Math.sign(yMin-yAtXmin)!=Math.sign(yMin-yAtXmax)){
             //console.log(['horizontalEdgeSmallBox1',a])
-            console.log(a)
+            selectedPCP.push(a)
             leftInt = xMaxC-1
           }
           else if (Math.sign(yMax-yAtXmin)!=Math.sign(yMax-yAtXmax)){
             //console.log(['horizontalEdgeSmallBox2',a])
-            console.log(a)
+            selectedPCP.push(a)
             leftInt = xMaxC-1
           }
         }
@@ -110,7 +111,7 @@ server <- function(input, output) {
               (Math.sign(yMin-yAtXmin) == Math.sign(yMin-yLeftInt) &&
               Math.sign(yMax-yAtXmin) == Math.sign(yMax-yLeftInt))){
                 //console.log(['horizontalEdgeXminBox',a])
-                console.log(a)
+                selectedPCP.push(a)
                 leftInt = xMaxC-1
           }
         }
@@ -122,7 +123,7 @@ server <- function(input, output) {
               (Math.sign(yMin-yAtXmax) == Math.sign(yMin-yRightInt) &&
               Math.sign(yMax-yAtXmax) == Math.sign(yMax-yRightInt))){
                 //console.log(['horizontalEdgeXmaxBox',a])
-                console.log(a)
+                selectedPCP.push(a)
                 leftInt = xMaxC-1
           }
         }
@@ -132,15 +133,16 @@ server <- function(input, output) {
             if (Math.sign(yMin-yLeftInt)!=Math.sign(yMin-yRightInt) ||
                 Math.sign(yMax-yLeftInt)!=Math.sign(yMax-yRightInt)){
               //console.log(['triangleWholeLength',a])
-                console.log(a)
+                selectedPCP.push(a)
                 leftInt = xMaxC-1
             }
         }
-    
         leftInt++;
       }
     }
   }
+console.log(selectedPCP)
+
 })
 }", data = list(pcpDat = pcpDat, nVar = nVar, colNms = colNms))})
 }

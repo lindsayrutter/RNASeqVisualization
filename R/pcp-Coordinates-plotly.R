@@ -10,11 +10,11 @@ ui <- basicPage(
 
 server <- function(input, output) {
   # For some reason, will only allow box select if use geom_blank() with qplot() instead of ggplot()
-  p <- ggplot(mtcars, aes(x = wt, y = mpg)) + geom_point(alpha=0) + xlim(0,3) +ylim(-3,3)
+  p <- ggplot(mtcars, aes(x = wt, y = mpg)) + geom_point(alpha=0) + xlim(0,5) +ylim(-3,3)
   gp <- ggplotly(p)
 
   set.seed(1)
-  pcpDat <- data.frame(ID = paste0("ID",1:2), A=rnorm(2), B=rnorm(2), C=rnorm(2), D=rnorm(2))
+  pcpDat <- data.frame(ID = paste0("ID",1:2), A=rnorm(2), B=rnorm(2), C=rnorm(2), D=rnorm(2), E=rnorm(2), F=rnorm(2))
   pcpDat$ID <- as.character(pcpDat$ID)
   colNms <- colnames(pcpDat[, c(2:(ncol(pcpDat)))])
   nVar <- length(colNms)
@@ -51,55 +51,70 @@ server <- function(input, output) {
 
   el.on('plotly_selected', function(e) {
     var xMin = e.range.x[0]
+    var xMax = e.range.x[1]
     var xMinF = Math.floor(xMin)
     var xMinC = Math.ceil(xMin)
-    var xMax = e.range.x[1]
     var xMaxF = Math.floor(xMax)
     var xMaxC = Math.ceil(xMax)
     var yMin = e.range.y[0]
     var yMax = e.range.y[1]
 
+    if (xMin<0){
+      xMin = 0
+      xMinF = 0
+      xMinC = 1
+    }
+    if (xMax>(vLength-1)){
+      xMax = vLength-1
+      xMaxF = vLength -2
+      xMaxC = vLength-1
+    }
+
 if (!((xMax<0) || (xMin>(vLength-1)))){
 for (a=0; a<dLength; a++){
   var dat = data.pcpDat[a]
-  var yMinDC1 = dat[cNames[xMinF+1]] // yMax for case1
-  var yMinDF1 = dat[cNames[xMinF]] // yMin for case1
 
-  var yMinDC2 = dat[cNames[xMaxF+1]] // yMax for case2
-  var yMinDF2 = dat[cNames[xMaxF]] // yMin for case2
+  var yAtXminF = dat[cNames[xMinF]] //yMinDF1
+  var yAtXminC = dat[cNames[xMinF+1]] //yMinDC1
+  var yAtXmaxF = dat[cNames[xMaxF+1]] //yMinDC2
+  var yAtXmaxC = dat[cNames[xMaxF]] //yMinDF2
 
-  //console.log(yMinDC1, yMinDF1, xMinC, xMinF, xMax) //case1
-  //console.log(yMinDC2, yMinDF2, xMaxC, xMaxF, xMax) //case2
-  var case1 = (xMin-xMinF)*(yMinDC1-yMinDF1)/(xMinC-xMinF) + yMinDF1
-  var case2 = (xMax-xMaxF)*(yMinDC2-yMinDF2)/(xMaxC-xMaxF) + yMinDF2
+  leftInt = xMinF
+  console.log(leftInt)
+  while (leftInt < xMaxC){
+    var rightInt = leftInt+1
 
-  //console.log(yMin, case1, yMax)
-  if (yMin < case1 && case1 < yMax){
-    console.log('yes case1')
-  }
-  else if (yMin < case2 && case2 < yMax){
-    console.log('yes case2')
-  }
-  else if (Math.sign(yMin-case1)!=Math.sign(yMin-case2)){
-    //if (!isNaN(case1)&&!isNaN(case2)){
-      console.log('yes case3')
-    //}
-  }
-  else if (Math.sign(yMax-case1)!=Math.sign(yMax-case2)){
-    //if (!isNaN(case1)&&!isNaN(case2)){
-      console.log('yes case4')
-    //}
-  }
-  // Check triangle case
-  else if (yMinDF1 < yMin && yMinDC2 < yMin && yMinDC1 > yMin && yMinDC1 < yMax){
-    console.log('yes case5')
-  }
-  else if (yMinDF1 > yMax && yMinDC2 > yMax && yMinDC1 < yMax && yMinDC1 > yMin){
-    console.log('yes case6')
+var yAtXmin = (xMin-xMinF)*(yAtXminC-yAtXminF)/(xMinC-xMinF) + yAtXminF
+var yAtXmax = (xMax-xMaxF)*(yAtXmaxF-yAtXmaxC)/(xMaxC-xMaxF) + yAtXmaxC
+
+    if (leftInt == xMinF){
+      if (yMin < yAtXmin && yAtXmin < yMax){
+        console.log(['leftEdge',a])
+    }}
+
+    if (xMinF == xMaxF){
+      if (Math.sign(yMin-yAtXmin)!=Math.sign(yMin-yAtXmax)){
+        console.log(['horizontalEdge1',a])
+      }
+      if (Math.sign(yMax-yAtXmin)!=Math.sign(yMax-yAtXmax)){
+        console.log(['horizontalEdge2',a])
+      }
+    }
+    else{
+      if (leftInt >= xMin && rightInt <= xMax){
+        var yLeftInt = dat[cNames[leftInt]]
+        var yRightInt = dat[cNames[rightInt]]
+        if (Math.sign(yMin-yLeftInt)!=Math.sign(yMin-yRightInt) ||
+            Math.sign(yMax-yLeftInt)!=Math.sign(yMax-yRightInt)){
+          console.log(['triangleWholeLength',a])
+        }
+      }
+    }
+
+    leftInt++;
   }
 
-  //console.log(case1) // works perfectly
-  //console.log(case2) // works perfectly
+
 }
 
 }

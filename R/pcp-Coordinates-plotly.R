@@ -94,10 +94,30 @@ var yAtXmax = (xMax-xMaxF)*(yAtXmaxF-yAtXmaxC)/(xMaxC-xMaxF) + yAtXmaxC
 
     if (xMinF == xMaxF){
       if (Math.sign(yMin-yAtXmin)!=Math.sign(yMin-yAtXmax)){
-        console.log(['horizontalEdge1',a])
+        console.log(['horizontalEdgeSmallBox1',a])
       }
       if (Math.sign(yMax-yAtXmin)!=Math.sign(yMax-yAtXmax)){
-        console.log(['horizontalEdge2',a])
+        console.log(['horizontalEdgeSmallBox2',a])
+      }
+    }
+    else if (leftInt == xMinF && xMinF != xMaxF){
+      var yLeftInt = dat[cNames[leftInt]]
+      var yRightInt = dat[cNames[rightInt]]
+      if ((Math.sign(yMin-yLeftInt)!=Math.sign(yMin-yRightInt) ||
+          Math.sign(yMax-yLeftInt)!=Math.sign(yMax-yRightInt)) &&
+          (Math.sign(yMin-yAtXmin) == Math.sign(yMin-yLeftInt) &&
+          Math.sign(yMax-yAtXmin) == Math.sign(yMax-yLeftInt))){
+            console.log(['horizontalEdgeXminBox',a])
+      }
+    }
+    else if (leftInt == xMaxF && xMinF != xMaxF){
+      var yLeftInt = dat[cNames[leftInt]]
+      var yRightInt = dat[cNames[rightInt]]
+      if ((Math.sign(yMin-yLeftInt)!=Math.sign(yMin-yRightInt) ||
+          Math.sign(yMax-yLeftInt)!=Math.sign(yMax-yRightInt)) &&
+          (Math.sign(yMin-yAtXmax) == Math.sign(yMin-yRightInt) &&
+          Math.sign(yMax-yAtXmax) == Math.sign(yMax-yRightInt))){
+            console.log(['horizontalEdgeXmaxBox',a])
       }
     }
     else{

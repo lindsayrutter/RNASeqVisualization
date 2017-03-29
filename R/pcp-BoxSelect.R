@@ -13,7 +13,7 @@ server <- function(input, output) {
   gp <- ggplotly(p)
 
   set.seed(3)
-  pcpDat <- data.frame(ID = paste0("ID",1:3), A=rnorm(3), B=rnorm(3), C=rnorm(3), D=rnorm(3), E=rnorm(3), F=rnorm(3))
+  pcpDat <- data.frame(ID = paste0("ID",1:7), A=rnorm(7), B=rnorm(7), C=rnorm(7), D=rnorm(7), E=rnorm(7), F=rnorm(7))
   pcpDat$ID <- as.character(pcpDat$ID)
   colNms <- colnames(pcpDat[, c(2:(ncol(pcpDat)))])
   nVar <- length(colNms)
@@ -47,6 +47,8 @@ server <- function(input, output) {
         Traces.push(pcpLine);
       }
       Plotly.addTraces(el.id, Traces);
+
+    console.log(el)
 
     el.on('plotly_selected', function(e) {
       var selectedPCP = []
@@ -87,18 +89,18 @@ server <- function(input, output) {
 
         if (leftInt == xMinF && yMin < yAtXmin && yAtXmin < yMax){
             //console.log(['leftEdge',a])
-            selectedPCP.push(a)
+            selectedPCP.push(a+1)
             leftInt = xMaxC-1
         }
         else if (xMinF == xMaxF){
           if (Math.sign(yMin-yAtXmin)!=Math.sign(yMin-yAtXmax)){
             //console.log(['horizontalEdgeSmallBox1',a])
-            selectedPCP.push(a)
+            selectedPCP.push(a+1)
             leftInt = xMaxC-1
           }
           else if (Math.sign(yMax-yAtXmin)!=Math.sign(yMax-yAtXmax)){
             //console.log(['horizontalEdgeSmallBox2',a])
-            selectedPCP.push(a)
+            selectedPCP.push(a+1)
             leftInt = xMaxC-1
           }
         }
@@ -110,7 +112,7 @@ server <- function(input, output) {
               (Math.sign(yMin-yAtXmin) == Math.sign(yMin-yLeftInt) &&
               Math.sign(yMax-yAtXmin) == Math.sign(yMax-yLeftInt))){
                 //console.log(['horizontalEdgeXminBox',a])
-                selectedPCP.push(a)
+                selectedPCP.push(a+1)
                 leftInt = xMaxC-1
           }
         }
@@ -122,7 +124,7 @@ server <- function(input, output) {
               (Math.sign(yMin-yAtXmax) == Math.sign(yMin-yRightInt) &&
               Math.sign(yMax-yAtXmax) == Math.sign(yMax-yRightInt))){
                 //console.log(['horizontalEdgeXmaxBox',a])
-                selectedPCP.push(a)
+                selectedPCP.push(a+1)
                 leftInt = xMaxC-1
           }
         }
@@ -132,7 +134,7 @@ server <- function(input, output) {
             if (Math.sign(yMin-yLeftInt)!=Math.sign(yMin-yRightInt) ||
                 Math.sign(yMax-yLeftInt)!=Math.sign(yMax-yRightInt)){
               //console.log(['triangleWholeLength',a])
-                selectedPCP.push(a)
+                selectedPCP.push(a+1)
                 leftInt = xMaxC-1
             }
         }
@@ -141,16 +143,48 @@ server <- function(input, output) {
     }
   }
 console.log(selectedPCP)
-for (a=0; a<selectedPCP.length; a++){
-  console.log(data.pcpDat[selectedPCP[a]]['ID'])
-}
+//for (a=0; a<selectedPCP.length; a++){
+//  console.log(data.pcpDat[selectedPCP[a]]['ID'])
+//}
 Shiny.onInputChange('selectedPCP', selectedPCP);
+
+//Plotly.deleteTraces(el.id, selectedPCP);
+//Plotly.deleteTraces(el.id, range(noPoint, (noPoint+(len*(len-1)/2-1)), 1));
+
+
+
+//      for (a=0; a<dLength; a++){
+//        xArr = [];
+//        yArr = [];
+//        for (b=0; b<vLength; b++){
+//          xArr.push(b)
+//          yArr.push(data.pcpDat[a][cNames[b]]);
+//        }
+//        var pcpLine = {
+//          x: xArr,
+//          y: yArr,
+//          mode: 'lines',
+//          line: {
+//            color: 'orange',
+//            width: 1
+//          },
+//          opacity: 0.9,
+//        }
+//        Traces.push(pcpLine);
+//      }
+//      Plotly.addTraces(el.id, Traces);
+
+
+
+//console.log(selectedPCP) // first data frame row has selectedPCP value of 0 and trace index of 1
+
+Plotly.deleteTraces(el.id, selectedPCP);
 
 })
 }", data = list(pcpDat = pcpDat, nVar = nVar, colNms = colNms))})
 
   selectedPCP <- reactive(input$selectedPCP)
-  selectID <- reactive(pcpDat[selectedPCP()+1,]$ID)
+  selectID <- reactive(pcpDat[selectedPCP(),]$ID)
 
   output$info <- renderText({
     paste0(selectID())

@@ -13,7 +13,7 @@ server <- function(input, output) {
   gp <- ggplotly(p)
 
   set.seed(3)
-  pcpDat <- data.frame(ID = paste0("ID",1:7), A=rnorm(7), B=rnorm(7), C=rnorm(7), D=rnorm(7), E=rnorm(7), F=rnorm(7))
+  pcpDat <- data.frame(ID = paste0("ID",1:20), A=rnorm(20), B=rnorm(20), C=rnorm(20), D=rnorm(20), E=rnorm(20), F=rnorm(20))
   pcpDat$ID <- as.character(pcpDat$ID)
   colNms <- colnames(pcpDat[, c(2:(ncol(pcpDat)))])
   nVar <- length(colNms)
@@ -148,8 +148,14 @@ console.log(selectedPCP)
 //}
 Shiny.onInputChange('selectedPCP', selectedPCP);
 
-//Plotly.deleteTraces(el.id, selectedPCP);
-//Plotly.deleteTraces(el.id, range(noPoint, (noPoint+(len*(len-1)/2-1)), 1));
+
+        var update = {
+          line: {
+            color: 'green',
+            width: 1
+          }
+        }
+        Plotly.restyle(el.id, update, selectedPCP);
 
 
 
@@ -178,7 +184,7 @@ Shiny.onInputChange('selectedPCP', selectedPCP);
 
 //console.log(selectedPCP) // first data frame row has selectedPCP value of 0 and trace index of 1
 
-Plotly.deleteTraces(el.id, selectedPCP);
+//Plotly.deleteTraces(el.id, selectedPCP);
 
 })
 }", data = list(pcpDat = pcpDat, nVar = nVar, colNms = colNms))})

@@ -13,7 +13,7 @@ server <- function(input, output) {
   gp <- ggplotly(p)
 
   set.seed(3)
-  pcpDat <- data.frame(ID = paste0("ID",1:20), A=rnorm(20), B=rnorm(20), C=rnorm(20), D=rnorm(20), E=rnorm(20), F=rnorm(20))
+  pcpDat <- data.frame(ID = paste0("ID",1:5), A=rnorm(5), B=rnorm(5), C=rnorm(5), D=rnorm(5), E=rnorm(5), F=rnorm(5))
   pcpDat$ID <- as.character(pcpDat$ID)
   colNms <- colnames(pcpDat[, c(2:(ncol(pcpDat)))])
   nVar <- length(colNms)
@@ -142,49 +142,27 @@ server <- function(input, output) {
       }
     }
   }
+
 console.log(selectedPCP)
 //for (a=0; a<selectedPCP.length; a++){
 //  console.log(data.pcpDat[selectedPCP[a]]['ID'])
 //}
 Shiny.onInputChange('selectedPCP', selectedPCP);
 
+///////////////// Update color when selected /////////////////
+  var update = {
+    line: {
+      color: 'green',
+      width: 1
+    }
+  }
 
-        var update = {
-          line: {
-            color: 'green',
-            width: 1
-          }
-        }
-        Plotly.restyle(el.id, update, selectedPCP);
-
-
-
-//      for (a=0; a<dLength; a++){
-//        xArr = [];
-//        yArr = [];
-//        for (b=0; b<vLength; b++){
-//          xArr.push(b)
-//          yArr.push(data.pcpDat[a][cNames[b]]);
-//        }
-//        var pcpLine = {
-//          x: xArr,
-//          y: yArr,
-//          mode: 'lines',
-//          line: {
-//            color: 'orange',
-//            width: 1
-//          },
-//          opacity: 0.9,
-//        }
-//        Traces.push(pcpLine);
-//      }
-//      Plotly.addTraces(el.id, Traces);
+///////////////// Update color when selected /////////////////
+  Plotly.deleteTraces(el.id, selectedPCP);
 
 
 
-//console.log(selectedPCP) // first data frame row has selectedPCP value of 0 and trace index of 1
 
-//Plotly.deleteTraces(el.id, selectedPCP);
 
 })
 }", data = list(pcpDat = pcpDat, nVar = nVar, colNms = colNms))})

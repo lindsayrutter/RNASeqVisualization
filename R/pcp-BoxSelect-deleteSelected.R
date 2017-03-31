@@ -4,19 +4,19 @@ library(plotly)
 library(htmlwidgets)
 
 ui <- basicPage(
-  plotlyOutput("plot1"),
-  actionButton("delete", "Delete selected")
+  plotlyOutput("plot1") #,
+  #actionButton("delete", "Delete selected")
 )
 
 server <- function(input, output) {
 
-  delete <- reactive(input$delete)
+  #delete <- reactive(input$delete)
 
   p <- ggplot(mtcars, aes(x = wt, y = mpg)) + geom_point(alpha=0) + xlim(0,5) +ylim(-3,3)
   gp <- ggplotly(p)
 
   set.seed(3)
-  pcpDat <- data.frame(ID = paste0("ID",1:10), A=rnorm(10), B=rnorm(10), C=rnorm(10), D=rnorm(10), E=rnorm(10), F=rnorm(10))
+  pcpDat <- data.frame(ID = paste0("ID",1:10), A=rnorm(10,-1), B=rnorm(10,-1), C=rnorm(10,-1), D=rnorm(10,1), E=rnorm(10,1), F=rnorm(10,1))
   pcpDat$ID <- as.character(pcpDat$ID)
   colNms <- colnames(pcpDat[, c(2:(ncol(pcpDat)))])
   nVar <- length(colNms)
@@ -155,23 +155,23 @@ width: 1
 Plotly.restyle(el.id, update, updateSPCP);
 
 
-observeEvent(input$delete, {
-  Plotly.deleteTraces(el.id, updateSPCP);
-  var newDat = []
-  var selectedPCPL = selectedPCP.length
-  for (a=0; a<dLength; a++){
-  var equal = 0;
-  for (b=0; b<selectedPCPL; b++){
-  if (a==selectedPCP[b]){
-  equal=1
-  }
-  }
-  if (equal==0){
-  newDat.push(pcpDat[a])
-  }
-  }
-  pcpDat = newDat
-})
+//observeEvent(input$delete, {
+//  Plotly.deleteTraces(el.id, updateSPCP);
+//  var newDat = []
+//  var selectedPCPL = selectedPCP.length
+//  for (a=0; a<dLength; a++){
+//  var equal = 0;
+//  for (b=0; b<selectedPCPL; b++){
+//  if (a==selectedPCP[b]){
+//  equal=1
+//  }
+//  }
+//  if (equal==0){
+//  newDat.push(pcpDat[a])
+//  }
+//  }
+//  pcpDat = newDat
+//})
 
 
 //    Plotly.deleteTraces(el.id, updateSPCP);
@@ -192,8 +192,8 @@ observeEvent(input$delete, {
 
 
   })
-  }", data = list(pcpDat = pcpDat, nVar = nVar, colNms = colNms, deleteS=delete()))})
-
+  }", data = list(pcpDat = pcpDat, nVar = nVar, colNms = colNms ))})
+#deleteS=delete()
   }
 
 shinyApp(ui, server)

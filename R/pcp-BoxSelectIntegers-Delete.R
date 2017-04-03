@@ -88,7 +88,7 @@ server <- function(input, output) {
       isOut = 1;
       }
       }
-      if (isOut==0){
+      if (isOut==1){
       selectedPCP.push(a)
       }
       }
@@ -107,7 +107,7 @@ server <- function(input, output) {
       }
       }
       if (selectedPCPL!=0){
-      Plotly.restyle(el.id, update, updateSPCP);
+      Plotly.deleteTraces(el.id, updateSPCP);
       }
 
       var newDat = []
@@ -119,11 +119,11 @@ server <- function(input, output) {
       equal=1
       }
       }
-      if (equal==1){
+      if (equal==0){
       newDat.push(pcpDat[a])
       }
       }
-      // pcpDat = newDat
+      pcpDat = newDat
       }
       }
 
@@ -153,16 +153,11 @@ server <- function(input, output) {
       for (a=0; a<notSelectedPCPL; a++){
       updateNSPCP[a]=notSelectedPCP[a]+1
       }
-      console.log(['updateNSPCP'], updateNSPCP)
+      //console.log(['updateNSPCP'], updateNSPCP)
 
-      var update = {
-      line: {
-      color: 'orange',
-      width: 1
-      }
-      }
       if (notSelectedPCPL!=0){
-      Plotly.restyle(el.id, update, updateNSPCP);
+      console.log(['deleting'], updateNSPCP)
+      Plotly.deleteTraces(el.id, updateNSPCP);
       }
 
       var newDat = []
@@ -178,7 +173,7 @@ server <- function(input, output) {
       newDat.push(pcpDat[a])
       }
       }
-      // pcpDat = newDat
+      pcpDat = newDat
       }
 
       else{
@@ -199,92 +194,61 @@ server <- function(input, output) {
       }
       }
       if (notSelectedPCPL!=0){
-      Plotly.restyle(el.id, update, updateNSPCP);
+      Plotly.deleteTraces(el.id, update, updateNSPCP);
       }
-      //pcpDat = []
+      pcpDat = []
       }
       }
 
-//      var sel1 = {
-//      x: [xMin, xMax],
-//      y: [yMin, yMin],
-//      mode: 'lines',
-//      //fill: 'tonexty',
-//      line: {
-//      color: 'black',
-//      width: 0.5,
-//      dash: 'dot'
-//      },
-//      hoverinfo: 'none',
-//      }
-//      var sel2 = {
-//      x: [xMax, xMax],
-//      y: [yMin, yMax],
-//      mode: 'lines',
-//      //fill: 'tonexty',
-//      line: {
-//      color: 'black',
-//      width: 0.5,
-//      dash: 'dot'
-//      },
-//      hoverinfo: 'none'
-//      }
-//      var sel3 = {
-//      x: [xMin, xMax],
-//      y: [yMax, yMax],
-//      mode: 'lines',
-//      //fill: 'tonexty',
-//      line: {
-//      color: 'black',
-//      dash: 'dot',
-//      width: 0.5
-//      },
-//      hoverinfo: 'none'
-//      }
-//      var sel4 = {
-//      x: [xMin, xMin],
-//      y: [yMin, yMax],
-//      mode: 'lines',
-//      //fill: 'tonexty',
-//      line: {
-//      color: 'black',
-//      dash: 'dot',
-//     width: 0.5
-//     },
-//     hoverinfo: 'none'
-//      }
-//      Plotly.addTraces(el.id, [sel1, sel2, sel3, sel4]);
-
-
-var Traces = []
-var drawRect = {
-  type: 'rect',
-   x0: 3,
-   y0: 1,
-   x1: 4,
-   y1: 2,
-   line: {
-      color: 'green',
-      width: 1
-   },
-  fillcolor: 'green'
-}
-Traces.push(drawRect);
-
-console.log('draw rectangle')
-Plotly.addTraces(el.id, Traces);
-
-//'type': 'rect',
-//'x0': 3,
-//'y0': 1,
-//'x1': 6,
-//'y1': 2,
-//'line': {
-//    'color': 'rgba(128, 0, 128, 1)',
-//    'width': 2,
-//},
-//'fillcolor': 'rgba(128, 0, 128, 0.7)',
-
+      var sel1 = {
+      x: [xMin, xMax],
+      y: [yMin, yMin],
+      mode: 'lines',
+      //fill: 'tonexty',
+      line: {
+      color: 'black',
+      width: 0.5,
+      dash: 'dot'
+      },
+      hoverinfo: 'none',
+      }
+      var sel2 = {
+      x: [xMax, xMax],
+      y: [yMin, yMax],
+      mode: 'lines',
+      //fill: 'tonexty',
+      line: {
+      color: 'black',
+      width: 0.5,
+      dash: 'dot'
+      },
+      hoverinfo: 'none'
+      }
+      var sel3 = {
+      x: [xMin, xMax],
+      y: [yMax, yMax],
+      mode: 'lines',
+      //fill: 'tonexty',
+      line: {
+      color: 'black',
+      dash: 'dot',
+      width: 0.5
+      },
+      hoverinfo: 'none'
+      }
+      var sel4 = {
+      x: [xMin, xMin],
+      y: [yMin, yMax],
+      mode: 'lines',
+      //fill: 'tonexty',
+      line: {
+      color: 'black',
+      dash: 'dot',
+     width: 0.5
+     },
+     hoverinfo: 'none'
+      }
+      Plotly.addTraces(el.id, [sel1, sel2, sel3, sel4]);
 
 
       console.log(['pcpDat', pcpDat])

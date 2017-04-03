@@ -51,6 +51,7 @@ server <- shinyServer(function(input, output) {
   output$myPlot <- renderPlotly(ggPS %>%
     onRender("
              function(el, x, data) {
+console.log('running new')
 
 function range(start, stop, step){
 var a=[start], b=start;

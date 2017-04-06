@@ -9,15 +9,30 @@ coty <- read_delim("R/SISBID-2016-master/data/GSE61857_Cotyledon_normalized.txt.
 coty <- as.data.frame(coty)
 colnames(coty) <- c("ID","S1.1","S1.2","S1.3","S2.1","S2.2","S2.3","S3.1","S3.2","S3.3")
 
-d <- DGEList(counts = coty[,2:7],
-             group = c(rep("S1", 3), rep("S2", 3)),
+d <- DGEList(counts = coty[,2:10],
+             group = c(rep("S1", 3), rep("S2", 3), rep("S3", 3)),
              genes = coty[,1])
 d <- calcNormFactors(d)
 d <- estimateCommonDisp(d)
 d <- estimateTagwiseDisp(d)
 d <- estimateTrendedDisp(d)
-de <- exactTest(d, pair=c("S1", "S2"), dispersion = "tagwise")
-deDF <- as.data.frame(de)
+
+myLevels <- levels(d@.Data[[2]]$group)
+myList <- list()
+
+# Runs exact test on all pairs of groups and saves in list
+for (i in 1:(length(myLevels)-1)){
+  for (j in (i+1):(length(myLevels))){
+    coty[[paste(i,j,sep="-")]] <- as.data.frame(exactTest(d, pair=c(myLevels[i], myLevels[j]), dispersion = "tagwise"))
+  }
+}
+
+for(i in 2:(coty$nrow)) {
+  for(j in 1:(coty$nrow-1)) {
+    coty[[paste(i,j,sep="-")]] <- attr(pS[i,j]$data, "cID")
+  }
+}
+
 
 qplot(data=deDF, table.logFC, -log(table.PValue))
 

@@ -255,7 +255,7 @@ server <- function(input, output) {
 
       selectTime++
       }
-      })
+})
       }", data = list(pcpDat = pcpDat, nVar = nVar, colNms = colNms))})
 
   }

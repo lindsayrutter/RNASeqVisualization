@@ -10,14 +10,15 @@ library(htmlwidgets)
 ui <- shinyUI(fluidPage(
   #sliderInput("threshold", "Fold Change:", min = 0, max = 30, value=15, step=0.1),
   plotlyOutput("plot1"),
-  textOutput("selectedValues")
+  #textOutput("selectedValues"),
+  plotlyOutput("boxPlot")
 ))
 
 server <- shinyServer(function(input, output) {
 
   coty <- read_delim(paste0(getwd(),"/SISBID-2016-master/data/GSE61857_Cotyledon_normalized.txt.gz"), delim="\t", col_types="cddddddddd", col_names=c("ID", "C_S1_R1", "C_S1_R2", "C_S1_R3", "C_S2_R1", "C_S2_R2", "C_S2_R3", "C_S3_R1", "C_S3_R2", "C_S3_R3"), skip=1)
 
-  coty <- coty[1:100,]
+  #coty <- coty[1:100,]
   coty <- as.data.frame(coty)
   colnames(coty) <- c("ID","S1.1","S1.2","S1.3","S2.1","S2.2","S2.3","S3.1","S3.2","S3.3")
 
@@ -98,6 +99,47 @@ el.on('plotly_selected', function(e) {
 
   pcpDat <- reactive(dat[selRow(), 1:(ncol(dat)-2*length(myLevels))])
   output$selectedValues <- renderPrint({str(pcpDat())})
+
+  colNms <- colnames(coty[, 2:(ncol(dat)-2*length(myLevels))])
+  nVar <- length(2:(ncol(dat)-2*length(myLevels)))
+
+  boxDat <- coty[, 1:(ncol(dat)-2*length(myLevels))] %>% gather(key, val, -c(ID))
+  BP <- ggplot(boxDat, aes(x = key, y = val)) + geom_boxplot()
+  ggBP <- ggplotly(BP)
+
+  output$boxPlot <- renderPlotly({
+    ggBP %>% onRender("
+      function(el, x, data) {
+
+      var Traces = [];
+
+      var dLength = data.pcpDat.length
+      var vLength = data.nVar
+      var cNames = data.colNms
+
+      for (a=0; a<dLength; a++){
+      xArr = [];
+      yArr = [];
+      for (b=0; b<vLength; b++){
+      xArr.push(b+1)
+      yArr.push(data.pcpDat[a][cNames[b]]);
+      }
+
+      var traceHiLine = {
+      x: xArr,
+      y: yArr,
+      mode: 'lines',
+      line: {
+      color: 'orange',
+      width: 1
+      },
+      opacity: 0.9,
+      }
+      Traces.push(traceHiLine);
+      }
+      Plotly.addTraces(el.id, Traces);
+
+      }", data = list(pcpDat = pcpDat(), nVar = nVar, colNms = colNms))})
 
 })
 

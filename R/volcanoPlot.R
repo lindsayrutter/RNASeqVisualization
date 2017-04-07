@@ -23,15 +23,41 @@ myList <- list()
 # Runs exact test on all pairs of groups and saves in list
 for (i in 1:(length(myLevels)-1)){
   for (j in (i+1):(length(myLevels))){
-    coty[[paste(i,j,sep="-")]] <- as.data.frame(exactTest(d, pair=c(myLevels[i], myLevels[j]), dispersion = "tagwise"))
+    coty[[paste(i,j,"FC",sep="-")]] <- as.data.frame(exactTest(d, pair=c(myLevels[i], myLevels[j]), dispersion = "tagwise"))$table.logFC
+    coty[[paste(i,j,"pval",sep="-")]] <- as.data.frame(exactTest(d, pair=c(myLevels[i], myLevels[j]), dispersion = "tagwise"))$table.PValue
   }
 }
 
-for(i in 2:(coty$nrow)) {
-  for(j in 1:(coty$nrow-1)) {
-    coty[[paste(i,j,sep="-")]] <- attr(pS[i,j]$data, "cID")
-  }
-}
+nCol = ncol(coty)
+dat = coty
+datFCP = dat[,(nCol-2*length(myLevels)+1):nCol]
+
+# x-axis FC, y-axis pval
+xMax = max(datFCP[,seq(1,ncol(datFCP),by=2)])
+xMin = min(datFCP[,seq(1,ncol(datFCP),by=2)])
+yMax = max(datFCP[,seq(2,ncol(datFCP),by=2)])
+yMin = min(datFCP[,seq(2,ncol(datFCP),by=2)])
+
+# my_fn <- function(data, mapping, ...){
+#   x = data[,c(as.character(mapping$x))]
+#   y = data[,c(as.character(mapping$y))]
+#   p <- ggplot(data = dat, aes(x=x, y=y)) + coord_cartesian(xlim = c(xMin, xMax), ylim = c(yMin, yMax))
+#   p
+# }
+#
+# p <- ggpairs(dat[,-1], lower = list(continuous = my_fn))
+
+
+      coord_cartesian(xlim = c(maxRange[1], maxRange[2]), ylim = c(maxRange[1], maxRange[2]))
+
+
+
+
+
+
+
+
+
 
 
 qplot(data=deDF, table.logFC, -log(table.PValue))

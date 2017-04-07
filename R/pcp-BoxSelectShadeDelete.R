@@ -20,7 +20,7 @@ server <- function(input, output) {
   nVar <- length(colNms)
 
   output$plot1 <- renderPlotly({
-    gp %>% onRender("
+    gp %>% layout(dragmode="select") %>% onRender("
       function(el, x, data) {
 
       var origPcpDat = data.pcpDat
@@ -200,58 +200,25 @@ server <- function(input, output) {
       }
       }
 
-      var sel1 = {
-      x: [xMin, xMax],
-      y: [yMin, yMin],
-      mode: 'lines',
-      //fill: 'tonexty',
-      line: {
-      color: 'black',
-      width: 0.5,
-      dash: 'dot'
-      },
-      hoverinfo: 'none',
+      var Traces = []
+      var drawRect = {
+        type: 'rect',
+        x0: xMin,
+        y0: yMin,
+        x1: xMax,
+        y1: yMax,
+        line: {
+          color: 'gray',
+          width: 1
+        },
+        fillcolor: 'gray',
+        opacity: 0.3
       }
-      var sel2 = {
-      x: [xMax, xMax],
-      y: [yMin, yMax],
-      mode: 'lines',
-      //fill: 'tonexty',
-      line: {
-      color: 'black',
-      width: 0.5,
-      dash: 'dot'
-      },
-      hoverinfo: 'none'
+      var update = {
+        shapes:[drawRect],
+        persistent: 'true'
       }
-      var sel3 = {
-      x: [xMin, xMax],
-      y: [yMax, yMax],
-      mode: 'lines',
-      //fill: 'tonexty',
-      line: {
-      color: 'black',
-      dash: 'dot',
-      width: 0.5
-      },
-      hoverinfo: 'none'
-      }
-      var sel4 = {
-      x: [xMin, xMin],
-      y: [yMin, yMax],
-      mode: 'lines',
-      //fill: 'tonexty',
-      line: {
-      color: 'black',
-      dash: 'dot',
-     width: 0.5
-     },
-     hoverinfo: 'none'
-      }
-      Plotly.addTraces(el.id, [sel1, sel2, sel3, sel4]);
-
-
-      console.log(['pcpDat', pcpDat])
+      Plotly.relayout(el.id, update)
 
       selectTime++
       }

@@ -8,7 +8,7 @@ library(shiny)
 
 ui <- shinyUI(fluidPage(
   plotlyOutput("scatMatPlot"),
-  #textOutput("selectedValues"),
+  textOutput("selectedValues"),
   plotlyOutput("boxPlot")
 ))
 
@@ -109,6 +109,7 @@ server <- shinyServer(function(input, output) {
     for (a=0; a<selRows.length; a++){
       selID.push(selRows[a]['ID'])
     }
+    console.log(selID)
     // Save selected row IDs for PCP
     Shiny.onInputChange('selID', selID);
 

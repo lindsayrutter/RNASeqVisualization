@@ -71,6 +71,8 @@ for (i in 1:myLength){
 output$myPlot <- renderPlotly(ggPS %>%
     onRender("
      function(el, x, data) {
+console.log(data.st)
+
          len = Math.sqrt(document.getElementsByClassName('cartesianlayer')[0].childNodes.length);
          AxisNames = [];
          for (i = 1; i < (len+1); i++) {

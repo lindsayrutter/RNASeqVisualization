@@ -9,6 +9,7 @@ library(htmlwidgets)
 
 ui <- shinyUI(fluidPage(
   sliderInput("threshP", "P-value:", min = 0, max = 1, value=0.05, step=0.05),
+  sliderInput("threshFC", "Fold change:", min = 0, max = 33, value=10, step=0.5),
   plotlyOutput("plot1"),
   #textOutput("selectedValues"),
   plotlyOutput("boxPlot")
@@ -17,6 +18,7 @@ ui <- shinyUI(fluidPage(
 server <- shinyServer(function(input, output) {
 
   threshP <- reactive(input$threshP)
+  threshFC <- reactive(input$threshFC)
 
   coty <- read_delim(paste0(getwd(),"/SISBID-2016-master/data/GSE61857_Cotyledon_normalized.txt.gz"), delim="\t", col_types="cddddddddd", col_names=c("ID", "C_S1_R1", "C_S1_R2", "C_S1_R3", "C_S2_R1", "C_S2_R2", "C_S2_R3", "C_S3_R1", "C_S3_R2", "C_S3_R3"), skip=1)
 
@@ -59,6 +61,7 @@ server <- shinyServer(function(input, output) {
     gp %>% onRender("
       function(el, x, data) {
 console.log(data.thP)
+console.log(data.thFC)
 
         var dat = data.dat
         var myX = 1
@@ -66,16 +69,17 @@ console.log(data.thP)
 
         var selFC = [];
         var selP = [];
-        //console.log(['threshP', data.thP])
-        //console.log(-1 * Math.log10(data.thP))
         dat.forEach(function(row){
           rowFC = row[myX+'-'+myY+'-FC']
           rowP = row[myX+'-'+myY+'-pval']
-          //console.log([rowP, ])
-          //if (rowP > -1 * Math.log10(data.thP)){
+          if (rowP >= -1 * Math.log10(data.thP)){
             selFC.push(rowFC);
             selP.push(rowP);
-          //}
+          }
+          else if (data.thFC <= Math.exp(Math.abs(rowFC))){
+            selFC.push(rowFC);
+            selP.push(rowP);
+          }
         });
         console.log(selP)
 
@@ -105,7 +109,7 @@ el.on('plotly_selected', function(e) {
     console.log(selRow)
     Shiny.onInputChange('selRow', selRow);
 })
-      }", data = list(dat = dat, thP=threshP()))})
+      }", data = list(dat = dat, thP=threshP(), thFC=threshFC()))})
 
   selRow <- reactive(input$selRow)
 

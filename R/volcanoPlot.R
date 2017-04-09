@@ -9,16 +9,14 @@ library(htmlwidgets)
 
 ui <- shinyUI(fluidPage(
   sliderInput("threshP", "P-value:", min = 0, max = 1, value=0.05, step=0.05),
-  sliderInput("threshFC", "Fold change:", min = 0, max = 33, value=10, step=0.5),
+  uiOutput("slider"),
   plotlyOutput("plot1"),
   #textOutput("selectedValues"),
+  verbatimTextOutput("selectedValues"),
   plotlyOutput("boxPlot")
 ))
 
 server <- shinyServer(function(input, output) {
-
-  threshP <- reactive(input$threshP)
-  threshFC <- reactive(input$threshFC)
 
   coty <- read_delim(paste0(getwd(),"/SISBID-2016-master/data/GSE61857_Cotyledon_normalized.txt.gz"), delim="\t", col_types="cddddddddd", col_names=c("ID", "C_S1_R1", "C_S1_R2", "C_S1_R3", "C_S2_R1", "C_S2_R2", "C_S2_R3", "C_S3_R1", "C_S3_R2", "C_S3_R3"), skip=1)
 
@@ -52,7 +50,16 @@ server <- shinyServer(function(input, output) {
   xMin = min(datFCP[,seq(1,ncol(datFCP),by=2)])
   yMax = max(datFCP[,seq(2,ncol(datFCP),by=2)])
   yMin = min(datFCP[,seq(2,ncol(datFCP),by=2)])
+  fcMax = ceiling(max(exp(xMax), 1/exp(xMin)))
 
+  #make dynamic slider
+  output$slider <- renderUI({
+    sliderInput("threshFC", "Fold change:", min=0, max=fcMax, value=ceiling((fcMax)/3), step=0.5)
+  })
+  
+  threshP <- reactive(input$threshP)
+  threshFC <- reactive(input$threshFC)
+  
   df <- data.frame()
   p <- ggplot(df) + geom_point() + xlim(xMin, xMax) + ylim(yMin, yMax)
   gp <- ggplotly(p)
@@ -60,8 +67,6 @@ server <- shinyServer(function(input, output) {
   output$plot1 <- renderPlotly({
     gp %>% onRender("
       function(el, x, data) {
-console.log(data.thP)
-console.log(data.thFC)
 
         var dat = data.dat
         var myX = 1
@@ -69,24 +74,25 @@ console.log(data.thFC)
 
         var selFC = [];
         var selP = [];
+        var sselID = [];
         dat.forEach(function(row){
           rowFC = row[myX+'-'+myY+'-FC']
           rowP = row[myX+'-'+myY+'-pval']
-          if (rowP >= -1 * Math.log10(data.thP)){
+          rowID = row['ID']
+          if (rowP >= -1 * Math.log10(data.thP) && data.thFC <= Math.exp(Math.abs(rowFC))){
             selFC.push(rowFC);
             selP.push(rowP);
-          }
-          else if (data.thFC <= Math.exp(Math.abs(rowFC))){
-            selFC.push(rowFC);
-            selP.push(rowP);
+            sselID.push(rowID);
           }
         });
-        console.log(selP)
+
+console.log(sselID)
 
         var Traces = [];
         var tracePoints = {
           x: selFC,
           y: selP,
+          text: sselID,
           mode: 'markers',
           marker: {
             color: 'black',
@@ -101,19 +107,24 @@ console.log(data.thFC)
 
 el.on('plotly_selected', function(e) {
     numSel = e.points.length
-    selRow = []
+    Points = e.points
+    console.log(e)
+    selID = []
     for (a=0; a<numSel; a++){
-      d = e.points[a].pointNumber+1
-      selRow.push(d)
+      PN = Points[a].pointNumber
+      selRow = sselID[PN]
+      selID.push(selRow)
     }
-    console.log(selRow)
-    Shiny.onInputChange('selRow', selRow);
+    console.log(selID)
+
+    Shiny.onInputChange('selID', selID);
 })
       }", data = list(dat = dat, thP=threshP(), thFC=threshFC()))})
 
-  selRow <- reactive(input$selRow)
+  selID <- reactive(input$selID)
 
-  pcpDat <- reactive(dat[selRow(), 1:(ncol(dat)-2*length(myLevels))])
+  pcpDat <- reactive(dat[which(dat$ID %in% selID()), 1:(ncol(dat)-2*length(myLevels))])
+  
   output$selectedValues <- renderPrint({str(pcpDat())})
 
   colNms <- colnames(coty[, 2:(ncol(dat)-2*length(myLevels))])

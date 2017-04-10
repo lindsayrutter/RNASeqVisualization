@@ -20,7 +20,7 @@ server <- shinyServer(function(input, output) {
 
   coty <- read_delim(paste0(getwd(),"/SISBID-2016-master/data/GSE61857_Cotyledon_normalized.txt.gz"), delim="\t", col_types="cddddddddd", col_names=c("ID", "C_S1_R1", "C_S1_R2", "C_S1_R3", "C_S2_R1", "C_S2_R2", "C_S2_R3", "C_S3_R1", "C_S3_R2", "C_S3_R3"), skip=1)
 
-  coty <- coty[1:100,]
+  coty <- coty[1:10,]
   coty <- as.data.frame(coty)
   colnames(coty) <- c("ID","S1.1","S1.2","S1.3","S2.1","S2.2","S2.3","S3.1","S3.2","S3.3")
 
@@ -62,12 +62,14 @@ server <- shinyServer(function(input, output) {
 
   df <- data.frame()
   p <- ggplot(df) + geom_point() + xlim(xMin, xMax) + ylim(yMin, yMax)
+  
+  p <- qplot(dat$`1-2-FC`, dat$`1-2-pval`) + xlim(xMin, xMax) + ylim(yMin, yMax)  
+  
   gp <- ggplotly(p)
 
   output$plot1 <- renderPlotly({
     gp %>% onRender("
       function(el, x, data) {
-
         var dat = data.dat
         var myX = 1
         var myY = 2
@@ -78,10 +80,10 @@ server <- shinyServer(function(input, output) {
         dat.forEach(function(row){
           rowFC = row[myX+'-'+myY+'-FC']
           rowP = row[myX+'-'+myY+'-pval']
-          rowID = row['ID']
           if (rowP >= -1 * Math.log10(data.thP) && data.thFC <= Math.exp(Math.abs(rowFC))){
             selFC.push(rowFC);
             selP.push(rowP);
+          rowID = row['ID']
             sselID.push(rowID);
           }
         });

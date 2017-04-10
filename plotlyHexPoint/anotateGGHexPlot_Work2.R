@@ -5,7 +5,7 @@ library(hexbin)
 library(htmlwidgets)
 
 set.seed(1)
-bindata <- data.frame(ID = paste0("ID",1:10000), A=rnorm(10000), B=rnorm(10000), C=rnorm(10000), D=rnorm(10000))
+bindata <- data.frame(ID = paste0("ID",1:100), A=rnorm(100), B=rnorm(100), C=rnorm(100), D=rnorm(100))
 bindata$ID <- as.character(bindata$ID)
 
 maxVal = max(abs(bindata[,-1]))

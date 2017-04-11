@@ -11,52 +11,39 @@ ui <- shinyUI(fluidPage(
 
 server <- shinyServer(function(input, output) {
   set.seed(1)
+  dat <- data.frame(ID = paste0("ID",1:1000), FC=runif(1000,0,10), pval=runif(1000,0,1))
+  dat$ID <- as.character(dat$ID)
+
   threshP <- reactive(input$threshP)
   threshFC <- reactive(input$threshFC)
 
-  dat <- data.frame(ID = paste0("ID",1:14), FC=runif(14,0,10), pval=runif(14,0,1))
-  dat$ID <- as.character(dat$ID)
-  print(dat)
+  datInput <- reactive(subset(dat , pval > threshP() & threshFC() < FC))
 
-  # x-axis FC, y-axis pval
-  xMax = max(dat$FC)
-  xMin = min(dat$FC)
-  yMax = max(dat$pval)
-  yMin = min(dat$pval)
+  p <- qplot(datInput()$FC, datInput()$pval)
+  gp <- ggplotly(p, tooltip=c())
 
   df <- data.frame()
-  p <- ggplot(df) + geom_point() + xlim(xMin, xMax) + ylim(yMin, yMax)
+  p <- ggplot(df) + geom_point()
   gp <- ggplotly(p)
 
   output$plot1 <- renderPlotly({
     gp %>% onRender("
-    function(el, x, data) {
+    function(el, x, datInput) {
 
 console.log(el)
 console.log(el.id)
 console.log(x)
 
-    var dat = data.dat
     var selFC = [];
     var selP = [];
     var sselID = [];
-    var NselFC = [];
-    var NselP = [];
-    var NsselID = [];
     dat.forEach(function(row){
     rowFC = row['FC']
     rowP = row['pval']
     rowID = row['ID']
-    if (rowP <= data.thP && data.thFC <= rowFC){
     selFC.push(rowFC);
     selP.push(rowP);
     sselID.push(rowID);
-    }
-    else{
-    NselFC.push(rowFC);
-    NselP.push(rowP);
-    NsselID.push(rowID)
-    }
     });
 
     var Traces = [];
@@ -70,22 +57,7 @@ console.log(x)
     size: 6
     },
     };
-
-    var NtracePoints = {
-    x: NselFC,
-    y: NselP,
-    text: NsselID,
-    mode: 'markers',
-    marker: {
-    color: 'black',
-    size: 6
-    },
-    opacity: 0,
-    hoverinfo: 'none'
-    };
-
     Traces.push(tracePoints);
-    Traces.push(NtracePoints);
     Plotly.addTraces(el.id, Traces);
 
     el.on('plotly_selected', function(e) {
@@ -100,7 +72,7 @@ console.log(x)
     }
     Shiny.onInputChange('selID', selID);
     })
-    }", data = list(dat = dat, thP=threshP(), thFC=threshFC()))})
+    }", data = datInput))
 
   selID <- reactive(input$selID)
   selDat <- reactive(dat[which(dat$ID %in% selID()), ])

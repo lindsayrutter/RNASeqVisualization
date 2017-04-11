@@ -70,6 +70,7 @@ server <- shinyServer(function(input, output) {
   output$scatMatPlot <- renderPlotly({
   ggPS %>% onRender("
   function(el, x, data) {
+console.log('start')
 
     function range(start, stop, step){
       var a=[start], b=start;

@@ -54,73 +54,73 @@ for(i in 2:(p$nrow)) {
 }
 
 ggPS %>% onRender("
-                  function(el, x, data) {
+  function(el, x, data) {
 
-                  function range(start, stop, step){
-                    var a=[start], b=start;
-                    while(b<stop){b+=step;a.push(b)}
-                    return a;
-                  };
+  function range(start, stop, step){
+    var a=[start], b=start;
+    while(b<stop){b+=step;a.push(b)}
+    return a;
+  };
 
-                  len = Math.sqrt(document.getElementsByClassName('cartesianlayer')[0].childNodes.length);
-                  AxisNames = [];
-                  for (i = 1; i < (len+1); i++) {
-                  AxisNames.push(document.getElementsByClassName('infolayer')[0].childNodes[i].textContent);
-                  }
-                  noPoint = x.data.length;
+  len = Math.sqrt(document.getElementsByClassName('cartesianlayer')[0].childNodes.length);
+  AxisNames = [];
+  for (i = 1; i < (len+1); i++) {
+  AxisNames.push(document.getElementsByClassName('infolayer')[0].childNodes[i].textContent);
+  }
+  noPoint = x.data.length;
 
-                  el.on('plotly_click', function(e) {
+  el.on('plotly_click', function(e) {
 
-                  if (x.data.length > noPoint){
-                    Plotly.deleteTraces(el.id, range(noPoint, (noPoint+(len*(len-1)/2-1)), 1));
-                  }
+  if (x.data.length > noPoint){
+    Plotly.deleteTraces(el.id, range(noPoint, (noPoint+(len*(len-1)/2-1)), 1));
+  }
 
-                  xVar = (e.points[0].xaxis._id).replace(/[^0-9]/g,'')
-                  if (xVar.length == 0) xVar = 1
-                  yVar = (e.points[0].yaxis._id).replace(/[^0-9]/g,'')
-                  if (yVar.length == 0) yVar = 1
-                  myX = len + 1 - (yVar - len * (xVar - 1))
-                  myY = xVar
-                  cN = e.points[0].curveNumber
-                  split1 = (x.data[cN].text).split(' ')
-                  hexID = (x.data[cN].t2).split(' ')[2]
-                  counts = split1[1].split('<')[0]
-                  var selRows = [];
-                  data.forEach(function(row){
-                    if(row[myX+'-'+myY]==hexID) selRows.push(row);
-                  });
-                  var Traces = [];
-                  var i=0;
-                  var k=1;
-                  while ((i*len+k)<=Math.pow((len-1),2)) {
-                    var xArr = [];
-                    for (a=0; a<selRows.length; a++){
-                      xArr.push(selRows[a][AxisNames[i]])
-                    }
-                    while ((i+k)<len){
-                    var yArr = [];
-                    for (a=0; a<selRows.length; a++){
-                      yArr.push(selRows[a][AxisNames[(len-k)]])
-                    }
-                    var trace = {
-                      x: xArr,
-                      y: yArr,
-                      mode: 'markers',
-                      marker: {
-                        color: 'orange',
-                        size: 7
-                      },
-                      xaxis: 'x' + (i+1),
-                      yaxis: 'y' + (i*len+k),
-                      hoverinfo: 'none'
-                    };
-                    Traces.push(trace);
-                    k++;
-                    }
-                    i++;
-                    k=1;
-                  }
-                  Plotly.addTraces(el.id, Traces);
-                  })}
-                  ", data = bindata)
+  xVar = (e.points[0].xaxis._id).replace(/[^0-9]/g,'')
+  if (xVar.length == 0) xVar = 1
+  yVar = (e.points[0].yaxis._id).replace(/[^0-9]/g,'')
+  if (yVar.length == 0) yVar = 1
+  myX = len + 1 - (yVar - len * (xVar - 1))
+  myY = xVar
+  cN = e.points[0].curveNumber
+  split1 = (x.data[cN].text).split(' ')
+  hexID = (x.data[cN].t2).split(' ')[2]
+  counts = split1[1].split('<')[0]
+  var selRows = [];
+  data.forEach(function(row){
+    if(row[myX+'-'+myY]==hexID) selRows.push(row);
+  });
+  var Traces = [];
+  var i=0;
+  var k=1;
+  while ((i*len+k)<=Math.pow((len-1),2)) {
+    var xArr = [];
+    for (a=0; a<selRows.length; a++){
+      xArr.push(selRows[a][AxisNames[i]])
+    }
+    while ((i+k)<len){
+    var yArr = [];
+    for (a=0; a<selRows.length; a++){
+      yArr.push(selRows[a][AxisNames[(len-k)]])
+    }
+    var trace = {
+      x: xArr,
+      y: yArr,
+      mode: 'markers',
+      marker: {
+        color: 'orange',
+        size: 7
+      },
+      xaxis: 'x' + (i+1),
+      yaxis: 'y' + (i*len+k),
+      hoverinfo: 'none'
+    };
+    Traces.push(trace);
+    k++;
+    }
+    i++;
+    k=1;
+  }
+  Plotly.addTraces(el.id, Traces);
+  })}
+  ", data = bindata)
 

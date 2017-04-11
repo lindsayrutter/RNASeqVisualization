@@ -18,11 +18,12 @@ ui <- shinyUI(fluidPage(
 
 server <- shinyServer(function(input, output) {
 
-  coty <- read_delim(paste0(getwd(),"/SISBID-2016-master/data/GSE61857_Cotyledon_normalized.txt.gz"), delim="\t", col_types="cddddddddd", col_names=c("ID", "C_S1_R1", "C_S1_R2", "C_S1_R3", "C_S2_R1", "C_S2_R2", "C_S2_R3", "C_S3_R1", "C_S3_R2", "C_S3_R3"), skip=1)
+  #coty <- read_delim(paste0(getwd(),"/SISBID-2016-master/data/GSE61857_Cotyledon_normalized.txt.gz"), delim="\t", col_types="cddddddddd", col_names=c("ID", "C_S1_R1", "C_S1_R2", "C_S1_R3", "C_S2_R1", "C_S2_R2", "C_S2_R3", "C_S3_R1", "C_S3_R2", "C_S3_R3"), skip=1)
+  #coty <- coty[1:1000,]
+  #coty <- as.data.frame(coty)
+  #colnames(coty) <- c("ID","S1.1","S1.2","S1.3","S2.1","S2.2","S2.3","S3.1","S3.2","S3.3")
 
-  coty <- coty[1:100,]
-  coty <- as.data.frame(coty)
-  colnames(coty) <- c("ID","S1.1","S1.2","S1.3","S2.1","S2.2","S2.3","S3.1","S3.2","S3.3")
+  coty <- data.frame(ID = paste0("ID",1:1000), S1.1=abs(rnorm(1000)), S1.2=abs(rnorm(1000)), S1.3=abs(rnorm(1000)), S2.1=abs(rnorm(1000)), S2.2=abs(rnorm(1000)), S2.3=abs(rnorm(1000)), S3.1=abs(rnorm(1000)), S3.2=abs(rnorm(1000)), S3.3=abs(rnorm(1000)))
 
   d <- DGEList(counts = coty[,2:10],
                group = c(rep("S1", 3), rep("S2", 3), rep("S3", 3)),

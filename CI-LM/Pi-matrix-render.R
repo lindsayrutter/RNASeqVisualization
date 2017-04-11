@@ -70,140 +70,141 @@ for (i in 1:myLength){
 
 output$myPlot <- renderPlotly(ggPS %>%
     onRender("
-             function(el, x, data) {
-                 len = Math.sqrt(document.getElementsByClassName('cartesianlayer')[0].childNodes.length);
-                 AxisNames = [];
-                 for (i = 1; i < (len+1); i++) {
-                   AxisNames.push(document.getElementsByClassName('infolayer')[0].childNodes[i].textContent);
-                 }
+     function(el, x, data) {
+      console.log('Start')
+       len = Math.sqrt(document.getElementsByClassName('cartesianlayer')[0].childNodes.length);
+       AxisNames = [];
+       for (i = 1; i < (len+1); i++) {
+         AxisNames.push(document.getElementsByClassName('infolayer')[0].childNodes[i].textContent);
+       }
 
-stIndex = Math.round((1-0)/.01*data.ci)
-console.log(stIndex)
-st = data.st[stIndex]
-console.log(st)
+      stIndex = Math.round((1-0)/.01*data.ci)
+      console.log(stIndex)
+      st = data.st[stIndex]
+      console.log(st)
 
-               var Traces = [];
-               var i=0;
-               var j=0;
-               var k=1;
-               while ((i*len+k)<=Math.pow((len-1),2)) {
-               while ((i+k)<len){
-                 var x = [];
-                 var y = [];
-                 var xTotal = 0;
-                 var ssx = 0;
-                 n = data.dat.length; // 100
-                 for (a=0; a<n; a++){
-                   xa = data.dat[a][AxisNames[i]]
-                   x.push(xa)
-                   y.push(data.dat[a][AxisNames[(len-k)]])
-                   xTotal+=xa
-                 }
+       var Traces = [];
+       var i=0;
+       var j=0;
+       var k=1;
+       while ((i*len+k)<=Math.pow((len-1),2)) {
+       while ((i+k)<len){
+         var x = [];
+         var y = [];
+         var xTotal = 0;
+         var ssx = 0;
+         n = data.dat.length; // 100
+         for (a=0; a<n; a++){
+           xa = data.dat[a][AxisNames[i]]
+           x.push(xa)
+           y.push(data.dat[a][AxisNames[(len-k)]])
+           xTotal+=xa
+         }
 
-                 var xm = xTotal/n
-                 for (a=0; a<n; a++){
-                   ssx+=Math.pow((data.dat[a][AxisNames[i]] - xm),2)
-                 }
+         var xm = xTotal/n
+         for (a=0; a<n; a++){
+           ssx+=Math.pow((data.dat[a][AxisNames[i]] - xm),2)
+         }
 
-                 var minX = Math.min.apply(null,x)
-                 var maxX = Math.max.apply(null,x)
+         var minX = Math.min.apply(null,x)
+         var maxX = Math.max.apply(null,x)
 
-                 //console.log(x)
-                 //console.log(minX)
-                 //console.log(maxX)
+         //console.log(x)
+         //console.log(minX)
+         //console.log(maxX)
 
-                 var inc = (maxX-minX)/100
-                 var xv = [];
-                 var yv = [];
-                 var se = [];
-                 var ci = [];
-                 var uyv = [];
-                 var lyv = [];
-                 var a = minX
-                 while (a < maxX){
-                   xv.push(a);
-                   yva = data.b0[j]+data.b1[j]*a;
-                   // just changed this to have 1+1/n instead of just 1/n
-                   sea = data.sse[j] * Math.sqrt(1+1/n+Math.pow((a-xm),2)/ssx);
-                   yv.push(yva);
-                   se.push(sea);
-                   ci.push(st*sea);
-                   uyv.push(yva+st*sea);
-                   lyv.push(yva-st*sea);
-                   a+=inc;
-                 }
+         var inc = (maxX-minX)/100
+         var xv = [];
+         var yv = [];
+         var se = [];
+         var ci = [];
+         var uyv = [];
+         var lyv = [];
+         var a = minX
+         while (a < maxX){
+           xv.push(a);
+           yva = data.b0[j]+data.b1[j]*a;
+           // just changed this to have 1+1/n instead of just 1/n
+           sea = data.sse[j] * Math.sqrt(1+1/n+Math.pow((a-xm),2)/ssx);
+           yv.push(yva);
+           se.push(sea);
+           ci.push(st*sea);
+           uyv.push(yva+st*sea);
+           lyv.push(yva-st*sea);
+           a+=inc;
+         }
 
-                 var lwr = [];
-                 var upr = [];
-                 var ypred = [];
-                 var ssea = [];
-                 var outCI = [];
-                 var xPoints = [];
-                 var yPoints = [];
-                 for (a=0; a<n; a++){
-                   xa = data.dat[a][AxisNames[i]]
-                   // just changed this to have 1+1/n instead of just 1/n
-                   ssea.push(data.sse[j] * Math.sqrt(1+1/n+Math.pow((xa-xm),2)/ssx))
-                   ypred.push(data.b0[j]+data.b1[j]*xa)
-                   lwr.push(ypred[a] - ssea[a]*st)
-                   upr.push(ypred[a] + ssea[a]*st)
-                   if (!(y[a]>lwr[a] & y[a]<upr[a])){
-                      xPoints.push(xa)
-                      yPoints.push(data.dat[a][AxisNames[(len-k)]])
-                   }
-                 }
+         var lwr = [];
+         var upr = [];
+         var ypred = [];
+         var ssea = [];
+         var outCI = [];
+         var xPoints = [];
+         var yPoints = [];
+         for (a=0; a<n; a++){
+           xa = data.dat[a][AxisNames[i]]
+           // just changed this to have 1+1/n instead of just 1/n
+           ssea.push(data.sse[j] * Math.sqrt(1+1/n+Math.pow((xa-xm),2)/ssx))
+           ypred.push(data.b0[j]+data.b1[j]*xa)
+           lwr.push(ypred[a] - ssea[a]*st)
+           upr.push(ypred[a] + ssea[a]*st)
+           if (!(y[a]>lwr[a] & y[a]<upr[a])){
+              xPoints.push(xa)
+              yPoints.push(data.dat[a][AxisNames[(len-k)]])
+           }
+         }
 
-                var tracePoints = {
-                  x: xPoints,
-                  y: yPoints,
-                  mode: 'markers',
-                  marker: {
-                    color: 'black',
-                    size: 2
-                  },
-                  xaxis: 'x' + (i+1),
-                  yaxis: 'y' + (i*len+k),
-                  hoverinfo: 'none'
-                };
-                var hiLine = {
-                  x: xv,
-                  y: uyv,
-                  mode: 'lines',
-                  line: {
-                    color: 'gray',
-                    width: 1
-                  },
-                  xaxis: 'x' + (i+1),
-                  yaxis: 'y' + (i*len+k),
-                  opacity: 0.25,
-                  hoverinfo: 'none'
-                };
-                var lowLine = {
-                  x: xv,
-                  y: lyv,
-                  mode: 'lines',
-                  fill: 'tonexty',
-                  line: {
-                    color: 'gray',
-                    width: 1
-                  },
-                  xaxis: 'x' + (i+1),
-                  yaxis: 'y' + (i*len+k),
-                  opacity: 0.25,
-                  hoverinfo: 'none'
-                };
-                Traces.push(tracePoints);
-                Traces.push(hiLine);
-                Traces.push(lowLine);
-                j++;
-                k++;
-               }
-               i++;
-               k=1;
-               }
-             Plotly.addTraces(el.id, Traces);
-             }
-             ", data = list(dat=dat, b0=b0, b1=b1, sse=sse, st=st, ci=ci())))})
+        var tracePoints = {
+          x: xPoints,
+          y: yPoints,
+          mode: 'markers',
+          marker: {
+            color: 'black',
+            size: 2
+          },
+          xaxis: 'x' + (i+1),
+          yaxis: 'y' + (i*len+k),
+          hoverinfo: 'none'
+        };
+        var hiLine = {
+          x: xv,
+          y: uyv,
+          mode: 'lines',
+          line: {
+            color: 'gray',
+            width: 1
+          },
+          xaxis: 'x' + (i+1),
+          yaxis: 'y' + (i*len+k),
+          opacity: 0.25,
+          hoverinfo: 'none'
+        };
+        var lowLine = {
+          x: xv,
+          y: lyv,
+          mode: 'lines',
+          fill: 'tonexty',
+          line: {
+            color: 'gray',
+            width: 1
+          },
+          xaxis: 'x' + (i+1),
+          yaxis: 'y' + (i*len+k),
+          opacity: 0.25,
+          hoverinfo: 'none'
+        };
+        Traces.push(tracePoints);
+        Traces.push(hiLine);
+        Traces.push(lowLine);
+        j++;
+        k++;
+       }
+       i++;
+       k=1;
+       }
+     Plotly.addTraces(el.id, Traces);
+     }
+     ", data = list(dat=dat, b0=b0, b1=b1, sse=sse, st=st, ci=ci())))})
 
 shinyApp(ui, server)
 

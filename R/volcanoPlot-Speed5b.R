@@ -82,12 +82,10 @@ server <- shinyServer(function(input, output) {
     )
   })
 
-
   output$plot1 <- renderPlotly({
     # will wait to render until datInput is validated
     plot_dat <- datInput()
-
-    p <- qplot(plot_dat$`1-2-FC`, plot_dat$`1-2-pval`, xlim = c(xMin, xMax), ylim=c(yMin, yMax))
+    p <- qplot(plot_dat[[col2()]], plot_dat[[col1()]], xlim = c(xMin, xMax), ylim=c(yMin, yMax))
     ggplotly(p)
   })
 

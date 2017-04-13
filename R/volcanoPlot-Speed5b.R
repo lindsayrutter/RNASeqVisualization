@@ -73,7 +73,7 @@ server <- shinyServer(function(input, output) {
 
   # datInput only validated once the go button is clicked
   datInput <- eventReactive(input$goButton, {
-    dat[ which(dat[col1()] > -1* log10(input$threshP) & exp(abs(dat[col2()])) > input$threshFC), ]
+    dat[ which(dat[isolate(col1())] > -1* log10(input$threshP) & exp(abs(dat[isolate(col2())])) > input$threshFC), ]
   })
 
   output$uiExample <- renderUI({
@@ -85,7 +85,7 @@ server <- shinyServer(function(input, output) {
   output$plot1 <- renderPlotly({
     # will wait to render until datInput is validated
     plot_dat <- datInput()
-    p <- qplot(plot_dat[[col2()]], plot_dat[[col1()]], xlim = c(xMin, xMax), ylim=c(yMin, yMax))
+    p <- qplot(plot_dat[[isolate(col2())]], plot_dat[[isolate(col1())]], xlim = c(xMin, xMax), ylim=c(yMin, yMax))
     ggplotly(p)
   })
 

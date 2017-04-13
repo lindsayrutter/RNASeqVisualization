@@ -6,7 +6,6 @@ library(edgeR)
 ui <- shinyUI(pageWithSidebar(
   headerPanel("Click the button"),
   sidebarPanel(
-    uiOutput("selInput"),
     uiOutput("slider"),
     sliderInput("threshP", "P-value:", min = 0, max = 1, value=0.1, step=0.05),
     uiOutput("uiExample")
@@ -22,7 +21,7 @@ ui <- shinyUI(pageWithSidebar(
 #dat <- data.frame(Case = paste0("case",1:100), val1=runif(100,0,1), val2=runif(100,0,1))
 
 dat <- read_delim(paste0(getwd(),"/SISBID-2016-master/data/GSE61857_Cotyledon_normalized.txt.gz"), delim="\t", col_types="cddddddddd", col_names=c("ID", "C_S1_R1", "C_S1_R2", "C_S1_R3", "C_S2_R1", "C_S2_R2", "C_S2_R3", "C_S3_R1", "C_S3_R2", "C_S3_R3"), skip=1)
-dat <- dat[1:1000,]
+dat <- dat[1:500,]
 dat <- as.data.frame(dat)
 colnames(dat) <- c("ID","S1.1","S1.2","S1.3","S2.1","S2.2","S2.3","S3.1","S3.2","S3.3")
 
@@ -35,16 +34,13 @@ d <- estimateTagwiseDisp(d)
 d <- estimateTrendedDisp(d)
 
 myLevels <- levels(d@.Data[[2]]$group)
-myPairs <- list()
+myList <- list()
 
 # Runs exact test on all pairs of groups and saves in list
-k=1
 for (i in 1:(length(myLevels)-1)){
   for (j in (i+1):(length(myLevels))){
     dat[[paste(i,j,"FC",sep="-")]] <- as.data.frame(exactTest(d, pair=c(myLevels[i], myLevels[j]), dispersion = "tagwise"))$table.logFC
     dat[[paste(i,j,"pval",sep="-")]] <- -1*log10(as.data.frame(exactTest(d, pair=c(myLevels[i], myLevels[j]), dispersion = "tagwise"))$table.PValue)
-    myPairs[[k]] <- paste(myLevels[i], " and ", myLevels[j])
-    k=k+1
   }
 }
 nCol = ncol(dat)
@@ -63,22 +59,14 @@ server <- shinyServer(function(input, output) {
     sliderInput("threshFC", "Fold change:", min=0, max=fcMax, value=ceiling((fcMax)/3), step=0.5)
   })
 
-  output$selInput <- renderUI({
-    selectInput("selPair", "Pairs:", myPairs)
-  })
-
-  pairNum <- reactive(as.numeric(which(myPairs==input$selPair)))
-  col1 <- reactive(colnames(dat)[nCol-2*length(myLevels)+2*pairNum()])
-  col2 <- reactive(colnames(dat)[nCol-2*length(myLevels)+2*pairNum()-1])
-
   # datInput only validated once the go button is clicked
   datInput <- eventReactive(input$goButton, {
-    dat[ which(dat[col1()] > -1* log10(input$threshP) & exp(abs(dat[col2()])) > input$threshFC), ]
+    subset(dat, `1-2-pval` > -1* log10(input$threshP) & exp(abs(`1-2-FC`)) > input$threshFC)
   })
 
   output$uiExample <- renderUI({
     tags$span(
-      tipify(actionButton("goButton", "Go!"), "A Pointless Button", "This button is pointless!")
+      tipify(actionButton("goButton", "Go!"), "A Pointless Button", "This button is pointless!", trigger ="click")
     )
   })
 

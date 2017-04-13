@@ -6,10 +6,9 @@ library(shinyBS)
 ui <- shinyUI(pageWithSidebar(
   headerPanel("Click the button"),
   sidebarPanel(
-    sliderInput("val1", "Value 1:", min = 0, max = 1, value=0.5, step=0.1),
+    uiOutput("slider"),
     sliderInput("val2", "Value 2:", min = 0, max = 1, value=0.5, step=0.1),
-    uiOutput("uiExample")#,
-    #actionButton("goButton", "Go!")
+    uiOutput("uiExample")
     ),
   mainPanel(
     plotlyOutput("plot1"),
@@ -18,7 +17,7 @@ ui <- shinyUI(pageWithSidebar(
 ))
 
 set.seed(1)
-dat <- data.frame(Case = paste0("case",1:15), val1=runif(15,0,1), val2=runif(15,0,1))
+dat <- data.frame(Case = paste0("case",1:100), val1=runif(100,0,1), val2=runif(100,0,1))
 dat$Case <- as.character(dat$Case)
 
 xMax = max(dat$val1)
@@ -29,17 +28,24 @@ maxTemp = max(abs(xMax), abs(xMin))
 
 server <- shinyServer(function(input, output) {
 
-  output$uiExample <- renderUI({
-    tags$span(
-      #tipify(bsButton("pointlessButton", "Button", style = "primary", size = "small"),
-      #       "A Pointless Button", "This button is pointless!")
-      tipify(actionButton("goButton", "Go!"), "A Pointless Button", "This button is pointless!")
-    )
+  output$slider <- renderUI({
+    sliderInput("val1", "Value 1:", min=0, max=ceiling(maxTemp), value=0.5, step=0.1)
   })
 
   # datInput only validated once the go button is clicked
   datInput <- eventReactive(input$goButton, {
     subset(dat, val1 > input$val1 & val2 > input$val2)
+  })
+
+  output$uiExample <- renderUI({
+    #if (nrow(datInput()>50)){
+    #    tags$span(
+   #       popify(actionButton("goButton", "Go!"), "Warning", "We recommend to choose val1 and val2 both to be greater than 0.5. If you wish to plot the selected values anyway, press Go again", trigger = "click")
+  #      )
+  #    }
+  #else{
+      actionButton("goButton", "Go!")
+  #}
   })
 
   output$plot1 <- renderPlotly({

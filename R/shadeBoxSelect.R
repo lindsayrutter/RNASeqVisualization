@@ -4,7 +4,8 @@ library(plotly)
 library(htmlwidgets)
 
 ui <- basicPage(
-  plotlyOutput("plot1")
+  plotlyOutput("plot1"),
+  verbatimTextOutput("rectdf")
 )
 
 server <- function(input, output) {
@@ -17,10 +18,22 @@ server <- function(input, output) {
   colNms <- colnames(myDF)
   nVar <- length(colNms)
 
+  inputRectDf <- reactive({
+    req(input$rects)
+    # data comes back as a big character vector
+    # so we reformat it as a dataframe here
+    df <- data.frame(t(matrix(input$rects,nrow=8)))
+    names(df) <- names(input$rects)[1:8]
+    return(df)
+  })
+  output$rectdf <- renderPrint({print(inputRectDf())})
+
+
   output$plot1 <- renderPlotly({
-    gp %>% layout(dragmode="select", persistent = "true") %>%
+    gp %>% layout(dragmode="select") %>%
       onRender("
        function(el, x, data) {
+       var rects = [];
 
        var myDF = data.myDF
        var Traces = [];
@@ -49,38 +62,36 @@ server <- function(input, output) {
        Plotly.addTraces(el.id, Traces);
 
        el.on('plotly_selected', function(e) {
-       var dLength = myDF.length
-       var selectedPCP = []
-       var xMin = e.range.x[0]
-       var xMax = e.range.x[1]
-       var yMin = e.range.y[0]
-       var yMax = e.range.y[1]
+         var dLength = myDF.length
+         var selectedPCP = []
+         var xMin = e.range.x[0]
+         var xMax = e.range.x[1]
+         var yMin = e.range.y[0]
+         var yMax = e.range.y[1]
 
-       console.log([xMin, xMax, yMin, yMax])
+         console.log([xMin, xMax, yMin, yMax])
 
-       var Traces = []
-       var drawRect = {
-       type: 'rect',
-       x0: xMin,
-       y0: yMin,
-       x1: xMax,
-       y1: yMax,
-       line: {
-       color: 'gray',
-       width: 1
-       },
-       fillcolor: 'gray',
-       opacity: 0.3
-       }
-       var update = {
-       shapes:[drawRect],
-       persistent: 'true'
-       }
-       Plotly.relayout(el.id, update)
-       //Traces.push(update)
-       //Plotly.relayout(el.id, Traces)
+         var Traces = []
+         var drawRect = {
+           type: 'rect',
+           x0: xMin,
+           y0: yMin,
+           x1: xMax,
+           y1: yMax,
+           line: {
+             color: 'gray',
+             width: 1
+           },
+           fillcolor: 'gray',
+           opacity: 0.25
+         }
+         rects.push(drawRect);
+         var update = {
+          shapes:rects
+         }
+         Plotly.relayout(el.id, update)
+         Shiny.onInputChange('rects', rects); // make the rects available to shiny
        })
-       //Plotly.relayout(el.id, persistent = 'true', update)
        }", data = list(myDF = myDF, nVar = nVar, colNms = colNms))})
 
   }

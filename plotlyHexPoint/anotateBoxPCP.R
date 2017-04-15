@@ -12,11 +12,10 @@ ui <- shinyUI(fluidPage(
   plotlyOutput("boxPlot")
 ))
 
-
 server <- shinyServer(function(input, output) {
 
   set.seed(1)
-  bindata <- data.frame(ID = paste0("ID",1:10000), A=rnorm(10000), B=rnorm(10000), C=rnorm(10000), D=rnorm(10000))
+  bindata <- data.frame(ID = paste0("ID",1:100), A=rnorm(100), B=rnorm(100), C=rnorm(100), D=rnorm(100))
   bindata$ID <- as.character(bindata$ID)
 
   ################################ Prepare scatterplot matrix
@@ -70,7 +69,6 @@ server <- shinyServer(function(input, output) {
   output$scatMatPlot <- renderPlotly({
   ggPS %>% onRender("
   function(el, x, data) {
-console.log('start')
 
     function range(start, stop, step){
       var a=[start], b=start;
@@ -86,6 +84,7 @@ console.log('start')
     noPoint = x.data.length;
 
     el.on('plotly_click', function(e) {
+console.log(e)
 
     if (x.data.length > noPoint){
       Plotly.deleteTraces(el.id, range(noPoint, (noPoint+(len*(len-1)/2-1)), 1));
@@ -96,21 +95,26 @@ console.log('start')
     yVar = (e.points[0].yaxis._id).replace(/[^0-9]/g,'')
     if (yVar.length == 0) yVar = 1
     myX = len + 1 - (yVar - len * (xVar - 1))
+console.log(['myX', myX])
     myY = xVar
+console.log(['myY', myY])
     cN = e.points[0].curveNumber
+//console.log(['cN', cN])
     split1 = (x.data[cN].text).split(' ')
+console.log(['split1',split1])
     hexID = (x.data[cN].t2).split(' ')[2]
+console.log(['hexID', hexID])
     counts = split1[1].split('<')[0]
     var selRows = [];
     data.forEach(function(row){
       if(row[myX+'-'+myY]==hexID) selRows.push(row);
     });
-
+console.log(selRows)
     selID = []
     for (a=0; a<selRows.length; a++){
       selID.push(selRows[a]['ID'])
     }
-    console.log(selID)
+console.log(selID)
     // Save selected row IDs for PCP
     Shiny.onInputChange('selID', selID);
 

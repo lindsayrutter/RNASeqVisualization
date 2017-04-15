@@ -5,24 +5,35 @@ library(htmlwidgets)
 library(shinyBS)
 
 ui <- basicPage(
-  plotlyOutput("plot1") #bsButton("high","Highlight Selected Points",type="toggle")
+  plotlyOutput("plot1"),
+  verbatimTextOutput("rectdf")
 )
 
 server <- function(input, output) {
 
-  p <- ggplot(mtcars, aes(x = wt, y = mpg)) + geom_point(alpha=0) + xlim(0,5) +ylim(-3,3)
-  gp <- ggplotly(p)
-
-  set.seed(3)
-  pcpDat <- data.frame(ID = paste0("ID",1:10), A=rnorm(10,-1), B=rnorm(10,-1), C=rnorm(10,-1), D=rnorm(10,1), E=rnorm(10,1), F=rnorm(10,1))
+  set.seed(6)
+  pcpDat <- data.frame(ID = paste0("ID",1:100), A=rnorm(100,-1), B=rnorm(100,-1), C=rnorm(100,-1), D=rnorm(100,1), E=rnorm(100,1), F=rnorm(100,1))
   pcpDat$ID <- as.character(pcpDat$ID)
   colNms <- colnames(pcpDat[, c(2:(ncol(pcpDat)))])
   nVar <- length(colNms)
 
+  p <- ggplot(mtcars, aes(x = wt, y = mpg)) + geom_point(alpha=0) + xlim(0,5) +ylim(min(pcpDat[,2:ncol(pcpDat)]),max(pcpDat[,2:ncol(pcpDat)]))
+  gp <- ggplotly(p)
+
+  inputRectDf <- reactive({
+    req(input$rects)
+    # data comes back as a big character vector
+    # so we reformat it as a dataframe here
+    df <- data.frame(t(matrix(input$rects,nrow=8)))
+    names(df) <- names(input$rects)[1:8]
+    return(df)
+  })
+  output$rectdf <- renderPrint({print(inputRectDf())})
+
   output$plot1 <- renderPlotly({
     gp %>% onRender("
       function(el, x, data) {
-
+      var rects = [];
       var origPcpDat = data.pcpDat
       var pcpDat = data.pcpDat
 
@@ -153,6 +164,7 @@ server <- function(input, output) {
       for (a=0; a<notSelectedPCPL; a++){
       updateNSPCP[a]=notSelectedPCP[a]+1
       }
+      //console.log(['updateNSPCP'], updateNSPCP)
 
       if (notSelectedPCPL!=0){
       console.log(['deleting'], updateNSPCP)
@@ -199,58 +211,26 @@ server <- function(input, output) {
       }
       }
 
-      var sel1 = {
-      x: [xMin, xMax],
-      y: [yMin, yMin],
-      mode: 'lines',
-      //fill: 'tonexty',
-      line: {
-      color: 'black',
-      width: 0.5,
-      dash: 'dot'
-      },
-      hoverinfo: 'none',
-      }
-      var sel2 = {
-      x: [xMax, xMax],
-      y: [yMin, yMax],
-      mode: 'lines',
-      //fill: 'tonexty',
-      line: {
-      color: 'black',
-      width: 0.5,
-      dash: 'dot'
-      },
-      hoverinfo: 'none'
-      }
-      var sel3 = {
-      x: [xMin, xMax],
-      y: [yMax, yMax],
-      mode: 'lines',
-      //fill: 'tonexty',
-      line: {
-      color: 'black',
-      dash: 'dot',
-      width: 0.5
-      },
-      hoverinfo: 'none'
-      }
-      var sel4 = {
-      x: [xMin, xMin],
-      y: [yMin, yMax],
-      mode: 'lines',
-      //fill: 'tonexty',
-      line: {
-      color: 'black',
-      dash: 'dot',
-     width: 0.5
-     },
-     hoverinfo: 'none'
-      }
-      Plotly.addTraces(el.id, [sel1, sel2, sel3, sel4]);
 
-
-      console.log(['pcpDat', pcpDat])
+var drawRect = {
+  type: 'rect',
+  x0: xMin,
+  y0: yMin,
+  x1: xMax,
+  y1: yMax,
+  line: {
+    color: 'gray',
+    width: 1
+  },
+  fillcolor: 'gray',
+  opacity: 0.25
+}
+rects.push(drawRect);
+var update = {
+  shapes:rects
+}
+Plotly.relayout(el.id, update)
+Shiny.onInputChange('rects', rects); // make the rects available to shiny
 
       selectTime++
       }

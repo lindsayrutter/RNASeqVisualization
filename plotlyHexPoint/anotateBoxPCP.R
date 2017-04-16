@@ -102,7 +102,8 @@ console.log(['myY', myY])
 //console.log(['cN', cN])
     split1 = (x.data[cN].text).split(' ')
 console.log(['split1',split1])
-    hexID = (x.data[cN].t2).split(' ')[2]
+console.log(x.data[cN].t2)
+    hexID = (x.data[cN].t2).split(' ')[4]
 console.log(['hexID', hexID])
     counts = split1[1].split('<')[0]
     var selRows = [];

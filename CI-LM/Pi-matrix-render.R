@@ -72,11 +72,11 @@ output$myPlot <- renderPlotly(ggPS %>%
     onRender("
      function(el, x, data) {
       console.log('Start')
-       len = Math.sqrt(document.getElementsByClassName('cartesianlayer')[0].childNodes.length);
-       AxisNames = [];
-       for (i = 1; i < (len+1); i++) {
-         AxisNames.push(document.getElementsByClassName('infolayer')[0].childNodes[i].textContent);
-       }
+      len = Math.sqrt(document.getElementsByClassName('cartesianlayer')[0].childNodes.length);
+      AxisNames = [];
+      for (i = 1; i < (len+1); i++) {
+        AxisNames.push(document.getElementsByClassName('infolayer')[0].childNodes[i].textContent);
+      }
 
       stIndex = Math.round((1-0)/.01*data.ci)
       console.log(stIndex)

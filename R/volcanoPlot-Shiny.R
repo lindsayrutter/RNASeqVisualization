@@ -24,8 +24,8 @@ ui <- shinyUI(pageWithSidebar(
     uiOutput("selInput"), ########## choose all pairs
     uiOutput("slider"),
     sliderInput("threshP", "P-value:", min = 0, max = 1, value=0.1, step=0.05),
-    uiOutput("uiExample"), ########## choose action GoButton
-    uiOutput("testPair")
+    uiOutput("uiExample") #, ########## choose action GoButton
+    #uiOutput("testPair")
     #actionButton("goButton", "Go!")
   ),
   mainPanel(
@@ -35,7 +35,6 @@ ui <- shinyUI(pageWithSidebar(
     plotlyOutput("boxPlot")
   )
 ))
-
 
 dat <- read_delim(paste0(getwd(),"/SISBID-2016-master/data/GSE61857_Cotyledon_normalized.txt.gz"), delim="\t", col_types="cddddddddd", col_names=c("ID", "C_S1_R1", "C_S1_R2", "C_S1_R3", "C_S2_R1", "C_S2_R2", "C_S2_R3", "C_S3_R1", "C_S3_R2", "C_S3_R3"), skip=1)
 dat <- dat[1:1000,]
@@ -88,16 +87,12 @@ server <- shinyServer(function(input, output) {
   col1 <- reactive(colnames(dat)[nCol-2*length(myLevels)+2*pairNum()])
   col2 <- reactive(colnames(dat)[nCol-2*length(myLevels)+2*pairNum()-1])
 
-
-  output$testPair <- renderPrint({str(col1())})
-
+  #output$testPair <- renderPrint({str(col1())})
 
   # datInput only validated once the go button is clicked
   datInput <- eventReactive(input$goButton, {
     dat[ which(dat[col1()] > -1* log10(input$threshP) & exp(abs(dat[col2()])) > input$threshFC), ]
   })
-
-  #output$testPair <- renderPrint({str(datInput())})
 
   output$uiExample <- renderUI({
     tags$span(
@@ -114,28 +109,18 @@ server <- shinyServer(function(input, output) {
 
   output$plot1 <- renderPlotly({gp %>% onRender("
       function(el, x, data) {
-      console.log('onRenderStart')
 
         var dat = data.dat
-        //var myX = 1
-        //var myY = 2
-
         var selFC = [];
         var selP = [];
         var sselID = [];
         dat.forEach(function(row){
-          //rowFC = row[myX+'-'+myY+'-FC']
-          //rowP = row[myX+'-'+myY+'-pval']
           rowP = row[data.col1]
           rowFC = row[data.col2]
-          console.log(data.col1)
-          console.log(data.col2)
           rowID = row['ID']
-          //if (rowP >= -1 * Math.log10(data.thP) && data.thFC <= Math.exp(Math.abs(rowFC))){
-            selFC.push(rowFC);
-            selP.push(rowP);
-            sselID.push(rowID);
-          //}
+          selFC.push(rowFC);
+          selP.push(rowP);
+          sselID.push(rowID);
         });
 
         var Traces = [];
@@ -152,20 +137,19 @@ server <- shinyServer(function(input, output) {
         Traces.push(tracePoints);
         Plotly.addTraces(el.id, Traces);
 
-el.on('plotly_selected', function(e) {
-    console.log('selectStart')
-    numSel = e.points.length
-    Points = e.points
-    selID = []
-    for (a=0; a<numSel; a++){
-      PN = Points[a].pointNumber
-      selRow = sselID[PN]
-      selID.push(selRow)
-    }
-
-    Shiny.onInputChange('selID', selID);
-})
-      }", data = list(dat = datInput(), col1 = col1(), col2 = col2()))})
+        el.on('plotly_selected', function(e) {
+          numSel = e.points.length
+          Points = e.points
+          selID = []
+          for (a=0; a<numSel; a++){
+            PN = Points[a].pointNumber
+            selRow = sselID[PN]
+            selID.push(selRow)
+          }
+          console.log(['selID', selID])
+          Shiny.onInputChange('selID', selID);
+        })
+      }", data = list(dat = datInput(), col1 = isolate(col1()), col2 = isolate(col2())))})
 
   selID <- reactive(input$selID)
   pcpDat <- reactive(dat[which(dat$ID %in% selID()), 1:(ncol(dat)-2*length(myLevels))])

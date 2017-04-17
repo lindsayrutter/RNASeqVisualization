@@ -1,6 +1,7 @@
 library(plotly)
 library(GGally)
 library(htmlwidgets)
+library(shiny)
 
 ui <- shinyUI(fluidPage(
   sliderInput("thresh", "Threshold:", min = 0, max = 3, value=1, step=1),
@@ -92,14 +93,16 @@ server <- shinyServer(function(input, output) {
 
    var nseltrace = 0;
    el.on('plotly_selected', function(e) {
+   console.log(e.points)
    numSel = e.points.length
-   cN = e.points[0].curveNumber;
 
    var pointNumbers = [];
    var selData = [];
    for (a=0; a<numSel; a++){
+   if (e.points[a].curveNumber==1){  // restrict to points in the original curve
    pointNumbers.push(e.points[a].pointNumber)
    selData.push(data.dat[idRows.indexOf(Points[0][pointNumbers[a]])])
+   }
    }
    Shiny.onInputChange('selData', selData);
    var Traces = [];

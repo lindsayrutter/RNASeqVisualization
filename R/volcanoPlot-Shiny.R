@@ -1,16 +1,31 @@
-library(shiny)
-library(plotly)
 library(readr)
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+library(GGally)
 library(edgeR)
+library(plotly)
+library(htmlwidgets)
 library(shinyBS)
+library(shiny)
+
+# ui <- shinyUI(fluidPage(
+#   uiOutput("slider"),
+#   sliderInput("threshP", "P-value:", min = 0, max = 1, value=0.1, step=0.05),
+#   plotlyOutput("plot1"),
+#   #textOutput("selectedValues"),
+#   verbatimTextOutput("selectedValues"),
+#   plotlyOutput("boxPlot")
+# ))
 
 ui <- shinyUI(pageWithSidebar(
   headerPanel("Click the button"),
   sidebarPanel(
-    uiOutput("selInput"),
+    uiOutput("selInput"), ########## choose all pairs
     uiOutput("slider"),
     sliderInput("threshP", "P-value:", min = 0, max = 1, value=0.1, step=0.05),
-    uiOutput("uiExample")
+    uiOutput("uiExample"), ########## choose action GoButton
+    uiOutput("testPair")
     #actionButton("goButton", "Go!")
   ),
   mainPanel(
@@ -21,8 +36,6 @@ ui <- shinyUI(pageWithSidebar(
   )
 ))
 
-#set.seed(1)
-#dat <- data.frame(Case = paste0("case",1:100), val1=runif(100,0,1), val2=runif(100,0,1))
 
 dat <- read_delim(paste0(getwd(),"/SISBID-2016-master/data/GSE61857_Cotyledon_normalized.txt.gz"), delim="\t", col_types="cddddddddd", col_names=c("ID", "C_S1_R1", "C_S1_R2", "C_S1_R3", "C_S2_R1", "C_S2_R2", "C_S2_R3", "C_S3_R1", "C_S3_R2", "C_S3_R3"), skip=1)
 dat <- dat[1:1000,]
@@ -61,6 +74,7 @@ fcMax = ceiling(max(exp(xMax), 1/exp(xMin)))
 
 
 server <- shinyServer(function(input, output) {
+
   #make dynamic slider
   output$slider <- renderUI({
     sliderInput("threshFC", "Fold change:", min=0, max=fcMax, value=ceiling((fcMax)/3), step=0.5)
@@ -74,10 +88,16 @@ server <- shinyServer(function(input, output) {
   col1 <- reactive(colnames(dat)[nCol-2*length(myLevels)+2*pairNum()])
   col2 <- reactive(colnames(dat)[nCol-2*length(myLevels)+2*pairNum()-1])
 
+
+  output$testPair <- renderPrint({str(col1())})
+
+
   # datInput only validated once the go button is clicked
   datInput <- eventReactive(input$goButton, {
-    dat[ which(dat[isolate(col1())] > -1* log10(input$threshP) & exp(abs(dat[isolate(col2())])) > input$threshFC), ]
+    dat[ which(dat[col1()] > -1* log10(input$threshP) & exp(abs(dat[col2()])) > input$threshFC), ]
   })
+
+  #output$testPair <- renderPrint({str(datInput())})
 
   output$uiExample <- renderUI({
     tags$span(
@@ -85,24 +105,70 @@ server <- shinyServer(function(input, output) {
     )
   })
 
-  output$plot1 <- renderPlotly({
-    # will wait to render until datInput is validated
-    plot_dat <- datInput()
-    p <- qplot(plot_dat[[isolate(col2())]], plot_dat[[isolate(col1())]], xlim = c(xMin, xMax), ylim=c(yMin, yMax)) + xlab("log2(Fold change)") + ylab("-log10(p-value)")
-    ggplotly(p)
-  })
+  threshP <- reactive(input$threshP)
+  threshFC <- reactive(input$threshFC)
 
-  d <- reactive(event_data("plotly_selected"))
-  output$click <- renderPrint({
-    if (is.null(d())){
-      "Click on a state to view event data"
-    }
-    else{
-      datInput()[d()$pointNumber+1,] #Working now
-    }
-  })
+  df <- data.frame()
+  p <- ggplot(df) + geom_point() + xlim(xMin, xMax) + ylim(yMin, yMax)
+  gp <- ggplotly(p)
 
-  pcpDat <- reactive(datInput()[d()$pointNumber+1,1:(ncol(dat)-2*length(myLevels))])
+  output$plot1 <- renderPlotly({gp %>% onRender("
+      function(el, x, data) {
+      console.log('onRenderStart')
+
+        var dat = data.dat
+        //var myX = 1
+        //var myY = 2
+
+        var selFC = [];
+        var selP = [];
+        var sselID = [];
+        dat.forEach(function(row){
+          //rowFC = row[myX+'-'+myY+'-FC']
+          //rowP = row[myX+'-'+myY+'-pval']
+          rowP = row[data.col1]
+          rowFC = row[data.col2]
+          console.log(data.col1)
+          console.log(data.col2)
+          rowID = row['ID']
+          //if (rowP >= -1 * Math.log10(data.thP) && data.thFC <= Math.exp(Math.abs(rowFC))){
+            selFC.push(rowFC);
+            selP.push(rowP);
+            sselID.push(rowID);
+          //}
+        });
+
+        var Traces = [];
+        var tracePoints = {
+          x: selFC,
+          y: selP,
+          text: sselID,
+          mode: 'markers',
+          marker: {
+            color: 'black',
+            size: 2
+          },
+        };
+        Traces.push(tracePoints);
+        Plotly.addTraces(el.id, Traces);
+
+el.on('plotly_selected', function(e) {
+    console.log('selectStart')
+    numSel = e.points.length
+    Points = e.points
+    selID = []
+    for (a=0; a<numSel; a++){
+      PN = Points[a].pointNumber
+      selRow = sselID[PN]
+      selID.push(selRow)
+    }
+
+    Shiny.onInputChange('selID', selID);
+})
+      }", data = list(dat = datInput(), col1 = col1(), col2 = col2()))})
+
+  selID <- reactive(input$selID)
+  pcpDat <- reactive(dat[which(dat$ID %in% selID()), 1:(ncol(dat)-2*length(myLevels))])
   output$selectedValues <- renderPrint({str(pcpDat())})
   colNms <- colnames(dat[, 2:(ncol(dat)-2*length(myLevels))])
   nVar <- length(2:(ncol(dat)-2*length(myLevels)))
@@ -112,37 +178,37 @@ server <- shinyServer(function(input, output) {
 
   output$boxPlot <- renderPlotly({
     ggBP %>% onRender("
-    function(el, x, data) {
+      function(el, x, data) {
 
-    var Traces = [];
+      var Traces = [];
 
-    var dLength = data.pcpDat.length
-    var vLength = data.nVar
-    var cNames = data.colNms
+      var dLength = data.pcpDat.length
+      var vLength = data.nVar
+      var cNames = data.colNms
 
-    for (a=0; a<dLength; a++){
-    xArr = [];
-    yArr = [];
-    for (b=0; b<vLength; b++){
-    xArr.push(b+1)
-    yArr.push(data.pcpDat[a][cNames[b]]);
-    }
+      for (a=0; a<dLength; a++){
+      xArr = [];
+      yArr = [];
+      for (b=0; b<vLength; b++){
+      xArr.push(b+1)
+      yArr.push(data.pcpDat[a][cNames[b]]);
+      }
 
-    var tracePCPLine = {
-    x: xArr,
-    y: yArr,
-    mode: 'lines',
-    line: {
-    color: 'orange',
-    width: 1
-    },
-    opacity: 0.9,
-    }
-    Traces.push(tracePCPLine);
-    }
-    Plotly.addTraces(el.id, Traces);
+      var traceHiLine = {
+      x: xArr,
+      y: yArr,
+      mode: 'lines',
+      line: {
+      color: 'orange',
+      width: 1
+      },
+      opacity: 0.9,
+      }
+      Traces.push(traceHiLine);
+      }
+      Plotly.addTraces(el.id, Traces);
 
-    }", data = list(pcpDat = pcpDat(), nVar = nVar, colNms = colNms))})
+      }", data = list(pcpDat = pcpDat(), nVar = nVar, colNms = colNms))})
 
 })
 

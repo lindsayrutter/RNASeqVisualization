@@ -69,6 +69,7 @@ server <- shinyServer(function(input, output) {
   output$plot1 <- renderPlotly({
     gp %>% onRender("
       function(el, x, data) {
+      console.log('onRenderStart')
 
         var dat = data.dat
         var myX = 1
@@ -103,6 +104,7 @@ server <- shinyServer(function(input, output) {
         Plotly.addTraces(el.id, Traces);
 
 el.on('plotly_selected', function(e) {
+    console.log('selectStart')
     numSel = e.points.length
     Points = e.points
     selID = []

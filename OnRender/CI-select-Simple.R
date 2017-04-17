@@ -13,35 +13,24 @@ server <- shinyServer(function(input, output) {
   thresh <- reactive(input$thresh)
 
   set.seed(1)
-  dat <- data.frame(ID = paste0("ID",sample(c(1:20),20)), A=4*rnorm(20), B=4*rnorm(20))
-  dat$ID <- as.character(dat$ID)
+  dat <- data.frame(Row = paste0("Row",sample(c(1:20),20)), A=4*rnorm(20), B=4*rnorm(20))
+  dat$Row <- as.character(dat$Row)
 
   minVal = min(dat[,-1])
   maxVal = max(dat[,-1])
 
-  p <- ggplot(data = dat, aes(x=A, y=B)) + coord_cartesian(xlim = c(minVal, maxVal), ylim = c(minVal, maxVal))
+  gg <- ggplot(data = dat, aes(x=A, y=B)) + coord_cartesian(xlim = c(minVal, maxVal), ylim = c(minVal, maxVal))
 
-  ggPS <- ggplotly(p)
+  ggY <- ggplotly(gg)
 
-  myLength <- length(ggPS[["x"]][["data"]])
-  for (i in 1:myLength){
-    item =ggPS[["x"]][["data"]][[i]]$text[1]
-    if (!is.null(item))
-      if (!startsWith(item, "co")){
-        ggPS[["x"]][["data"]][[i]]$hoverinfo <- "none"
-      }
-  }
-
-  output$myPlot <- renderPlotly(ggPS %>% onRender("
+  output$myPlot <- renderPlotly(ggY %>% onRender("
     function(el, x, data) {
-
     var Points = [];
     var Traces = [];
     var selRows = [];
 
-data.dat.forEach(function(row){
-if(Math.abs(row['B']) > data.thresh) selRows.push(row);});
-
+    data.dat.forEach(function(row){
+    if(Math.abs(row['B']) > data.thresh) selRows.push(row);});
 
     var xArr = [];
     var yArr = [];
@@ -49,11 +38,11 @@ if(Math.abs(row['B']) > data.thresh) selRows.push(row);});
     for (a=0; a<selRows.length; a++){
       xArr.push(selRows[a]['A'])
       yArr.push(selRows[a]['B'])
-      keepIndex.push(selRows[a]['ID'])
+      keepIndex.push(selRows[a]['Row'])
     }
-
     Points.push(keepIndex);
 
+    // Add points above the threshold in black
     var tracePoints = {
       x: xArr,
       y: yArr,
@@ -65,6 +54,7 @@ if(Math.abs(row['B']) > data.thresh) selRows.push(row);});
       }
     };
 
+    // Add upper horizontal line of gray box
     var hiLine = {
       x: [-15,15],
       y: [data.thresh,data.thresh],
@@ -77,6 +67,7 @@ if(Math.abs(row['B']) > data.thresh) selRows.push(row);});
       hoverinfo: 'none'
     };
 
+    // Add lower horizontal line of gray box
     var lowLine = {
       x: [-15,15],
       y: [-1*data.thresh,-1*data.thresh],
@@ -97,11 +88,10 @@ if(Math.abs(row['B']) > data.thresh) selRows.push(row);});
 
     var idRows = []
     for (a=0; a<data.dat.length; a++){
-      idRows.push(data.dat[a]['ID'])
+      idRows.push(data.dat[a]['Row'])
     }
 
     el.on('plotly_selected', function(e) {
-
       numSel = e.points.length
       cN = e.points[0].curveNumber;
 
@@ -119,6 +109,8 @@ if(Math.abs(row['B']) > data.thresh) selRows.push(row);});
         xArr.push(selData[a]['A'])
         yArr.push(selData[a]['B'])
       }
+
+      // Add user-selected points in red
       var traceRed = {
         x: xArr,
         y: yArr,

@@ -10,13 +10,13 @@ ui <- basicPage(
 server <- function(input, output) {
   p <- ggplot(mtcars, aes(x = wt, y = mpg)) + geom_point(alpha=0) + xlim(0,5) +ylim(-3,3)
   gp <- ggplotly(p)
-
+  
   set.seed(3)
   pcpDat <- data.frame(ID = paste0("ID",1:20), A=1.3*rnorm(20), B=1.3*rnorm(20), C=1.3*rnorm(20), D=1.3*rnorm(20), E=1.3*rnorm(20), F=1.3*rnorm(20))
   pcpDat$ID <- as.character(pcpDat$ID)
   colNms <- colnames(pcpDat[, c(2:(ncol(pcpDat)))])
   nVar <- length(colNms)
-
+  
   output$plot1 <- renderPlotly({
     gp %>% onRender("
                     function(el, x, data) {
@@ -42,10 +42,9 @@ server <- function(input, output) {
                     y: yArr,
                     mode: 'lines',
                     line: {
-                    color: 'purple',
+                    color: 'pink',
                     width: 1
                     },
-                    opacity: 0.9,
                     }
                     Traces.push(pcpLine);
                     }
@@ -140,21 +139,17 @@ server <- function(input, output) {
                     updateSPCP[a]=selectedPCP[a]+1
                     }
                     console.log(selectedPCP)
-                    Plotly.deleteTraces(el.id, updateSPCP);
-                    var newDat = []
-                    var selectedPCPL = selectedPCP.length
-                    for (a=0; a<dLength; a++){
-                    var equal = 0;
-                    for (b=0; b<selectedPCPL; b++){
-                    if (a==selectedPCP[b]){
-                    equal=1
-                    }
-                    }
-                    if (equal==0){
-                    newDat.push(pcpDat[a])
-                    }
-                    }
-                    pcpDat = newDat
+                    //Plotly.deleteTraces(el.id, updateSPCP);
+
+var update = {
+line: {
+color: 'red',
+width: 1
+},
+opacity: 1,
+}
+Plotly.restyle(el.id, update, updateSPCP);
+
                     })
                     }", data = list(pcpDat = pcpDat, nVar = nVar, colNms = colNms))})
 

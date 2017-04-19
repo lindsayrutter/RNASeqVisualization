@@ -5,45 +5,55 @@ library(hexbin)
 library(htmlwidgets)
 library(tidyr)
 library(shiny)
+library(edgeR)
+library(EDASeq)
+library(dplyr)
+library(data.table)
 
 ui <- shinyUI(fluidPage(
-  plotlyOutput("scatMatPlot"),
-  textOutput("selectedValues"),
-  plotlyOutput("boxPlot")
+  plotlyOutput("scatMatPlot", height = 700),
+  plotlyOutput("boxPlot"),
+  verbatimTextOutput("selectedValues")
 ))
+
+
 
 server <- shinyServer(function(input, output) {
 
-  set.seed(1)
-  bindata <- data.frame(ID = paste0("ID",1:100), A=rnorm(100), B=rnorm(100), C=rnorm(100), D=rnorm(100))
-  bindata$ID <- as.character(bindata$ID)
+  #set.seed(1)
+  #bindata <- data.frame(ID = paste0("ID",1:100), A=rnorm(100), B=rnorm(100), C=rnorm(100), D=rnorm(100))
+  #bindata$ID <- as.character(bindata$ID)
+
+  load("../data/bindataL120.Rda")
 
   ################################ Prepare scatterplot matrix
   ###########################################################
 
   maxVal = max(abs(bindata[,-1]))
   maxRange = c(-1*maxVal, maxVal)
+  #maxRange = c(0, maxVal)
 
   my_fn <- function(data, mapping, ...){
     x = data[,c(as.character(mapping$x))]
     y = data[,c(as.character(mapping$y))]
-    h <- hexbin(x=x, y=y, xbins=5, shape=1, IDs=TRUE, xbnds=maxRange, ybnds=maxRange)
+    h <- hexbin(x=x, y=y, xbins=21, shape=1, IDs=TRUE, xbnds=maxRange, ybnds=maxRange)
     hexdf <- data.frame (hcell2xy (h),  hexID = h@cell, counts = h@count)
     attr(hexdf, "cID") <- h@cID
-    p <- ggplot(hexdf, aes(x=x, y=y, fill = counts, hexID=hexID)) + geom_hex(stat="identity") + geom_abline(intercept = 0, color = "red", size = 0.25)
+    p <- ggplot(hexdf, aes(x=x, y=y, fill = counts, hexID=hexID)) + geom_hex(stat="identity") + geom_abline(intercept = 0, color = "red", size = 0.25) + coord_cartesian(xlim = c(-0.5, maxRange[2]+0.5), ylim = c(-0.5, maxRange[2]+0.5))
     p
   }
 
   p <- ggpairs(bindata[,-1], lower = list(continuous = my_fn))
   pS <- p
-  for(i in 2:p$nrow) {
-    for(j in 1:(i-1)) {
-      pS[i,j] <- p[i,j] +
-        coord_cartesian(xlim = c(maxRange[1], maxRange[2]), ylim = c(maxRange[1], maxRange[2]))
-    }
-  }
+  # for(i in 2:p$nrow) {
+  #   for(j in 1:(i-1)) {
+  #     pS[i,j] <- p[i,j] +
+  #       coord_cartesian(xlim = c(0, maxRange[2]), ylim = c(0, maxRange[2]))
+  #   }
+  # }
 
   ggPS <- ggplotly(pS)
+  #ggPS <- ggplotly(p)
 
   myLength <- length(ggPS[["x"]][["data"]])
   for (i in 1:myLength){
@@ -138,7 +148,7 @@ console.log(selID)
         mode: 'markers',
         marker: {
           color: 'orange',
-          size: 7
+          size: 6
         },
         xaxis: 'x' + (i+1),
         yaxis: 'y' + (i*len+k),
@@ -158,9 +168,9 @@ console.log(selID)
   selID <- reactive(input$selID)
 
   pcpDat <- reactive(bindata[which(bindata$ID %in% selID()), c(1:(p$nrow+1))])
-  #pcpDat<- bindata[which(bindata$ID %in% c("ID1","ID2","ID3")), c(1:(p$nrow+1))]
   output$selectedValues <- renderPrint({str(pcpDat())})
   colNms <- colnames(bindata[, c(2:(p$nrow+1))])
+  #colNms <- colnames(bindata)[2:(p$nrow+1)]
 
   boxDat <- bindata[, c(1:(p$nrow+1))] %>% gather(key, val, -c(ID))
   BP <- ggplot(boxDat, aes(x = key, y = val)) + geom_boxplot()

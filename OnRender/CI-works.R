@@ -41,6 +41,7 @@ server <- shinyServer(function(input, output) {
    keepIndex.push(selRows[a]['Row'])
    }
    Points.push(keepIndex);
+console.log(['Points', Points])
 
    // Add points above the threshold in black
    var tracePoints = {
@@ -90,7 +91,7 @@ server <- shinyServer(function(input, output) {
    for (a=0; a<data.dat.length; a++){
    idRows.push(data.dat[a]['Row'])
    }
-
+console.log(['idRows', idRows])
    var nseltrace = 0;
    el.on('plotly_selected', function(e) {
    console.log(e.points)

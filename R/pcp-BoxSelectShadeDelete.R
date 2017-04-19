@@ -5,7 +5,7 @@ library(htmlwidgets)
 library(shinyBS)
 
 ui <- basicPage(
-  plotlyOutput("plot1") #bsButton("high","Highlight Selected Points",type="toggle")
+  plotlyOutput("plot1", height = 650) #bsButton("high","Highlight Selected Points",type="toggle")
 )
 
 server <- function(input, output) {
@@ -14,7 +14,7 @@ server <- function(input, output) {
   gp <- ggplotly(p)
 
   set.seed(3)
-  pcpDat <- data.frame(ID = paste0("ID",1:10), A=rnorm(10,-1), B=rnorm(10,-1), C=rnorm(10,-1), D=rnorm(10,1), E=rnorm(10,1), F=rnorm(10,1))
+  pcpDat <- data.frame(ID = paste0("ID",1:20), A=rnorm(20,-1), B=rnorm(20,-1), C=rnorm(20,-1), D=rnorm(20,1), E=rnorm(20,1), F=rnorm(20,1))
   pcpDat$ID <- as.character(pcpDat$ID)
   colNms <- colnames(pcpDat[, c(2:(ncol(pcpDat)))])
   nVar <- length(colNms)
@@ -43,7 +43,7 @@ server <- function(input, output) {
       mode: 'lines',
       line: {
       color: 'orange',
-      width: 1
+      width: 1.5
       },
       opacity: 0.9,
       }

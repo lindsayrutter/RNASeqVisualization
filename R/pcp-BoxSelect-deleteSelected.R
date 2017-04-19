@@ -4,7 +4,7 @@ library(plotly)
 library(htmlwidgets)
 
 ui <- basicPage(
-  plotlyOutput("plot1", height = 700)
+  plotlyOutput("plot1", height = 650)
 )
 
 server <- function(input, output) {
@@ -42,8 +42,8 @@ server <- function(input, output) {
                     y: yArr,
                     mode: 'lines',
                     line: {
-                    color: 'purple',
-                    width: 1
+                    color: 'orange',
+                    width: 1.5
                     },
                     opacity: 0.9,
                     }

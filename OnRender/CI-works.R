@@ -40,6 +40,7 @@ server <- shinyServer(function(input, output) {
    yArr.push(selRows[a]['B'])
    keepIndex.push(selRows[a]['Row'])
    }
+   // Points contains row indices that are plotted (outside threshold)
    Points.push(keepIndex);
 console.log(['Points', Points])
 
@@ -86,6 +87,7 @@ console.log(['Points', Points])
    Traces.push(hiLine);
    Traces.push(lowLine);
    Plotly.addTraces(el.id, Traces);
+   console.log(['Traces', Traces])
 
    var idRows = []
    for (a=0; a<data.dat.length; a++){
@@ -100,7 +102,7 @@ console.log(['idRows', idRows])
    var pointNumbers = [];
    var selData = [];
    for (a=0; a<numSel; a++){
-   if (e.points[a].curveNumber==1){  // restrict to points in the original curve
+   if (e.points[a].curveNumber==1){  // remove duplicates of same point being selected twice (because already red)
    pointNumbers.push(e.points[a].pointNumber)
    selData.push(data.dat[idRows.indexOf(Points[0][pointNumbers[a]])])
    }
@@ -126,13 +128,16 @@ console.log(['idRows', idRows])
    hoverinfo: 'none'
    };
 
+   console.log(['TracesB4Delete', Traces])
    if (nseltrace>0){
    Plotly.deleteTraces(el.id,-1)
    }
+   console.log(['TracesAfterDelete', Traces])
    Traces.push(traceRed);
    nseltrace = nseltrace+1
 
    Plotly.addTraces(el.id, Traces);
+   console.log(['TracesAfterAdd', Traces])
    })
 
    }", data = list(dat=dat, thresh=thresh())))

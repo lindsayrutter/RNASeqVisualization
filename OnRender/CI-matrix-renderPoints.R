@@ -83,6 +83,7 @@ while ((i*len+k)<=Math.pow((len-1),2)) {
     keepIndex.push(selRows[a]['ID'])
    }
    SubPoints.push(keepIndex);
+  console.log(['SubPoints', SubPoints])
 
    var tracePoints = {
      x: xArr,
@@ -138,6 +139,7 @@ idRows.push(data.dat[a]['ID'])
 
 console.log(SubPoints[1])
 
+console.log(['x.data', x.data])
 noPoint = x.data.length;
 
 el.on('plotly_selected', function(e) {

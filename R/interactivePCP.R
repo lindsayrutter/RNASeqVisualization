@@ -8,7 +8,7 @@ library(crosstalk)
 
 nPatients <- 20
 nVisits <- 10
-set.seed(1)
+set.seed(7)
 df <- data.frame(
   ID = rnorm(n = nPatients * nVisits, mean = 50, sd = 10),
   patient = rep(seq(nPatients), each = nVisits),
@@ -26,7 +26,7 @@ p <- plot_ly(df, x = ~Sample, y = ~ID, text = ~paste("Patient:", patient)) %>%
 
 
 
-set.seed(3)
+set.seed(5)
 pcpDat <- data.frame(ID = paste0("ID",1:20), A=1.3*rnorm(20), B=1.3*rnorm(20), C=1.3*rnorm(20), D=1.3*rnorm(20), E=1.3*rnorm(20), F=1.3*rnorm(20))
 pcpDat$ID <- as.character(pcpDat$ID)
 colNms <- colnames(pcpDat[, c(2:(ncol(pcpDat)))])

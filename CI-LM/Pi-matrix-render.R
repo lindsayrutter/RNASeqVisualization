@@ -71,6 +71,13 @@ server <- shinyServer(function(input, output) {
   output$myPlot <- renderPlotly(ggPS %>%
   onRender("
    function(el, x, data) {
+
+             function range(start, stop, step){
+             var a=[start], b=start;
+             while(b<stop){b+=step;a.push(b)}
+             return a;
+             };
+
    console.log('Start')
    len = Math.sqrt(document.getElementsByClassName('cartesianlayer')[0].childNodes.length);
    AxisNames = [];

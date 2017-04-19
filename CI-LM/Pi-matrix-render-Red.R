@@ -73,6 +73,12 @@ server <- shinyServer(function(input, output) {
    function(el, x, data) {
   myDat = data.dat
 
+function range(start, stop, step){
+var a=[start], b=start;
+while(b<stop){b+=step;a.push(b)}
+return a;
+}
+
    len = Math.sqrt(document.getElementsByClassName('cartesianlayer')[0].childNodes.length);
    AxisNames = [];
    for (i = 1; i < (len+1); i++) {
@@ -80,9 +86,7 @@ server <- shinyServer(function(input, output) {
    }
 
    stIndex = Math.round((1-0)/.01*data.ci)
-   //console.log(stIndex)
    st = data.st[stIndex]
-   //console.log(st)
 
    var Traces = [];
    var i=0;
@@ -108,8 +112,10 @@ server <- shinyServer(function(input, output) {
      ssx+=Math.pow((data.dat[a][AxisNames[i]] - xm),2)
      }
 
-     var minX = Math.min.apply(null,x)
-     var maxX = Math.max.apply(null,x)
+var minX = -1
+var maxX = 2*Math.max.apply(null,x)
+     //var minX = Math.min.apply(null,x)
+     //var maxX = Math.max.apply(null,x)
 
      var inc = (maxX-minX)/100
      var xv = [];
@@ -212,11 +218,9 @@ for (a=0; a<data.dat.length; a++){
 idRows.push(data.dat[a]['ID'])
 }
 
-   var nseltrace = 0;
-
+var nseltrace = 0;
 el.on('plotly_selected', function(e) {
 
-//console.log(e)
 numSel = e.points.length
 cN = e.points[0].curveNumber;
 
@@ -224,22 +228,30 @@ var pointNumbers = [];
 for (a=0; a<numSel; a++){
 pointNumbers.push(e.points[a].pointNumber)
 }
-//console.log(numSel)
-//console.log(['pointNumbers',pointNumbers])
 
 // Determine which subplot was selected
 subPlot = (cN - Math.pow(len,2))/3+1
-//console.log(['subPlot',subPlot])
 
-//console.log(['pointNumbers.length', pointNumbers.length])
 var selData = []
 for (a=0; a<pointNumbers.length; a++){
 var selDot = SubPoints[subPlot-1][pointNumbers[a]]
-//console.log(['myDat[selDot]',myDat[selDot]])
 selData.push(myDat[selDot])
 }
-console.log(['selData', selData])
 
+
+if (nseltrace>0){
+//Plotly.deleteTraces(el.id,-1)
+//Plotly.deleteTraces(el.id,-1)
+//Plotly.deleteTraces(el.id,-1)
+//Plotly.deleteTraces(el.id,-1)
+//Plotly.deleteTraces(el.id,-1)
+//Plotly.deleteTraces(el.id,-1)
+//Plotly.deleteTraces(el.id,-1)
+//Plotly.deleteTraces(el.id,-1)
+//Plotly.deleteTraces(el.id,-1)
+//Plotly.deleteTraces(el.id,-1)
+Plotly.deleteTraces(el.id,range((-1*len*(len-1)/2),-1,1))
+}
 
 var Traces = [];
 var i=0;
@@ -272,7 +284,10 @@ while ((i+k)<len){
 i++;
 k=1;
 }
+
+nseltrace = nseltrace+1
 Plotly.addTraces(el.id, Traces);
+
 })
 
 
@@ -280,6 +295,3 @@ Plotly.addTraces(el.id, Traces);
    ", data = list(dat=dat, b0=b0, b1=b1, sse=sse, st=st, ci=ci())))})
 
 shinyApp(ui, server)
-
-
-

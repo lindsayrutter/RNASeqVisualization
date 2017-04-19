@@ -16,8 +16,6 @@ ui <- shinyUI(fluidPage(
   verbatimTextOutput("selectedValues")
 ))
 
-
-
 server <- shinyServer(function(input, output) {
 
   #set.seed(1)

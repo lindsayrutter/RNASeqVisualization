@@ -6,22 +6,39 @@ devtools::install_github("rstudio/crosstalk", repos = "http://cran.rstudio.com")
 library(plotly)
 library(crosstalk)
 
-nPatients <- 50
+nPatients <- 20
 nVisits <- 10
-
+set.seed(1)
 df <- data.frame(
-  perc = rnorm(n = nPatients * nVisits, mean = 50, sd = 10),
+  ID = rnorm(n = nPatients * nVisits, mean = 50, sd = 10),
   patient = rep(seq(nPatients), each = nVisits),
-  visit = rep(seq(nVisits), nPatients))
+  Sample = rep(seq(nVisits), nPatients))
 
 # declare the patient variable as the "unit of interest"
 sd <- SharedData$new(df, ~patient)
 
-p <- plot_ly(df, x = ~visit, y = ~perc, text = ~paste("Patient:", patient)) %>%
+p <- plot_ly(df, x = ~Sample, y = ~ID, text = ~paste("Patient:", patient)) %>%
   group_by(patient) %>%
   add_lines(color = I("orange")) %>%
   add_markers(color = I("steelblue"), hoverinfo = "text") %>%
   hide_legend()
+
+
+
+
+set.seed(3)
+pcpDat <- data.frame(ID = paste0("ID",1:20), A=1.3*rnorm(20), B=1.3*rnorm(20), C=1.3*rnorm(20), D=1.3*rnorm(20), E=1.3*rnorm(20), F=1.3*rnorm(20))
+pcpDat$ID <- as.character(pcpDat$ID)
+colNms <- colnames(pcpDat[, c(2:(ncol(pcpDat)))])
+nVar <- length(colNms)
+
+
+boxDat <- pcpDat %>% gather(key, val, -c(ID))
+BP <- ggplot(boxDat, aes(x = key, y = val)) + geom_boxplot()
+ggBP <- ggplotly(BP)
+
+
+
 
 # Since crosstalk's SharedData object was supplied to plot_ly() with a key of
 # patient, it knows to highlight any lines/markers matching the selected patient(s).

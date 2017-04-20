@@ -3,9 +3,11 @@ library(plotly)
 library(readr)
 library(edgeR)
 library(shinyBS)
+library(tidyr)
+library(htmlwidgets)
 
-ui <- shinyUI(pageWithSidebar(
-  headerPanel("Click the button"),
+ui <- shinyUI(fluidPage(
+  sidebarLayout(
   sidebarPanel(
     uiOutput("selInput"),
     uiOutput("slider"),
@@ -14,12 +16,12 @@ ui <- shinyUI(pageWithSidebar(
     #actionButton("goButton", "Go!")
   ),
   mainPanel(
-    plotlyOutput("plot1"),
+    plotlyOutput("plot1", height = 350),
     #verbatimTextOutput("click"),
     #verbatimTextOutput("selectedValues"),
-    plotlyOutput("boxPlot")
-  )
-))
+    plotlyOutput("boxPlot", height = 350)
+  )))
+)
 
 #set.seed(1)
 #dat <- data.frame(Case = paste0("case",1:100), val1=runif(100,0,1), val2=runif(100,0,1))
@@ -81,7 +83,7 @@ server <- shinyServer(function(input, output) {
 
   output$uiExample <- renderUI({
     tags$span(
-      tipify(actionButton("goButton", "Go!"), "A Pointless Button", "This button is pointless!")
+      tipify(actionButton("goButton", "Go!"), "Choose low p-value and high fold change", "This button is pointless!")
     )
   })
 
@@ -103,11 +105,12 @@ server <- shinyServer(function(input, output) {
   })
 
   pcpDat <- reactive(datInput()[d()$pointNumber+1,1:(ncol(dat)-2*length(myLevels))])
-  output$selectedValues <- renderPrint({str(pcpDat())})
   colNms <- colnames(dat[, 2:(ncol(dat)-2*length(myLevels))])
   nVar <- length(2:(ncol(dat)-2*length(myLevels)))
   boxDat <- dat[, 1:(ncol(dat)-2*length(myLevels))] %>% gather(key, val, -c(ID))
-  BP <- ggplot(boxDat, aes(x = key, y = val)) + geom_boxplot()
+  #output$selectedValues <- renderPrint({str(boxDat)})  
+  colnames(boxDat)[2:3] <- c("Sample","Counts")
+  BP <- ggplot(boxDat, aes(x = Sample, y = Counts)) + geom_boxplot()
   ggBP <- ggplotly(BP)
 
   output$boxPlot <- renderPlotly({

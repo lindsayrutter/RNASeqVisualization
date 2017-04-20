@@ -5,8 +5,8 @@ library(GGally)
 library(tidyr)
 
 ui <- shinyUI(fluidPage(
-  sliderInput("ci", "Prediction interval:", min = 0, max = 0.99, value=0.95, step=0.01),
-  plotlyOutput("myPlot"),
+  sliderInput("ci", "Prediction interval:", min = 0.8, max = 0.99, value=0.95, step=0.01),
+  plotlyOutput("myPlot", height = 620),
   plotlyOutput("boxPlot"),
   verbatimTextOutput("selectedValues")
 

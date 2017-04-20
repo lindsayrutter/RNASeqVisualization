@@ -4,7 +4,7 @@ library(htmlwidgets)
 
 ui <- shinyUI(fluidPage(
   sliderInput("threshold", "Threshold:", min = 0, max = 4, value=1, step=0.1),
-  plotlyOutput("myPlot", height = 620),
+  plotlyOutput("myPlot"),
   plotlyOutput("boxPlot"),
   verbatimTextOutput("selectedValues")
 ))

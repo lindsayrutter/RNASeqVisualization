@@ -4,13 +4,19 @@ library(htmlwidgets)
 
 ui <- shinyUI(fluidPage(
   sliderInput("threshold", "Fold Change:", min = 0, max = 30, value=15, step=0.1),
-  plotlyOutput("myPlot")
+  plotlyOutput("myPlot", height = 620),
+  plotlyOutput("boxPlot"),
+  verbatimTextOutput("selectedValues")
 ))
 
 server <- shinyServer(function(input, output) {
-  set.seed(1)
+  #set.seed(1)
   # Acts strange when not all values are positive
-  dat <- data.frame(ID = paste0("ID",sample(c(1:100),100)), A=abs(rnorm(100)), B=abs(rnorm(100)), C=abs(rnorm(100)), D=abs(rnorm(100)), E=abs(rnorm(100)))
+  #dat <- data.frame(ID = paste0("ID",sample(c(1:100),100)), A=abs(rnorm(100)), B=abs(rnorm(100)), C=abs(rnorm(100)), D=abs(rnorm(100)), E=abs(rnorm(100)))
+  
+  load("../data/bindataL120.Rda")
+  dat <- bindata
+  
   dat$ID <- as.character(dat$ID)
 
   minVal = min(dat[,-1])
@@ -183,6 +189,16 @@ server <- shinyServer(function(input, output) {
               selData.push(data.dat[idRows.indexOf(SubPoints[subPlot-1][pointNumbers[a]])])
             }
 
+var selData = []
+var selDots = []
+for (a=0; a<pointNumbers.length; a++){
+var selDot = SubPoints[subPlot-1][pointNumbers[a]]
+selData.push(data.dat[idRows.indexOf(selDot)])
+selDots.push(idRows.indexOf(selDot))
+}
+
+Shiny.onInputChange('selDots', selDots);
+
 
 
              var Traces = [];
@@ -220,6 +236,55 @@ server <- shinyServer(function(input, output) {
              })
 
              }
-             ", data = list(dat=dat, val = input$threshold, minLine=minLine, maxLine=maxLine)))})
+             ", data = list(dat=dat, val = input$threshold, minLine=minLine, maxLine=maxLine)))
+  
+  selID <- reactive(input$selDots)
+  
+  pcpDat <- reactive(dat[selID()+1, ])
+  output$selectedValues <- renderPrint({str(pcpDat())})
+  
+  colNms <- colnames(dat[, c(2:(ncol(dat)))])
+
+  boxDat <- dat %>% gather(key, val, -c(ID))
+  BP <- ggplot(boxDat, aes(x = key, y = val)) + geom_boxplot()
+  ggBP <- ggplotly(BP)
+  
+  output$boxPlot <- renderPlotly({
+    ggBP %>% onRender("
+    function(el, x, data) {
+    
+    var Traces = [];
+    
+    var dLength = data.pcpDat.length
+    var vLength = data.nVar
+    var cNames = data.colNms
+    
+    for (a=0; a<dLength; a++){
+    xArr = [];
+    yArr = [];
+    for (b=0; b<vLength; b++){
+    xArr.push(b+1)
+    yArr.push(data.pcpDat[a][cNames[b]]);
+    }
+    
+    var traceHiLine = {
+    x: xArr,
+    y: yArr,
+    mode: 'lines',
+    line: {
+    color: 'orange',
+    width: 1
+    },
+    opacity: 0.9,
+    }
+    Traces.push(traceHiLine);
+    }
+    Plotly.addTraces(el.id, Traces);
+    
+    }", data = list(pcpDat = pcpDat(), nVar = p$nrow, colNms = colNms))})
+
+  
+  
+  })
 
 shinyApp(ui, server)

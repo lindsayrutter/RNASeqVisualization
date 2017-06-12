@@ -13,7 +13,7 @@ server <- shinyServer(function(input, output) {
   ci <- reactive(input$ci)
 
   set.seed(2)
-  dat <- data.frame(ID = paste0("ID",1:10), A.1=sort(abs(rnorm(10))), A.2=sort(abs(rnorm(10))), A.3=sort(abs(rnorm(10))), B.1=sort(abs(rnorm(10))), B.2=sort(abs(rnorm(10))))
+  dat <- data.frame(ID = paste0("ID",1:1000), A.1=sort(abs(rnorm(1000))), A.2=sort(abs(rnorm(1000))), A.3=sort(abs(rnorm(1000))), B.1=sort(abs(rnorm(1000))), B.2=sort(abs(rnorm(1000))))
 
   #load("../leavesDat.Rda")
   #dat <- data.frame(ID = paste0("ID",1:nrow(data)), M.1=data[,2], M.2=data[,3], M.3=data[,4], P.1=data[,5], P.2=data[,6], P.3=data[,7])
@@ -240,16 +240,6 @@ selData.push(myDat[selDot])
 
 
 if (nseltrace>0){
-//Plotly.deleteTraces(el.id,-1)
-//Plotly.deleteTraces(el.id,-1)
-//Plotly.deleteTraces(el.id,-1)
-//Plotly.deleteTraces(el.id,-1)
-//Plotly.deleteTraces(el.id,-1)
-//Plotly.deleteTraces(el.id,-1)
-//Plotly.deleteTraces(el.id,-1)
-//Plotly.deleteTraces(el.id,-1)
-//Plotly.deleteTraces(el.id,-1)
-//Plotly.deleteTraces(el.id,-1)
 Plotly.deleteTraces(el.id,range((-1*len*(len-1)/2),-1,1))
 }
 
@@ -289,8 +279,6 @@ nseltrace = nseltrace+1
 Plotly.addTraces(el.id, Traces);
 
 })
-
-
    }
    ", data = list(dat=dat, b0=b0, b1=b1, sse=sse, st=st, ci=ci())))})
 

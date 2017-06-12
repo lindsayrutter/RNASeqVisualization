@@ -18,11 +18,11 @@ ui <- shinyUI(fluidPage(
 
 server <- shinyServer(function(input, output) {
 
-  #set.seed(1)
-  #bindata <- data.frame(ID = paste0("ID",1:100), A=rnorm(100), B=rnorm(100), C=rnorm(100), D=rnorm(100))
-  #bindata$ID <- as.character(bindata$ID)
+  set.seed(1)
+  bindata <- data.frame(ID = paste0("ID",1:10000), A=rnorm(10000), B=rnorm(10000), C=rnorm(10000), D=rnorm(10000))
+  bindata$ID <- as.character(bindata$ID)
 
-  load("../data/bindataL120.Rda")
+  #load("../data/bindataL120.Rda")
 
   ################################ Prepare scatterplot matrix
   ###########################################################
@@ -34,7 +34,7 @@ server <- shinyServer(function(input, output) {
   my_fn <- function(data, mapping, ...){
     x = data[,c(as.character(mapping$x))]
     y = data[,c(as.character(mapping$y))]
-    h <- hexbin(x=x, y=y, xbins=21, shape=1, IDs=TRUE, xbnds=maxRange, ybnds=maxRange)
+    h <- hexbin(x=x, y=y, xbins=10, shape=1, IDs=TRUE, xbnds=maxRange, ybnds=maxRange)
     hexdf <- data.frame (hcell2xy (h),  hexID = h@cell, counts = h@count)
     attr(hexdf, "cID") <- h@cID
     p <- ggplot(hexdf, aes(x=x, y=y, fill = counts, hexID=hexID)) + geom_hex(stat="identity") + geom_abline(intercept = 0, color = "red", size = 0.25) + coord_cartesian(xlim = c(-0.5, maxRange[2]+0.5), ylim = c(-0.5, maxRange[2]+0.5))

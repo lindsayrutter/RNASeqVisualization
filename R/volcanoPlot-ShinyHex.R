@@ -8,6 +8,7 @@ library(plotly)
 library(htmlwidgets)
 library(shinyBS)
 library(shiny)
+library(utils)
 
 ui <- shinyUI(pageWithSidebar(
   headerPanel("Click the button"),

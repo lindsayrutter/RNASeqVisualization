@@ -3,6 +3,7 @@ library(plotly)
 library(data.table)
 library(dplyr)
 library(bsplus)
+library(tidyr)
 
 # ui <- shinyUI(pageWithSidebar(
 #   headerPanel("Dynamic number of plots"),

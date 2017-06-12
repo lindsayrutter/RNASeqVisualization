@@ -16,15 +16,15 @@ server <- shinyServer(function(input, output) {
 
   ci <- reactive(input$ci)
 
-  #set.seed(2)
-  #dat <- data.frame(ID = paste0("ID",1:10), A.1=sort(abs(rnorm(10))), A.2=sort(abs(rnorm(10))), A.3=sort(abs(rnorm(10))), B.1=sort(abs(rnorm(10))), B.2=sort(abs(rnorm(10))))
+  set.seed(2)
+  dat <- data.frame(ID = paste0("ID",1:10000), A.1=sort(abs(rnorm(10000))), A.2=sort(abs(rnorm(10000))), A.3=sort(abs(rnorm(10000))), B.1=sort(abs(rnorm(10000))), B.2=sort(abs(rnorm(10000))))
 
   #load("../leavesDat.Rda")
   #dat <- data.frame(ID = paste0("ID",1:nrow(data)), M.1=data[,2], M.2=data[,3], M.3=data[,4], P.1=data[,5], P.2=data[,6], P.3=data[,7])
   #dat <- dat[1:100,]
 
-  load("../data/bindataL120.Rda")
-  dat <- bindata
+  #load("../data/bindataL120.Rda")
+  #dat <- bindata
 
   dat$ID <- as.character(dat$ID)
   nCol = ncol(dat)

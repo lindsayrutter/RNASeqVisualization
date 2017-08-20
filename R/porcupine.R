@@ -1,12 +1,10 @@
 # DRDUq1s.Rdata was made from L120.Rnw file in /Users/lindz/CLUSTERING_WASP/Clustering
 # It is the data before making PCP (normalized, logged, standardized)
 
-load("DRDUq1s.Rdata")
-
-
-
-load("geneList.rda")
+load("../DRDUq1s.Rdata")
+load("../geneList.rda")
 library(dplyr)
+library(genefilter)
 
 geneList$MeanDR = rowMeans(subset(geneList, select = c(DR.1, DR.2, DR.3, DR.4, DR.5, DR.6)), na.rm = TRUE)
 geneList$MeanDU = rowMeans(subset(geneList, select = c(DU.1, DU.2, DU.3, DU.4, DU.5, DU.6)), na.rm = TRUE)

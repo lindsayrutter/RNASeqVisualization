@@ -11,18 +11,19 @@ library(dplyr)
 library(data.table)
 
 ui <- shinyUI(fluidPage(
-  plotlyOutput("scatMatPlot", height = 700),
-  plotlyOutput("boxPlot"),
+  plotlyOutput("scatMatPlot", width = 700, height = 700),
+  plotlyOutput("boxPlot", width = 700),
+  HTML("<br><br><br>"),
   verbatimTextOutput("selectedValues")
 ))
 
 server <- shinyServer(function(input, output) {
 
-  set.seed(1)
-  bindata <- data.frame(ID = paste0("ID",1:10000), A=rnorm(10000), B=rnorm(10000), C=rnorm(10000), D=rnorm(10000))
-  bindata$ID <- as.character(bindata$ID)
+  #set.seed(1)
+  #bindata <- data.frame(ID = paste0("ID",1:10000), A=abs(rnorm(10000)), B=abs(rnorm(10000)), C=abs(rnorm(10000)), D=abs(rnorm(10000)))
+  #bindata$ID <- as.character(bindata$ID)
 
-  #load("../data/bindataL120.Rda")
+  load("/Users/lindz/bigPint/DashboardSoyBean/soyBeanDashboard-BreaksAuto/bindataL120.Rda")
 
   ################################ Prepare scatterplot matrix
   ###########################################################
@@ -34,7 +35,7 @@ server <- shinyServer(function(input, output) {
   my_fn <- function(data, mapping, ...){
     x = data[,c(as.character(mapping$x))]
     y = data[,c(as.character(mapping$y))]
-    h <- hexbin(x=x, y=y, xbins=10, shape=1, IDs=TRUE, xbnds=maxRange, ybnds=maxRange)
+    h <- hexbin(x=x, y=y, xbins=16, shape=1, IDs=TRUE, xbnds=maxRange, ybnds=maxRange)
     hexdf <- data.frame (hcell2xy (h),  hexID = h@cell, counts = h@count)
     attr(hexdf, "cID") <- h@cID
     p <- ggplot(hexdf, aes(x=x, y=y, fill = counts, hexID=hexID)) + geom_hex(stat="identity") + geom_abline(intercept = 0, color = "red", size = 0.25) + coord_cartesian(xlim = c(-0.5, maxRange[2]+0.5), ylim = c(-0.5, maxRange[2]+0.5))
@@ -50,7 +51,7 @@ server <- shinyServer(function(input, output) {
   #   }
   # }
 
-  ggPS <- ggplotly(pS)
+  ggPS <- ggplotly(pS, width=700, height=600)
   #ggPS <- ggplotly(p)
 
   myLength <- length(ggPS[["x"]][["data"]])
@@ -172,7 +173,7 @@ console.log(selID)
 
   boxDat <- bindata[, c(1:(p$nrow+1))] %>% gather(key, val, -c(ID))
   BP <- ggplot(boxDat, aes(x = key, y = val)) + geom_boxplot()
-  ggBP <- ggplotly(BP)
+  ggBP <- ggplotly(BP, width=700)
 
   output$boxPlot <- renderPlotly({
   ggBP %>% onRender("

@@ -31,3 +31,4 @@ stat_binhex(mapping = aes(x=longitude, y=latitude, label = ..count.., fill = {pr
             vjust = -0.3,
             bins = 25,
             na.rm=TRUE)
+

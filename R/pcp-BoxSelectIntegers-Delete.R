@@ -2,7 +2,7 @@ library(ggplot2)
 library(shiny)
 library(plotly)
 library(htmlwidgets)
-library(shinyBS)
+#library(shinyBS)
 
 ui <- basicPage(
   plotlyOutput("plot1") #bsButton("high","Highlight Selected Points",type="toggle")

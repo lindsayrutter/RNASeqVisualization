@@ -24,7 +24,7 @@ colnames(L120)=c("s8","s14","s22","s11","s27","s33")
 # Make sure each gene has at least one count in at least half of the six samples
 L120 <- L120[rowSums(L120$counts>1)>=ncol(L120)/2,]
 #L120a <- calcNormFactors(L120, method="none") # does nothing
-# Not positive and negative
+# Now positive and negative
 cpm.L120.new <- cpm(L120, TRUE, TRUE)
 cpm.L120.norm <- betweenLaneNormalization(cpm.L120.new, which="full", round=FALSE)
 L120 = cpm.L120.norm

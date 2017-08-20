@@ -4,9 +4,8 @@ devtools::install_github("timelyportfolio/parcoords", force=TRUE)
 library(parcoords)
 
 parcoords(
-  mtcars
-  , brush = "1d-axes" # 2d-strums are really neat
-  , reorderable = TRUE
+  mtcars, brush = "1d-axes", # 2d-strums are really neat
+  reorderable = TRUE
 )
 
 data( diamonds, package = "ggplot2" )

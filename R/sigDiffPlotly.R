@@ -20,7 +20,7 @@ library(gtools)
 library(plotly)
 
 rm(list=ls())
-load("data/All_wasp.rda")
+load("../data/All_wasp.rda")
 
 listcond = rep(c("DR","DU"),each= 6)
 y = DGEList(counts=countTable[,c(1:12)], group=listcond)
